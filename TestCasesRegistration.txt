@@ -1,0 +1,13 @@
+We start up a certain Registration Desk with registration period X. 
+
+Case 1:
+We send a request and get an AGREE and an INFORM
+
+Case 2:
+We send another request (within registration period) and get AGREE and FAILURE
+
+Case 3:
+We send rubbish and get NOT_UNDERSTOOD
+
+Case 4:
+We send another request outside of registration period and get REFUSE

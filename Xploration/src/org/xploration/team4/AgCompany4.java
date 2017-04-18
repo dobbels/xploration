@@ -1,5 +1,7 @@
 package org.xploration.team4;
 
+import org.xploration.ontology.*;
+
 import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.core.AID;
@@ -21,12 +23,13 @@ public class AgCompany4 extends Agent {
 	protected void setup()
 	{
 		System.out.println(getLocalName()+": HAS ENTERED"); //TODO what is LocalName? Better AgCompany4 ?
-
-
-//		BEHAVIOURS ****************************************************************
-
-		// Adds a behavior to request search a painter agent
-		// IF it is found, asks it an estimation
+		
+		//source: http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
+		jade.content.onto.Ontology ontology = XplorationOntology.getInstance();
+        getContentManager().registerOntology(ontology);
+		
+		// Add a behavior to register to the registration desk
+		// IF registration is successful, ok 
 		// ELSE, waits 5 seconds and tries again
 		addBehaviour(new SimpleBehaviour(this)
 		{
@@ -206,7 +209,6 @@ public class AgCompany4 extends Agent {
 			}
 
 		});
-
 
 	}
 }
