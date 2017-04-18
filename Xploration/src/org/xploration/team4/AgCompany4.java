@@ -1,0 +1,212 @@
+package org.xploration.team4;
+
+import jade.core.Agent;
+import jade.core.behaviours.*;
+import jade.core.AID;
+import jade.domain.FIPAAgentManagement.*;
+import jade.domain.DFService;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+
+import java.util.Date;
+
+public class AgCompany4 extends Agent {
+	 
+	private static final long serialVersionUID = 1L;
+	public final static String TEAM_ID = "4";
+	public final static String REGISTRATION_DESK_NAME = "registrationDesk";
+	public final static String REQUEST_SUCCEEDED = "Request: Success";
+	public final static String REQUEST_FAULED = "Request: Failure";
+
+	protected void setup()
+	{
+		System.out.println(getLocalName()+": HAS ENTERED"); //TODO what is LocalName? Better AgCompany4 ?
+
+
+//		BEHAVIOURS ****************************************************************
+
+		// Adds a behavior to request search a painter agent
+		// IF it is found, asks it an estimation
+		// ELSE, waits 5 seconds and tries again
+		addBehaviour(new SimpleBehaviour(this)
+		{
+			private static final long serialVersionUID =1L;
+			boolean end = false;
+			AID[] painters = new AID[20];
+			AID ag;
+			boolean ignore = false;
+			int last = 0;
+			int i, j;
+
+			public void action()
+			{   
+				// Creates the description for the type of agent to be searched
+				DFAgentDescription dfd = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType(PAINTER);
+				dfd.addServices(sd);
+
+				try
+				{
+					// If has been searching for estimations for more than a minute, it does not search any more
+					if ((new Date()).getTime() - registerTime.getTime() >= 60000)
+					{
+						end = true;
+					}
+
+					// It finds agents of the required type
+					DFAgentDescription[] res = new DFAgentDescription[20];
+					res = DFService.search(myAgent, dfd);
+
+					// Gets the first occurrence, if there was success
+					if (res.length > 0)
+					{
+						for (i=0; i < res.length; i++)
+						{
+							ag = (AID)res[i].getName();
+
+							for (j=0; j<last; j++)
+							{
+								if (painters[j].compareTo(ag) == 0)
+								{
+									ignore = true;
+								}
+							}
+							if (!ignore)
+							{
+								painters[last++] = ag;
+								// Asks the estimation to the painter
+								ACLMessage msg = new ACLMessage(ACLMessage.CFP);
+								msg.setContent(ESTIMATION);
+								msg.addReceiver(ag);
+								send(msg);
+								System.out.println(getLocalName()+": ASKS FOR AN ESTIMATION");
+							}
+							ignore = false;
+						}
+						doWait(5000);
+					}
+					else
+					{
+						// If no PAINTER has been found, it waits 5 seconds
+						doWait(5000);
+					}
+				}
+				catch (Exception e) 
+				{
+					e.printStackTrace();
+				}
+			}
+
+			public boolean done ()
+			{
+				return end;
+			}
+
+		});
+
+
+		// Adds a behavior to process the answer to an estimation request
+		// The painter with the best estimation will be notified about its acceptation
+		// while the rest will receive a reject message
+
+		addBehaviour(new SimpleBehaviour(this)
+		{
+			private static final long serialVersionUID =1L;			
+			boolean end = false;
+			boolean thereisestimation = false;
+			int best;
+			ACLMessage replybest;
+
+			public void action()
+			{
+				// Waits for the arrival of an answer
+				ACLMessage msg = receive(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+				if (msg != null)
+				{
+					String estim = msg.getContent();
+					if(estim.startsWith(ESTIMATION))
+					{
+						// If an estimation has arrived, is analysed
+						System.out.println(myAgent.getLocalName()+": ESTIMATION RECEIVED"); 
+						estim = estim.substring(11);
+						int p = Integer.parseInt(estim);
+
+						// If it is the best estimation, it becomes the best
+						if (!thereisestimation)
+						{
+							replybest = msg.createReply();
+							best = p;
+							thereisestimation = true;							
+						}
+						// If there was already an estimation, it checks if this new is better
+						// If it is better, this becomes the best and it is notified the rejection of the previous one
+						// If it is worse, it is notified directly its rejection		
+						else
+						{
+							if (best > p)
+							{
+								replybest.setPerformative(ACLMessage.REJECT_PROPOSAL);
+								myAgent.send(replybest);	
+								System.out.println(myAgent.getLocalName()+": SENT ESTIMATION REJECTION ("+best+")");
+
+								replybest = msg.createReply();
+								best = p;
+							}
+							else
+							{
+								ACLMessage reply = msg.createReply();
+								reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+								myAgent.send(reply);
+								System.out.println(myAgent.getLocalName()+": SENT ESTIMATION REJECTION ("+p+")");
+							}
+						}
+					}
+					// If there was no estimation in the message, answers saying that it was not understood
+					else
+					{
+						ACLMessage reply = msg.createReply();
+						reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+						myAgent.send(reply);
+						System.out.println(myAgent.getLocalName()+": ESTIMATION NOT UNDERSTOOD!!!");
+						end = false;
+					}
+				}
+				else
+				{
+					// If 60 seconds have already passed searching for estimations, the best one is accepted
+					if ((new Date()).getTime() - registerTime.getTime() >= 60000)
+					{
+						if (thereisestimation)
+						{		
+							replybest.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+							myAgent.send(replybest);	
+							System.out.println(myAgent.getLocalName()+": SENT ESTIMATION ACCEPTATION ("+best+")");
+						}
+						else
+						{
+							System.out.println(myAgent.getLocalName()+": NO PAINTER WAS FOUND");						
+						}
+						end = true;
+					}
+
+					// If no message has yet arrived, the behavior blocks itself
+					else
+					{
+						block();
+						end = false;
+					}
+				}
+
+			}
+
+			public boolean done ()
+			{
+				return end;
+			}
+
+		});
+
+
+	}
+}
