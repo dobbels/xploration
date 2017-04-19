@@ -11,3 +11,10 @@ We send rubbish and get NOT_UNDERSTOOD
 
 Case 4:
 We send another request outside of registration period and get REFUSE
+
+To test the company:
+Case 1:
+
+
+Or does it have to be more blackbox? We start up a registration desk and agent and let them do their thing? 
+Then we start up another agent with the same id and make sure it fails? 
