@@ -1,0 +1,7 @@
+*.class
+Xploration/bin/
+Xploration/APDescription.txt
+Xploration/MTPs-Main-Container
+Xploration/.classpath
+Xploration/.project
+Xploration/.settings
