@@ -13,7 +13,7 @@ Case 4:
 We send another request outside of registration period and get REFUSE
 
 To test the company:
-Case 1:
+Case 1: Put yourself in yellow pages, listen for company, start up company-agent and check if the message is in correct format and delivered within the registration period
 
 
 Or does it have to be more blackbox? We start up a registration desk and agent and let them do their thing? 

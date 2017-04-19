@@ -7,5 +7,6 @@
 			<attribute name="javadoc_location" value="file:/C:/Users/steven/Documents/ETSIINF/Agent%20Based%20Software%20Development/JADE-all-4.4.0/jade/doc/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
