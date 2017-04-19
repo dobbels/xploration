@@ -12,9 +12,6 @@ import jade.core.AID;
 import jade.domain.FIPAAgentManagement.*;
 import jade.domain.DFService;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-
-import java.util.Date;
 
 public class AgCompany4 extends Agent {
 	 
@@ -22,8 +19,8 @@ public class AgCompany4 extends Agent {
 	public final static int TEAM_ID = 4;
 	// The name of the service the Registration Desk agent is using to announce itself in the Yellow Pages
 	public final static String REGISTRATION_DESK_NAME = "registrationDesk";
-	public final static String REQUEST_SUCCEEDED = "Request: Success";
-	public final static String REQUEST_FAULED = "Request: Failure";
+//	public final static String REQUEST_SUCCEEDED = "Request: Success";
+//	public final static String REQUEST_FAULED = "Request: Failure";
 
 	//sources: 
 	//  http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
@@ -40,7 +37,7 @@ public class AgCompany4 extends Agent {
 		// Add a behavior to register to the registration desk
 		// IF registration is successful, it is saved in the boolean
 		// ELSE an error message is printed
-		addBehaviour(new SimpleBehaviour(this)
+		addBehaviour(new SimpleBehaviour(this) //TODO should be cyclic to keep trying until a registration desk is found and registration is succesful? (for a certain amount of time maybe)
 		{
 			
 			private static final long serialVersionUID = 1L;
@@ -78,12 +75,34 @@ public class AgCompany4 extends Agent {
 								regReq.setTeam(team);
 								AgentAction regReqAction = new Action(ag, regReq);
 								sendMessage(ACLMessage.REQUEST, regReqAction);
-								System.out.println(getLocalName()+": TRY TO REGISTER");
+								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
 								
 								//TODO process answers and add printing messages with possible outcomes (too late, already registered) ..
-								ACLMessage ans = receive(MessageTemplate.MatchPerformative(ACLMessage.AGREE));
+								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
+								ACLMessage ans = receive();
+								if (ans.getPerformative() == ACLMessage.REFUSE)
+								{
+									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");
+								}
+								else if (ans.getPerformative() == ACLMessage.NOT_UNDERSTOOD)
+								{
+									System.out.println(getLocalName()+"'S MESSAGE WAS NOT UNDERSTOOD");
+								}
+								else if (ans.getPerformative() == ACLMessage.AGREE) {
+									System.out.println(getLocalName()+": INITIAL AGREEMENT ON REGISTRATION");
+									ACLMessage ans2 = receive();
+									if (ans2.getPerformative() == ACLMessage.FAILURE)
+									{
+										System.out.println(getLocalName()+" REGISTRATION FAILED: ALREADY REGISTERED");
+									}
+									else if (ans2.getPerformative() == ACLMessage.INFORM)
+									{
+										System.out.println(getLocalName()+": REGISTRATION SUCCESFUL");
+										registrationSuccess = true;
+									}
+								}
 								
-//								doWait(5000);
+								doWait(5000);
 							}
 							else
 							{
@@ -104,14 +123,16 @@ public class AgCompany4 extends Agent {
 				
 				msg.setLanguage(codec.getName());
                 msg.setOntology(ontology.getName());
-                try {
-                	getContentManager().fillContent(msg, new Action(server, action));
+                try 
+                {
+                	getContentManager().fillContent(msg, new Action(ag, action));
                 	msg.addReceiver(ag);
                 	send(msg);
-                	}
-                catch (Exception ex) { ex.printStackTrace(); }
-			}
-				send(msg);
+                }
+                catch (Exception ex) 
+                { 
+                	ex.printStackTrace(); 
+                }
 			}
 
 			public boolean done ()
@@ -120,108 +141,5 @@ public class AgCompany4 extends Agent {
 			}
 
 		});
-
-
-		// Adds a behavior to process the answer to an estimation request
-		// The painter with the best estimation will be notified about its acceptation
-		// while the rest will receive a reject message
-
-		addBehaviour(new SimpleBehaviour(this)
-		{
-			private static final long serialVersionUID =1L;			
-			boolean end = false;
-			boolean thereisestimation = false;
-			int best;
-			ACLMessage replybest;
-
-			public void action()
-			{
-				// Waits for the arrival of an answer
-				ACLMessage msg = receive(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
-				if (msg != null)
-				{
-					String estim = msg.getContent();
-					if(estim.startsWith(ESTIMATION))
-					{
-						// If an estimation has arrived, is analysed
-						System.out.println(myAgent.getLocalName()+": ESTIMATION RECEIVED"); 
-						estim = estim.substring(11);
-						int p = Integer.parseInt(estim);
-
-						// If it is the best estimation, it becomes the best
-						if (!thereisestimation)
-						{
-							replybest = msg.createReply();
-							best = p;
-							thereisestimation = true;							
-						}
-						// If there was already an estimation, it checks if this new is better
-						// If it is better, this becomes the best and it is notified the rejection of the previous one
-						// If it is worse, it is notified directly its rejection		
-						else
-						{
-							if (best > p)
-							{
-								replybest.setPerformative(ACLMessage.REJECT_PROPOSAL);
-								myAgent.send(replybest);	
-								System.out.println(myAgent.getLocalName()+": SENT ESTIMATION REJECTION ("+best+")");
-
-								replybest = msg.createReply();
-								best = p;
-							}
-							else
-							{
-								ACLMessage reply = msg.createReply();
-								reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-								myAgent.send(reply);
-								System.out.println(myAgent.getLocalName()+": SENT ESTIMATION REJECTION ("+p+")");
-							}
-						}
-					}
-					// If there was no estimation in the message, answers saying that it was not understood
-					else
-					{
-						ACLMessage reply = msg.createReply();
-						reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-						myAgent.send(reply);
-						System.out.println(myAgent.getLocalName()+": ESTIMATION NOT UNDERSTOOD!!!");
-						end = false;
-					}
-				}
-				else
-				{
-					// If 60 seconds have already passed searching for estimations, the best one is accepted
-					if ((new Date()).getTime() - registerTime.getTime() >= 60000)
-					{
-						if (thereisestimation)
-						{		
-							replybest.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-							myAgent.send(replybest);	
-							System.out.println(myAgent.getLocalName()+": SENT ESTIMATION ACCEPTATION ("+best+")");
-						}
-						else
-						{
-							System.out.println(myAgent.getLocalName()+": NO PAINTER WAS FOUND");						
-						}
-						end = true;
-					}
-
-					// If no message has yet arrived, the behavior blocks itself
-					else
-					{
-						block();
-						end = false;
-					}
-				}
-
-			}
-
-			public boolean done ()
-			{
-				return end;
-			}
-
-		});
-
 	}
 }
