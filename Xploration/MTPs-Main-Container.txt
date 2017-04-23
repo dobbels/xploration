@@ -1,1 +1,1 @@
-http://laptop-dobbels:7778/acc
+http://pc:7778/acc
