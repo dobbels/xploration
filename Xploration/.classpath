@@ -2,11 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/steven/Documents/ETSIINF/Agent Based Software Development/JADE-all-4.4.0/JADE-bin-4.4.0/jade/lib/jade.jar" sourcepath="C:/Users/steven/Documents/ETSIINF/Agent Based Software Development/JADE-all-4.4.0/jade/src/JADE_SRC.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/steven/Documents/ETSIINF/Agent%20Based%20Software%20Development/JADE-all-4.4.0/jade/doc/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="C:/Users/asus/Desktop/Courses/ABS/Jade Folder From Steven/jade.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
