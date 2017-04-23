@@ -1,9 +1,9 @@
 *.class
 .metadata/
 .recommenders/
-Xploration/bin/
-Xploration/APDescription.txt
-Xploration/MTPs-Main-Container
+bin/
+APDescription.txt
+MTPs-Main-Container
 Xploration/.classpath
 Xploration/.project
 Xploration/.settings
