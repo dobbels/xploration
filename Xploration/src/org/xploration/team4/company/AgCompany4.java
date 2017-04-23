@@ -1,4 +1,4 @@
-package org.xploration.team4;
+package org.xploration.team4.company;
 
 import org.xploration.ontology.*;
 
@@ -69,15 +69,15 @@ public class AgCompany4 extends Agent {
 								ag = (AID)res[0].getName();
 		
 								// Try to register to the desk
-								org.xploration.ontology.Team team = new Team();
+								Team team = new Team();
 								team.setTeamId(TEAM_ID);
-								org.xploration.ontology.RegistrationRequest regReq = new RegistrationRequest();
+								RegistrationRequest regReq = new RegistrationRequest();
 								regReq.setTeam(team);
-								AgentAction regReqAction = new Action(ag, regReq);
+//								AgentAction regReqAction = new Action(ag, regReq);
+								Action regReqAction = new Action(ag, regReq);
 								sendMessage(ACLMessage.REQUEST, regReqAction);
 								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
 								
-								//TODO process answers and add printing messages with possible outcomes (too late, already registered) ..
 								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
 								ACLMessage ans = receive();
 								if (ans.getPerformative() == ACLMessage.REFUSE)
@@ -118,14 +118,14 @@ public class AgCompany4 extends Agent {
 				}
 			}
 			
-			void sendMessage(int performative, AgentAction action) {
+			void sendMessage(int performative, Action action) {
 				ACLMessage msg = new ACLMessage(performative);
 				
 				msg.setLanguage(codec.getName());
                 msg.setOntology(ontology.getName());
                 try 
                 {
-                	getContentManager().fillContent(msg, new Action(ag, action));
+                	getContentManager().fillContent(msg, action);
                 	msg.addReceiver(ag);
                 	send(msg);
                 }
