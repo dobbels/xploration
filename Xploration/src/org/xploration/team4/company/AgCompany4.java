@@ -79,7 +79,7 @@ public class AgCompany4 extends Agent {
 								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
 								
 								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
-								ACLMessage ans = receive();
+								ACLMessage ans = blockingReceive(); //TODO not do this? dangerous if registration desk not in yellow pages yet?
 								if (ans.getPerformative() == ACLMessage.REFUSE)
 								{
 									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");
@@ -90,7 +90,7 @@ public class AgCompany4 extends Agent {
 								}
 								else if (ans.getPerformative() == ACLMessage.AGREE) {
 									System.out.println(getLocalName()+": INITIAL AGREEMENT ON REGISTRATION");
-									ACLMessage ans2 = receive();
+									ACLMessage ans2 = blockingReceive();
 									if (ans2.getPerformative() == ACLMessage.FAILURE)
 									{
 										System.out.println(getLocalName()+" REGISTRATION FAILED: ALREADY REGISTERED");
@@ -103,6 +103,36 @@ public class AgCompany4 extends Agent {
 								}
 								
 								doWait(5000);
+								
+//								sendMessage(ACLMessage.REQUEST, regReqAction);
+//								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
+//								
+//								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
+//								ACLMessage ans3 = blockingReceive(); //TODO not do this? dangerous if registration desk not in yellow pages yet?
+//								if (ans3.getPerformative() == ACLMessage.REFUSE)
+//								{
+//									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");
+//								}
+//								else if (ans3.getPerformative() == ACLMessage.NOT_UNDERSTOOD)
+//								{
+//									System.out.println(getLocalName()+"'S MESSAGE WAS NOT UNDERSTOOD");
+//								}
+//								else if (ans3.getPerformative() == ACLMessage.AGREE) {
+//									System.out.println(getLocalName()+": INITIAL AGREEMENT ON REGISTRATION");
+//									ACLMessage ans4 = blockingReceive();
+//									if (ans4.getPerformative() == ACLMessage.FAILURE)
+//									{
+//										System.out.println(getLocalName()+" REGISTRATION FAILED: ALREADY REGISTERED");
+//									}
+//									else if (ans4.getPerformative() == ACLMessage.INFORM)
+//									{
+//										System.out.println(getLocalName()+": REGISTRATION SUCCESFUL");
+//										registrationSuccess = true;
+//									}
+//								}
+//								
+//								doWait(5000);
+
 							}
 							else
 							{

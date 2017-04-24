@@ -32,7 +32,7 @@ public class RegistrationDesk extends Agent {
 	// ArrayList to store Registered Agent Teams
 	private List<Team> registerationList = new ArrayList<Team>();
 	// Registration Duration as 1 minute
-	private final int registrationPeriod = 60000;
+	private final int registrationPeriod = 6000;
 
 	boolean checkRegisteredBefore(List<Team> registerationList, Team requestorTeam) {
 		boolean check = false;
