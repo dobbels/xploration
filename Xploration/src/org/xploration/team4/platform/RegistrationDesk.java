@@ -26,7 +26,6 @@ import jade.lang.acl.*;
 public class RegistrationDesk extends Agent {
 
 	// private static final long serialVersionUID = 1L;
-	public static final String registrationDeskName = "registrationDesk";
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
 	// ArrayList to store Registered Agent Teams
@@ -60,7 +59,7 @@ public class RegistrationDesk extends Agent {
 			DFAgentDescription dfd = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
 			sd.setName(this.getName());
-			sd.setType(registrationDeskName);
+			sd.setType(Constants.REGISTRATION_DESK_NAME);
 			dfd.addServices(sd);
 			// Registers its description in the DF
 			DFService.register(this, dfd);

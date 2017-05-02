@@ -4,6 +4,10 @@
 bin/
 APDescription.txt
 MTPs-Main-Container
+Xploration/bin/
+Xploration/APDescription.txt
+Xploration/MTPs-Main-Container
 Xploration/.classpath
 Xploration/.project
 Xploration/.settings
+*.classpath
