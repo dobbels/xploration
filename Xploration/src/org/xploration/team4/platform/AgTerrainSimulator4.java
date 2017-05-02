@@ -3,6 +3,7 @@ package org.xploration.team4.platform;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.*;
 
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
@@ -40,29 +41,37 @@ public class AgTerrainSimulator4 extends Agent {
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
 	
-	//I guess world map should be like this:
-	//TODO Opening and Reading Map File
-	//TODO Storing Map File in a 2D array			
-	//TODO Arguments for x,y Coordinates to Claim by Rover
-
 	protected void setup(){
+				
 		System.out.println(getLocalName() + ": HAS ENTERED");
 
+		//Register Language and Ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 
+		try{
 		//Registration Description of Terrain Simulator
 		DFAgentDescription dfd = new DFAgentDescription(); 
 		ServiceDescription sd  = new ServiceDescription();
 		sd.setType(terrainSimulatorName);
 		sd.setName(getLocalName());
-		dfd.addServices(sd);
-		try {
-			DFService.register(this, dfd );  
+		dfd.addServices(sd);	
+		DFService.register(this, dfd );  
 		}catch (FIPAException e){ 
 			e.printStackTrace();
 			System.out.println("REGISTRATION EXCEPTION is detected!"); 
 		}
+		
+		//Makes the agent KILLED!
+		//Map 5X5 sizes with A,B,C,D minerals
+		/*
+		String [][] multi = new String [5][5];	
+		multi[1][1] = "A"; multi[1][3] = "B"; multi[1][5] = "C";
+		multi[2][2] = "B"; multi[2][4] = "C"; 
+		multi[3][1] = "D"; multi[3][3] = "B"; multi[3][5] = "D";
+		multi[4][2] = "C"; multi[4][4] = "A";
+		multi[5][1] = "D"; multi[5][3] = "C"; multi[5][5] = "A";	
+		*/
 		//Adding Behaviour to Setup() Method
 		addBehaviour(cellRequestListener());
 	}
@@ -108,8 +117,11 @@ public class AgTerrainSimulator4 extends Agent {
 								reply.setOntology(ontology.getName());
 
 								//Invalid Cell Condition
-								//Checking world boundaries
-								if(claimedCell.getX()>10 || claimedCell.getY()>10)
+								//Checking world boundaries 5x5
+								//UPDATE THIS CHECK
+								if(claimedCell.getX()>5 || claimedCell.getY()>5 || 
+										(!(claimedCell.getMineral()=="A" || claimedCell.getMineral()=="B"||
+										claimedCell.getMineral()== "C"|| claimedCell.getMineral()== "D")))
 								{
 									reply.setContent("REFUSE");
 									reply.setPerformative(ACLMessage.REFUSE);
@@ -119,7 +131,10 @@ public class AgTerrainSimulator4 extends Agent {
 
 								//Valid Cell Condition
 								//Checking world boundaries
-								else if(claimedCell.getX()<= 10 && claimedCell.getY()<=10){
+								//UPDATE THIS CHECK
+								else if(claimedCell.getX()<= 5 && claimedCell.getY()<=5 && 
+										(claimedCell.getMineral()=="A") || claimedCell.getMineral()== "B" ||
+										claimedCell.getMineral()== "C" ||	claimedCell.getMineral()=="D"){
 									reply.setContent("initial AGREE");
 									reply.setPerformative(ACLMessage.AGREE);
 									myAgent.send(reply);

@@ -32,18 +32,21 @@ public class AgRover4 extends Agent {
 
 	//Cell object to claim by Rover
 	public Cell myCell = new Cell();
+	//Example Coordinates
+	private int xCoord = 3;
+	private int yCoord = 3;
 
 	protected void setup(){
 
 		System.out.println(getLocalName() + " HAS ENTERED");
 
+		//Register Language and Ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 
-		//TODO Claiming Cell by Arguments,(I guess so) DON'T KNOW HOW???
 		//Just a trial for (3,3) coordinates
-		myCell.setX(3);
-		myCell.setY(3);
+		myCell.setX(xCoord);
+		myCell.setY(yCoord);
 
 		//Behaviour is added in the cellAnalysis Method
 		cellAnalysis(myCell);
@@ -73,20 +76,22 @@ public class AgRover4 extends Agent {
 						// It finds agents of the required type
 						DFAgentDescription[] result = new DFAgentDescription[20];
 						result = DFService.search(myAgent, dfd);
-
+						
 						// Gets the first occurrence, if there was success
 						if (result.length > 0)
 						{
 							//System.out.println(result[0].getName());
 							agTerrain = (AID) result[0].getName();						  
 
-							//REQUEST is sent						  
+							//REQUEST is sent	
+							//MISSING Parts I need to use Cell(x,y)
 							ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 							msg.setContent("Request for Cell");
 							msg.addReceiver(agTerrain);
 							send(msg);
 							System.out.println("REQUEST is sent");
-
+							
+							
 							//Returned answer from Terrain Simulation
 							ACLMessage ans = receive();
 							if(ans!= null){	  
@@ -111,7 +116,7 @@ public class AgRover4 extends Agent {
 												+" from (" +myCell.getX() + ","+ myCell.getY()+ ") Cell");
 										claimingCell = true;
 										//Update of the Cell 
-										myCell.setMineral("");												
+										myCell.setMineral(" ");												
 									}
 									else{
 										System.out.println("A problem occured, it should be informed");
