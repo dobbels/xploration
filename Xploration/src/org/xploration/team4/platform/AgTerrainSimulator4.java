@@ -34,7 +34,7 @@ import jade.lang.acl.MessageTemplate;
 public class AgTerrainSimulator4 extends Agent {
 
 	private static final long serialVersionUID = 1L;
-	public static final String terrainSimulatorName = "agTerrain";
+	
 	//For this sprint it remains always true, only INFORM case
 	boolean validPosition = true;
 
@@ -53,7 +53,7 @@ public class AgTerrainSimulator4 extends Agent {
 		//Registration Description of Terrain Simulator
 		DFAgentDescription dfd = new DFAgentDescription(); 
 		ServiceDescription sd  = new ServiceDescription();
-		sd.setType(terrainSimulatorName);
+		sd.setType(Constants.TERRAIN_SIMULATOR);
 		sd.setName(getLocalName());
 		dfd.addServices(sd);	
 		DFService.register(this, dfd );  
@@ -63,15 +63,14 @@ public class AgTerrainSimulator4 extends Agent {
 		}
 		
 		//Makes the agent KILLED!
-		//Map 5X5 sizes with A,B,C,D minerals
-		/*
-		String [][] multi = new String [5][5];	
+		//Map 5X5 sizes with A,B,C,D minerals		
+		String [][] multi = new String [6][6];	
 		multi[1][1] = "A"; multi[1][3] = "B"; multi[1][5] = "C";
 		multi[2][2] = "B"; multi[2][4] = "C"; 
 		multi[3][1] = "D"; multi[3][3] = "B"; multi[3][5] = "D";
 		multi[4][2] = "C"; multi[4][4] = "A";
 		multi[5][1] = "D"; multi[5][3] = "C"; multi[5][5] = "A";	
-		*/
+	
 		//Adding Behaviour to Setup() Method
 		addBehaviour(cellRequestListener());
 	}
@@ -89,21 +88,24 @@ public class AgTerrainSimulator4 extends Agent {
 				{
 					// If a Cell Claiming request arrives
 					// it answers with the REFUSE, AGREE or NOT_UNDERSTOOD
-					
+					System.out.println("1");
 					// storing the message sender agent
 					AID fromAgent = msg.getSender();
 					// The ContentManager transforms the message content
 					ContentElement ce;
 					try {
 						ce = getContentManager().extractContent(msg);
+						System.out.println("2");
 						// We expect an action inside the message
 						if (ce instanceof Action)
 						{
+							System.out.println("3");
 							Action agAction = (Action) ce;
 							Concept conc = agAction.getAction();
 							// If the action is CellAnalysis
 							if(conc instanceof CellAnalysis)
 							{
+								System.out.println("4");
 								System.out.println(getLocalName()+": CellAnalysis REQUEST is received from " + 
 										(msg.getSender()).getLocalName());
 
@@ -115,13 +117,20 @@ public class AgTerrainSimulator4 extends Agent {
 								ACLMessage reply = msg.createReply();
 								reply.setLanguage(codec.getName());
 								reply.setOntology(ontology.getName());
-
+								
+								/*
+								System.out.println(claimedCell.getX());
+								System.out.println(claimedCell.getY());
+								System.out.println(claimedCell.getMineral());
+								System.out.println(claimedCell.getX()>5 || claimedCell.getY()>5 || 
+										!(claimedCell.getMineral().equals("A") || claimedCell.getMineral().equals("B")||
+										claimedCell.getMineral().equals("C")|| claimedCell.getMineral().equals("D")));
+								*/
 								//Invalid Cell Condition
 								//Checking world boundaries 5x5
-								//UPDATE THIS CHECK
-								if(claimedCell.getX()>5 || claimedCell.getY()>5 || 
-										(!(claimedCell.getMineral()=="A" || claimedCell.getMineral()=="B"||
-										claimedCell.getMineral()== "C"|| claimedCell.getMineral()== "D")))
+								
+								
+								if(claimedCell.getX()>5 || claimedCell.getY()>5)
 								{
 									reply.setContent("REFUSE");
 									reply.setPerformative(ACLMessage.REFUSE);
@@ -132,9 +141,7 @@ public class AgTerrainSimulator4 extends Agent {
 								//Valid Cell Condition
 								//Checking world boundaries
 								//UPDATE THIS CHECK
-								else if(claimedCell.getX()<= 5 && claimedCell.getY()<=5 && 
-										(claimedCell.getMineral()=="A") || claimedCell.getMineral()== "B" ||
-										claimedCell.getMineral()== "C" ||	claimedCell.getMineral()=="D"){
+								else if(claimedCell.getX()<=5 && claimedCell.getY()<=5){
 									reply.setContent("initial AGREE");
 									reply.setPerformative(ACLMessage.AGREE);
 									myAgent.send(reply);
