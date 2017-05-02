@@ -25,7 +25,6 @@ public class AgRover4 extends Agent {
 	private static final long serialVersionUID = 1L;
 	public final static int TEAM_ID = 4;
 	//The name of the Terrain Simulator Agent in the DF yellow pages
-	public final static String TERRAIN_SIMULATOR = "TerrainSimulator4";
 
 	private Codec codec = new SLCodec();
 	private jade.content.onto.Ontology ontology = XplorationOntology.getInstance();
@@ -47,6 +46,7 @@ public class AgRover4 extends Agent {
 		//Just a trial for (3,3) coordinates
 		myCell.setX(xCoord);
 		myCell.setY(yCoord);
+	    //myCell.setMineral("A");
 
 		//Behaviour is added in the cellAnalysis Method
 		cellAnalysis(myCell);
@@ -69,7 +69,7 @@ public class AgRover4 extends Agent {
 					//Creates description for the AGENT TERRAIN SIMULATOR to be searched
 					DFAgentDescription dfd = new DFAgentDescription();     
 					ServiceDescription sd = new ServiceDescription();
-					sd.setType(TERRAIN_SIMULATOR);
+					sd.setType(Constants.TERRAIN_SIMULATOR);
 					dfd.addServices(sd);
 
 					try {
@@ -84,14 +84,35 @@ public class AgRover4 extends Agent {
 							agTerrain = (AID) result[0].getName();						  
 
 							//REQUEST is sent	
-							//MISSING Parts I need to use Cell(x,y)
+							
+							//There should be something about CellAnalysis
+							CellAnalysis cellAnalysis = new CellAnalysis();
+							cellAnalysis.setCell(myCell);
+							
+							Action cellAction = new Action(agTerrain, cellAnalysis);
+					
+							
+							ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+							
+							msg.setLanguage(codec.getName());
+			                msg.setOntology(ontology.getName());
+			                try{
+			                	getContentManager().fillContent(msg, cellAction);
+			                	msg.addReceiver(agTerrain);
+			                	send(msg);
+			                }
+			                catch(Exception e){
+			                	System.out.println("Request Exception");
+			                }
+							
+							/*
 							ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 							msg.setContent("Request for Cell");
 							msg.addReceiver(agTerrain);
 							send(msg);
+							*/
 							System.out.println("REQUEST is sent");
-							
-							
+														
 							//Returned answer from Terrain Simulation
 							ACLMessage ans = receive();
 							if(ans!= null){	  
