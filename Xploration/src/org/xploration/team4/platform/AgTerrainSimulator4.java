@@ -23,6 +23,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -34,15 +35,15 @@ import jade.lang.acl.MessageTemplate;
 public class AgTerrainSimulator4 extends Agent {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	//For this sprint it remains always true, only INFORM case
 	boolean validPosition = true;
 
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
-	
+
 	protected void setup(){
-				
+
 		System.out.println(getLocalName() + ": HAS ENTERED");
 
 		//Register Language and Ontology
@@ -50,67 +51,56 @@ public class AgTerrainSimulator4 extends Agent {
 		getContentManager().registerOntology(ontology);
 
 		try{
-		//Registration Description of Terrain Simulator
-		DFAgentDescription dfd = new DFAgentDescription(); 
-		ServiceDescription sd  = new ServiceDescription();
-		sd.setType(Constants.TERRAIN_SIMULATOR);
-		sd.setName(getLocalName());
-		dfd.addServices(sd);	
-		DFService.register(this, dfd );  
+			//Registration Description of Terrain Simulator
+			DFAgentDescription dfd = new DFAgentDescription(); 
+			ServiceDescription sd  = new ServiceDescription();
+			sd.setType(Constants.TERRAIN_SIMULATOR);
+			sd.setName(getLocalName());
+			dfd.addServices(sd);	
+			DFService.register(this, dfd );  
 		}catch (FIPAException e){ 
 			e.printStackTrace();
 			System.out.println("REGISTRATION EXCEPTION is detected!"); 
 		}
-		
-		//Makes the agent KILLED!
-		//Map 5X5 sizes with A,B,C,D minerals		
-		String [][] multi = new String [6][6];	
-		multi[1][1] = "A"; multi[1][3] = "B"; multi[1][5] = "C";
-		multi[2][2] = "B"; multi[2][4] = "C"; 
-		multi[3][1] = "D"; multi[3][3] = "B"; multi[3][5] = "D";
-		multi[4][2] = "C"; multi[4][4] = "A";
-		multi[5][1] = "D"; multi[5][3] = "C"; multi[5][5] = "A";	
-	
+
 		//Adding Behaviour to Setup() Method
 		addBehaviour(cellRequestListener());
 	}
 
 	private Behaviour cellRequestListener() {
 		return new CyclicBehaviour(this) {
-
+			
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
 						MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
 								MessageTemplate.MatchPerformative(ACLMessage.REQUEST)))); 
-
+				
 				if (msg != null )
 				{
 					// If a Cell Claiming request arrives
 					// it answers with the REFUSE, AGREE or NOT_UNDERSTOOD
-					System.out.println("1");
-					// storing the message sender agent
-					AID fromAgent = msg.getSender();
+
 					// The ContentManager transforms the message content
 					ContentElement ce;
 					try {
 						ce = getContentManager().extractContent(msg);
-						System.out.println("2");
+
 						// We expect an action inside the message
 						if (ce instanceof Action)
 						{
-							System.out.println("3");
 							Action agAction = (Action) ce;
 							Concept conc = agAction.getAction();
 							// If the action is CellAnalysis
 							if(conc instanceof CellAnalysis)
 							{
-								System.out.println("4");
+								//Storing the message sender agent
+								AID fromAgent = msg.getSender();
+
 								System.out.println(getLocalName()+": CellAnalysis REQUEST is received from " + 
 										(msg.getSender()).getLocalName());
 
 								CellAnalysis ca = (CellAnalysis) conc;
-								//claimedCell has the (x,y) coordinates to check validity
 								Cell claimedCell = ca.getCell();
 
 								//Creating reply message
@@ -118,35 +108,36 @@ public class AgTerrainSimulator4 extends Agent {
 								reply.setLanguage(codec.getName());
 								reply.setOntology(ontology.getName());
 								
-								/*
-								System.out.println(claimedCell.getX());
-								System.out.println(claimedCell.getY());
-								System.out.println(claimedCell.getMineral());
-								System.out.println(claimedCell.getX()>5 || claimedCell.getY()>5 || 
-										!(claimedCell.getMineral().equals("A") || claimedCell.getMineral().equals("B")||
-										claimedCell.getMineral().equals("C")|| claimedCell.getMineral().equals("D")));
-								*/
+								//Map object								
+								Map myMap = new Map();
+								//Exact coordinates for the map
+								int m = claimedCell.getX();
+								int n = claimedCell.getY();
+								
 								//Invalid Cell Condition
-								//Checking world boundaries 5x5
-								
-								
-								if(claimedCell.getX()>5 || claimedCell.getY()>5)
+								//Checking world boundaries 3x3			
+								//Checking whether there exists  a mineral or not for that cell																																
+								if(claimedCell.getX()>3 || claimedCell.getY()>3 || !(myMap.getCell(m, n).getMineral().equals("A") ||
+										myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")|| 
+										myMap.getCell(m, n).getMineral().equals("D")))
 								{
 									reply.setContent("REFUSE");
 									reply.setPerformative(ACLMessage.REFUSE);
 									myAgent.send(reply);
 									System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
+									doWait(3000);
 								}
 
 								//Valid Cell Condition
-								//Checking world boundaries
-								//UPDATE THIS CHECK
-								else if(claimedCell.getX()<=5 && claimedCell.getY()<=5){
+								else if(claimedCell.getX()<=3 && claimedCell.getY()<=3 && (myMap.getCell(m, n).getMineral().equals("A")
+										|| myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")||
+										myMap.getCell(m, n).getMineral().equals("D")))
+								{								
 									reply.setContent("initial AGREE");
 									reply.setPerformative(ACLMessage.AGREE);
 									myAgent.send(reply);
-									System.out.println(myAgent.getLocalName()+":Initial AGREEMENT is sent");
-									
+									System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
+
 									//Only INFORM case
 									if(validPosition){
 										ACLMessage finalMsg = new ACLMessage(ACLMessage.INFORM);
@@ -154,7 +145,7 @@ public class AgTerrainSimulator4 extends Agent {
 										finalMsg.setLanguage(codec.getName());
 										finalMsg.setOntology(ontology.getName());
 										send(finalMsg);
-										System.out.println(myAgent.getLocalName() + ": confirmation to claiming cell!");
+										System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+myMap.getCell(m, n).getMineral());
 									}								
 								}
 							}else{
@@ -173,6 +164,10 @@ public class AgTerrainSimulator4 extends Agent {
 						myAgent.send(reply);
 						System.out.println(myAgent.getLocalName() + ": NOT_UNDERSTOOD is sent");				
 					}
+				}
+				else{
+					//if no message arrives
+					block();
 				}
 			}
 		};
