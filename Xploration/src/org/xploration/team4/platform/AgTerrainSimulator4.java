@@ -1,14 +1,8 @@
 package org.xploration.team4.platform;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.*;
 
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
-import org.xploration.ontology.RegistrationRequest;
-import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
 
 import jade.content.Concept;
@@ -23,7 +17,6 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -38,6 +31,8 @@ public class AgTerrainSimulator4 extends Agent {
 
 	//For this sprint it remains always true, only INFORM case
 	boolean validPosition = true;
+	private int worldWidth = 10; //TODO get these from somewhere (mapsimulator?)
+	private int worldHeight = 10;
 
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
@@ -73,8 +68,8 @@ public class AgTerrainSimulator4 extends Agent {
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-						MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
-								MessageTemplate.MatchPerformative(ACLMessage.REQUEST)))); 
+												MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
+												MessageTemplate.MatchPerformative(ACLMessage.REQUEST)))); 
 				
 				if (msg != null )
 				{
@@ -102,6 +97,7 @@ public class AgTerrainSimulator4 extends Agent {
 
 								CellAnalysis ca = (CellAnalysis) conc;
 								Cell claimedCell = ca.getCell();
+								System.out.println(claimedCell.getX() + "  " + claimedCell.getY());
 
 								//Creating reply message
 								ACLMessage reply = msg.createReply();
@@ -109,44 +105,54 @@ public class AgTerrainSimulator4 extends Agent {
 								reply.setOntology(ontology.getName());
 								
 								//Map object								
-								Map myMap = new Map();
+								Map myMap = new Map(worldWidth, worldHeight);
 								//Exact coordinates for the map
 								int m = claimedCell.getX();
 								int n = claimedCell.getY();
 								
-								//Invalid Cell Condition
-								//Checking world boundaries 3x3			
-								//Checking whether there exists  a mineral or not for that cell																																
-								if(claimedCell.getX()>3 || claimedCell.getY()>3 || !(myMap.getCell(m, n).getMineral().equals("A") ||
-										myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")|| 
-										myMap.getCell(m, n).getMineral().equals("D")))
-								{
-									reply.setContent("REFUSE");
-									reply.setPerformative(ACLMessage.REFUSE);
-									myAgent.send(reply);
-									System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
-									doWait(3000);
-								}
-
-								//Valid Cell Condition
-								else if(claimedCell.getX()<=3 && claimedCell.getY()<=3 && (myMap.getCell(m, n).getMineral().equals("A")
-										|| myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")||
-										myMap.getCell(m, n).getMineral().equals("D")))
-								{								
-									reply.setContent("initial AGREE");
-									reply.setPerformative(ACLMessage.AGREE);
-									myAgent.send(reply);
-									System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
-
-									//Only INFORM case
-									if(validPosition){
-										ACLMessage finalMsg = new ACLMessage(ACLMessage.INFORM);
-										finalMsg.addReceiver(fromAgent);
-										finalMsg.setLanguage(codec.getName());
-										finalMsg.setOntology(ontology.getName());
-										send(finalMsg);
-										System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+myMap.getCell(m, n).getMineral());
-									}								
+								try {
+//									System.out.println(myMap);
+//									System.out.println(myMap.getCell(m, n));
+//									System.out.println(myMap.getCell(m, n).getX());
+//									System.out.println(myMap.getCell(m, n).getY());
+//									System.out.println(myMap.getCell(m, n).getMineral());
+									//Invalid Cell Condition
+									//Checking world boundaries	
+									//Checking whether there exists  a mineral or not for that cell																																
+									if(claimedCell.getX()>worldWidth || claimedCell.getY()>worldHeight || 
+											!(myMap.getCell(m,n).getMineral().equals("A") ||
+											myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")|| 
+											myMap.getCell(m, n).getMineral().equals("D")))
+									{
+										reply.setContent("REFUSE");
+										reply.setPerformative(ACLMessage.REFUSE);
+										myAgent.send(reply);
+										System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
+										doWait(3000);
+									}
+	
+									//Valid Cell Condition
+									else if(claimedCell.getX()<=worldWidth && claimedCell.getY()<=worldHeight && (myMap.getCell(m, n).getMineral().equals("A")
+											|| myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")||
+											myMap.getCell(m, n).getMineral().equals("D")))
+									{								
+										reply.setContent("initial AGREE");
+										reply.setPerformative(ACLMessage.AGREE);
+										myAgent.send(reply);
+										System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
+	
+										//Only INFORM case
+										if(validPosition){
+											ACLMessage finalMsg = new ACLMessage(ACLMessage.INFORM);
+											finalMsg.addReceiver(fromAgent);
+											finalMsg.setLanguage(codec.getName());
+											finalMsg.setOntology(ontology.getName());
+											send(finalMsg);
+											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+myMap.getCell(m, n).getMineral());
+										}								
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
 								}
 							}else{
 								throw new NotUnderstoodException(msg);

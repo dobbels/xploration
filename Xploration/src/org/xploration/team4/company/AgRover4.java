@@ -3,6 +3,7 @@ package org.xploration.team4.company;
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.XplorationOntology;
+import org.xploration.team4.platform.Map;
 
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -26,12 +27,14 @@ public class AgRover4 extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	public final static int TEAM_ID = 4;
+	
+	private Cell location = new Cell();
+	private int worldWidth;
+	private int worldHeight;
+	private Map map;
 
 	private Codec codec = new SLCodec();
 	private jade.content.onto.Ontology ontology = XplorationOntology.getInstance();
-
-	//Cell object to claim by Rover
-	public Cell myCell = new Cell();
 
 	protected void setup(){
 
@@ -40,13 +43,24 @@ public class AgRover4 extends Agent {
 		//Register Language and Ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
+		
+		Object[] args = getArguments();
+		int arg1 = (int)args[0]; // Landing of Capsule X-coordinate 
+		int arg2 = (int)args[1]; // Landing of Capsule Y-coordinate 
+		int arg3 = (int)args[2]; // Dimension of world X
+		int arg4 = (int)args[3]; // Dimension of world Y
 
+		location.setX(arg1);
+		location.setY(arg2);
+		worldWidth = arg3;
+		worldHeight = arg4;
+		
 		//Just a trial for (3,3) coordinates
-		myCell.setX(Constants.xCoord);
-		myCell.setY(Constants.yCoord);
+//		myCell.setX(Constants.xCoord);
+//		myCell.setY(Constants.yCoord);
 	    
 		//Behaviour is added in the cellAnalysis Method
-		cellAnalysis(myCell);
+		cellAnalysis(location);
 	} 
 
 	private void cellAnalysis(Cell myCell){
