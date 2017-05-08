@@ -75,7 +75,7 @@ public class AgCompany4 extends Agent {
 								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
 								
 								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
-								ACLMessage ans = receive();
+								ACLMessage ans = blockingReceive();
 								if (ans.getPerformative() == ACLMessage.REFUSE)
 								{
 									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");
@@ -86,7 +86,7 @@ public class AgCompany4 extends Agent {
 								}
 								else if (ans.getPerformative() == ACLMessage.AGREE) {
 									System.out.println(getLocalName()+": INITIAL AGREEMENT ON REGISTRATION");
-									ACLMessage ans2 = receive();
+									ACLMessage ans2 = blockingReceive();
 									if (ans2.getPerformative() == ACLMessage.FAILURE)
 									{
 										System.out.println(getLocalName()+" REGISTRATION FAILED: ALREADY REGISTERED");

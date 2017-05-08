@@ -20,8 +20,6 @@ public class Constants {
 		while (!isExistingCoordinate(dimX, dimY, randomX, randomY)) {
 			randomX = 1 + (int)(Math.random() * dimX);
 			randomY = 1 + (int)(Math.random() * dimY);
-			System.out.println("rand X: " + randomX);
-			System.out.println("rand Y: " + randomY);
 		}
 		
 		Cell cell = new Cell();

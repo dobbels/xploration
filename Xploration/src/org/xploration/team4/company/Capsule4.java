@@ -1,5 +1,6 @@
 package org.xploration.team4.company;
 
+import org.xploration.team4.company.Constants;
 import org.xploration.ontology.RegistrationRequest;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
