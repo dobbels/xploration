@@ -97,7 +97,7 @@ public class AgTerrainSimulator4 extends Agent {
 
 								CellAnalysis ca = (CellAnalysis) conc;
 								Cell claimedCell = ca.getCell();
-								System.out.println(claimedCell.getX() + "  " + claimedCell.getY());
+//								System.out.println(claimedCell.getX() + "  " + claimedCell.getY());
 
 								//Creating reply message
 								ACLMessage reply = msg.createReply();
@@ -111,11 +111,6 @@ public class AgTerrainSimulator4 extends Agent {
 								int n = claimedCell.getY();
 								
 								try {
-//									System.out.println(myMap);
-//									System.out.println(myMap.getCell(m, n));
-//									System.out.println(myMap.getCell(m, n).getX());
-//									System.out.println(myMap.getCell(m, n).getY());
-//									System.out.println(myMap.getCell(m, n).getMineral());
 									//Invalid Cell Condition
 									//Checking world boundaries	
 									//Checking whether there exists  a mineral or not for that cell																																
@@ -143,11 +138,18 @@ public class AgTerrainSimulator4 extends Agent {
 	
 										//Only INFORM case
 										if(validPosition){
-											ACLMessage finalMsg = new ACLMessage(ACLMessage.INFORM);
-											finalMsg.addReceiver(fromAgent);
-											finalMsg.setLanguage(codec.getName());
-											finalMsg.setOntology(ontology.getName());
-											send(finalMsg);
+											CellAnalysis cellAnalysis = new CellAnalysis();
+											cellAnalysis.setCell(claimedCell);
+											
+											Action cellAction = new Action(fromAgent, cellAnalysis);
+
+											ACLMessage inform = msg.createReply();
+											inform.setPerformative(ACLMessage.INFORM);
+											getContentManager().fillContent(inform, cellAction);
+//											finalMsg.addReceiver(fromAgent);
+//											finalMsg.setLanguage(codec.getName());
+//											finalMsg.setOntology(ontology.getName());
+											send(inform);
 											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+myMap.getCell(m, n).getMineral());
 										}								
 									}
