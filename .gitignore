@@ -3,13 +3,13 @@
 .recommenders/
 bin/
 APDescription.txt
-MTPs-Main-Container
+MTPs-Main-Container.txt
 .classpath
 .project
 .settings
 Xploration/bin/
 Xploration/APDescription.txt
-Xploration/MTPs-Main-Container
+Xploration/MTPs-Main-Container.txt
 Xploration/.classpath
 Xploration/.project
 Xploration/.settings
