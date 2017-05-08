@@ -147,7 +147,7 @@ public class AgRover4 extends Agent {
 										{										
 											System.out.println(getLocalName()+": INFORM is received!");
 											System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
-												   +myCell.getX() + ","+ myCell.getY()+ ")");
+												   +myCell.getX() + ","+ myCell.getY()+  ", " + myCell.getMineral() + ")");
 											claimingCell = true;											
 										}
 										else{
