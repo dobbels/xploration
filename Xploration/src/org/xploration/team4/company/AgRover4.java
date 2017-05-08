@@ -110,7 +110,7 @@ public class AgRover4 extends Agent {
 							//doWait(1000);
 														
 							//Returned answer from Terrain Simulation
-							ACLMessage ans = receive();
+							ACLMessage ans = blockingReceive();
 							if(ans!= null){	  
 								if(ans.getPerformative()==ACLMessage.REFUSE)
 								{
@@ -127,7 +127,7 @@ public class AgRover4 extends Agent {
 								{
 									System.out.println(getLocalName() + ": Initial AGREE is received");	  
 
-									ACLMessage finalMsg = receive();
+									ACLMessage finalMsg = blockingReceive();
 									if(finalMsg != null){
 										if(finalMsg.getPerformative()==ACLMessage.INFORM)
 										{										
