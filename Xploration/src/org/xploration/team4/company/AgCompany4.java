@@ -16,11 +16,7 @@ import jade.lang.acl.ACLMessage;
 public class AgCompany4 extends Agent {
 	 
 	private static final long serialVersionUID = 1L;
-	public final static int TEAM_ID = 4;
-	// The name of the service the Registration Desk agent is using to announce itself in the Yellow Pages
-	public final static String REGISTRATION_DESK_NAME = "registrationDesk";
-//	public final static String REQUEST_SUCCEEDED = "Request: Success";
-//	public final static String REQUEST_FAULED = "Request: Failure";
+	
 
 	//sources: 
 	//  http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
@@ -29,7 +25,7 @@ public class AgCompany4 extends Agent {
 	private jade.content.onto.Ontology ontology = XplorationOntology.getInstance();
 	protected void setup()
 	{
-		System.out.println(getLocalName()+": HAS ENTERED"); //TODO what is LocalName? Better AgCompany4 ?
+		System.out.println(getLocalName()+": HAS ENTERED");
 		
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
@@ -53,7 +49,7 @@ public class AgCompany4 extends Agent {
 					// Creates the description for the type of agent to be searched in the yellow pages
 					DFAgentDescription dfd = new DFAgentDescription();
 					ServiceDescription sd = new ServiceDescription();
-					sd.setType(REGISTRATION_DESK_NAME);
+					sd.setType(Constants.REGISTRATION_DESK_NAME);
 					dfd.addServices(sd);
 	
 					try
@@ -70,7 +66,7 @@ public class AgCompany4 extends Agent {
 		
 								// Try to register to the desk
 								Team team = new Team();
-								team.setTeamId(TEAM_ID);
+								team.setTeamId(Constants.TEAM_ID);
 								RegistrationRequest regReq = new RegistrationRequest();
 								regReq.setTeam(team);
 //								AgentAction regReqAction = new Action(ag, regReq);
@@ -79,7 +75,7 @@ public class AgCompany4 extends Agent {
 								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
 								
 								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
-								ACLMessage ans = blockingReceive(); //TODO not do this? dangerous if registration desk not in yellow pages yet?
+								ACLMessage ans = blockingReceive();
 								if (ans.getPerformative() == ACLMessage.REFUSE)
 								{
 									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");

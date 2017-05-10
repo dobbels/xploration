@@ -9,7 +9,7 @@ import jade.core.CaseInsensitiveString;
 
 /** file: XplorationOntology.java
  * @author ontology bean generator
- * @version 2017/04/10, 10:36:04
+ * @version 2017/04/27, 10:39:47
  */
 public class XplorationOntology extends jade.content.onto.Ontology  {
   //NAME
@@ -25,6 +25,15 @@ public class XplorationOntology extends jade.content.onto.Ontology  {
    // VOCABULARY
     public static final String REGISTRATIONREQUEST_TEAM="team";
     public static final String REGISTRATIONREQUEST="RegistrationRequest";
+    public static final String CELLANALYSIS_CELL="cell";
+    public static final String CELLANALYSIS="CellAnalysis";
+    public static final String REGISTRATIONDESK="RegistrationDesk";
+    public static final String TERRAINSIMULATOR="TerrainSimulator";
+    public static final String CELL_MINERAL="mineral";
+    public static final String CELL_Y="y";
+    public static final String CELL_X="x";
+    public static final String CELL="Cell";
+    public static final String SERVICE="Service";
     public static final String TEAM_TEAMID="teamId";
     public static final String TEAM="Team";
 
@@ -38,8 +47,18 @@ public class XplorationOntology extends jade.content.onto.Ontology  {
     // adding Concept(s)
     ConceptSchema teamSchema = new ConceptSchema(TEAM);
     add(teamSchema, org.xploration.ontology.Team.class);
+    ConceptSchema serviceSchema = new ConceptSchema(SERVICE);
+    add(serviceSchema, org.xploration.ontology.Service.class);
+    ConceptSchema cellSchema = new ConceptSchema(CELL);
+    add(cellSchema, org.xploration.ontology.Cell.class);
+    ConceptSchema terrainSimulatorSchema = new ConceptSchema(TERRAINSIMULATOR);
+    add(terrainSimulatorSchema, org.xploration.ontology.TerrainSimulator.class);
+    ConceptSchema registrationDeskSchema = new ConceptSchema(REGISTRATIONDESK);
+    add(registrationDeskSchema, org.xploration.ontology.RegistrationDesk.class);
 
     // adding AgentAction(s)
+    AgentActionSchema cellAnalysisSchema = new AgentActionSchema(CELLANALYSIS);
+    add(cellAnalysisSchema, org.xploration.ontology.CellAnalysis.class);
     AgentActionSchema registrationRequestSchema = new AgentActionSchema(REGISTRATIONREQUEST);
     add(registrationRequestSchema, org.xploration.ontology.RegistrationRequest.class);
 
@@ -50,11 +69,17 @@ public class XplorationOntology extends jade.content.onto.Ontology  {
 
     // adding fields
     teamSchema.add(TEAM_TEAMID, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+    cellSchema.add(CELL_X, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+    cellSchema.add(CELL_Y, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+    cellSchema.add(CELL_MINERAL, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    cellAnalysisSchema.add(CELLANALYSIS_CELL, cellSchema, ObjectSchema.MANDATORY);
     registrationRequestSchema.add(REGISTRATIONREQUEST_TEAM, teamSchema, ObjectSchema.OPTIONAL);
 
     // adding name mappings
 
     // adding inheritance
+    terrainSimulatorSchema.addSuperSchema(serviceSchema);
+    registrationDeskSchema.addSuperSchema(serviceSchema);
 
    }catch (java.lang.Exception e) {e.printStackTrace();}
   }
