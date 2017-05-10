@@ -6,6 +6,7 @@ import java.util.*;
 import org.xploration.ontology.RegistrationRequest;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
+import org.xploration.team4.common.Constants;
 
 import jade.content.*; 
 import jade.content.lang.Codec;

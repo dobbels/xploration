@@ -1,6 +1,7 @@
 package org.xploration.team4.company;
 
 import org.xploration.ontology.*;
+import org.xploration.team4.common.Constants;
 
 import jade.content.AgentAction;
 import jade.content.lang.Codec;
