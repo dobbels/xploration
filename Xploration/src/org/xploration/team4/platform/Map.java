@@ -27,7 +27,6 @@ public class Map {
 //		multi[3][0].setMineral(""); multi[3][1].setMineral("D"); multi[3][2].setMineral(""); multi[3][3].setMineral("B");
 	}
 	
-
     public Cell getCell(int x, int y) throws Exception {
         if(x%2 == y%2)
             return multi[x-1][y-1];

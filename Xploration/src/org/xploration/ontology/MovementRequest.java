@@ -6,11 +6,11 @@ import jade.util.leap.*;
 import jade.core.*;
 
 /**
-* Protege name: CellAnalysis
+* Protege name: MovementRequest
 * @author ontology bean generator
-* @version 2017/05/10, 22:02:17
+* @version 2017/05/10, 13:22:08
 */
-public class CellAnalysis implements AgentAction {
+public class MovementRequest implements AgentAction {
 
    /**
 * Protege name: cell
