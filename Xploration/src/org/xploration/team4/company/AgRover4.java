@@ -4,6 +4,7 @@ import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.XplorationOntology;
 import org.xploration.team4.platform.Map;
+import org.xploration.team4.common.Constants;
 
 import jade.content.Concept;
 import jade.content.ContentElement;

@@ -1,8 +1,8 @@
 package org.xploration.team4.company;
 
-import org.xploration.team4.company.Constants;
 import org.xploration.team4.platform.Map;
 import org.xploration.ontology.*;
+import org.xploration.team4.common.Constants;
 
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
