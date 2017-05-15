@@ -6,8 +6,13 @@ import org.xploration.team4.common.Constants;
 
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
+import jade.content.onto.basic.Action;
 import jade.core.Agent;
 import jade.core.behaviours.*;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
 import jade.core.AID;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
@@ -33,15 +38,18 @@ public class Capsule4 extends Agent {
 		System.out.println(getLocalName()+": HAS ENTERED");
 		
 		Object[] args = getArguments();
-		int arg1 = (int)args[0]; // Landing of Capsule X-coordinate 
-		int arg2 = (int)args[1]; // Landing of Capsule Y-coordinate 
-		int arg3 = (int)args[2]; // Dimension of world X
-		int arg4 = (int)args[3]; // Dimension of world Y
+		//Type needed to be changed into String
+		//Integer type causes program to be crashed
+		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
+		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
+		String arg3 = (String) args[2]; // Dimension of world X
+		String arg4 = (String) args[3]; // Dimension of world Y
 		
-		location.setX(arg1);
-		location.setY(arg2);
-		worldWidth = arg3;
-		worldHeight = arg4;
+		//Type conversions
+		location.setX(Integer.parseInt(arg1));
+		location.setY(Integer.parseInt(arg2));
+		worldWidth = Integer.parseInt(arg3);
+		worldHeight = Integer.parseInt(arg4);
 		
 		try {
 			map = new Map(worldWidth, worldHeight);
@@ -49,12 +57,13 @@ public class Capsule4 extends Agent {
 			e.printStackTrace();
 		}
 		
-		System.out.println(getLocalName()+" starting location: "+ Integer.toString(arg1) +  ", " + Integer.toString(arg2));
+		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
 		
         addBehaviour(deployRover());
+        capsuleRegistration(location);
         
 		// Add a behavior to handle requests form rover
 //		addBehaviour(mainBehaviour());
@@ -104,4 +113,77 @@ public class Capsule4 extends Agent {
             }
         };
 	}
+		
+	private void capsuleRegistration(Cell myCell){	
+		addBehaviour (new SimpleBehaviour(this)
+		{	
+			private static final long serialVersionUID1 = 3L;
+
+			AID agMapSimulator;
+
+			private boolean capsuleRegistration = false;
+
+			public void action(){
+				//A defensive check
+				if(!capsuleRegistration){
+					//Creates description for the AGENT MAP SIMULATOR to be searched
+					DFAgentDescription dfd = new DFAgentDescription();     
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType(Constants.MAP_SIMULATOR);
+					dfd.addServices(sd);
+
+					try {
+						// It finds agents of the required type
+						DFAgentDescription[] result = new DFAgentDescription[20];
+						result = DFService.search(myAgent, dfd);
+
+						// Gets the first occurrence, if there was success
+						if (result.length > 0)
+						{
+							//System.out.println(result[0].getName());
+							agMapSimulator = (AID) result[0].getName();	
+							System.out.println(getLocalName()+ ": Map Simulator agent is found");
+
+
+							CapsuleRegistrationInfo capsuleReg = new CapsuleRegistrationInfo();
+							capsuleReg.setCell(myCell);
+							//TODO: Type should be integer or team
+							capsuleReg.setTeam(Constants.myTeam);
+
+							Action cellAction = new Action(agMapSimulator, capsuleReg);
+
+							ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+
+							msg.setProtocol(XplorationOntology.CAPSULEREGISTRATIONSERVICE);
+							msg.setLanguage(codec.getName());
+							msg.setOntology(ontology.getName());
+							try{
+								getContentManager().fillContent(msg, cellAction);
+								msg.addReceiver(agMapSimulator);
+								send(msg);			
+								System.out.println(getLocalName() + ": INFORM is sent");
+								capsuleRegistration = true;
+							}
+							catch(Exception e){
+								System.out.println(getLocalName() + " INFORM Exception");
+							}					
+						}
+						else{
+							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
+							doWait(5000);
+						}
+					}
+					catch(Exception e){
+						System.out.println(getLocalName() + "Exception is detected!");
+						e.printStackTrace();
+					}
+				}
+			}
+			//To stop behaviour
+			public boolean done() {
+				return capsuleRegistration;
+			}
+		});
+	}
 }
+
