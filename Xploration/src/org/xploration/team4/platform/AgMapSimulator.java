@@ -93,6 +93,10 @@ public class AgMapSimulator extends Agent {
 
 									System.out.println(getLocalName()+": Rover Registration INFORM is received from " + 
 											(msg.getSender()).getLocalName());
+									
+									RoverRegistrationInfo roverLoc = (RoverRegistrationInfo) conc;
+									Cell roverLocation = roverLoc.getCell();									
+									System.out.println(getLocalName()+ ": Rover Location is " + roverLocation.getX() + "," + roverLocation.getY());
 								}
 							}
 						}catch(Exception e){
@@ -103,8 +107,7 @@ public class AgMapSimulator extends Agent {
 			}
 		};		
 	}
-	
-	
+		
 	private Behaviour capsuleRequestListener() {
 		return new CyclicBehaviour(this) {
 
@@ -133,6 +136,10 @@ public class AgMapSimulator extends Agent {
 
 									System.out.println(getLocalName()+": Capsule Registration INFORM is received from " + 
 											(msg.getSender()).getLocalName());
+									
+									CapsuleRegistrationInfo capsuleLoc = (CapsuleRegistrationInfo) conc;
+									Cell capsuleLocation = capsuleLoc.getCell();									
+									System.out.println(getLocalName()+ ": Capsule Location is " + capsuleLocation.getX() + "," + capsuleLocation.getY());
 								}
 							}
 						}catch(Exception e){

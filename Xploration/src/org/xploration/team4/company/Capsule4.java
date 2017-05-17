@@ -24,7 +24,8 @@ public class Capsule4 extends Agent {
 	private Cell location = new Cell();
 	private int worldWidth;
 	private int worldHeight;
-	Map worldMap = new Map();
+	private int missionLength;
+	//Map worldMap = new Map();
 	
 	
 	//sources: 
@@ -48,15 +49,22 @@ public class Capsule4 extends Agent {
 		Object[] args = getArguments();
 		//Type needed to be changed into String
 		//Integer type causes program to be crashed
-		//ONLY Capsule coordinates
 		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
 		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
+		String arg3 = (String) args[2]; // World map X dimension
+		String arg4 = (String) args[3]; // World map Y dimension
+		String arg5 = (String) args[4]; // the mission length
 
 		
 		//Type conversions
 		location.setX(Integer.parseInt(arg1));
-		location.setY(Integer.parseInt(arg2));		
+		location.setY(Integer.parseInt(arg2));
+		worldWidth = Integer.parseInt(arg3);
+		worldHeight = Integer.parseInt(arg4);
+		missionLength = Integer.parseInt(arg5);
+		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
+		System.out.println(getLocalName()+": missionLength: "+ arg5);
 		
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
@@ -103,7 +111,7 @@ public class Capsule4 extends Agent {
                 try {
                 	String teamName = "Rover4";
 					String className = this.getClass().getPackage().getName()+".AgRover4";
-                    Object[] args = new Object[]{x, y, worldMap.getWidth(), worldMap.getHeight()};
+                    Object[] args = new Object[]{x, y, worldWidth, worldHeight};
                     a = cnt.createNewAgent(teamName, className, args);
                     a.start();
                 } catch (StaleProxyException e) {

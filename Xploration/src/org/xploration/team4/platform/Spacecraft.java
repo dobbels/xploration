@@ -46,6 +46,7 @@ public class Spacecraft extends Agent {
 		
 		private int mapDimensionX = 10;
 		private int mapDimensionY = 10;
+		private int missionLength = 10; // mission length in seconds
 		
 		
 		public void setup() {
@@ -93,11 +94,12 @@ public class Spacecraft extends Agent {
 								String teamName = "Capsule" + teamNb;
 								String className = "org.xploration.team" + teamNb + ".company."+ teamName;
 //								String className = "org.xploration.team" + 4 + ".company."+ teamName;
-								Object[] args = new Object[4];
+								Object[] args = new Object[5];
 								args[0] = currentCell.getX();
 								args[1] = currentCell.getY();
 								args[2] = mapDimensionX;
 								args[3] = mapDimensionY;
+								args[4] = missionLength;
 						        agents.add(container.createNewAgent(teamName,className, args));
 						        alreadyAssigned = false;
 							} catch (StaleProxyException e) {
