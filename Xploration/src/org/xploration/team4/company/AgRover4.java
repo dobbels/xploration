@@ -1,5 +1,7 @@
 package org.xploration.team4.company;
 
+import java.util.ArrayList;
+
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.RoverRegistrationInfo;
@@ -33,6 +35,11 @@ public class AgRover4 extends Agent {
 	public final static int TEAM_ID = 4;
 	
 	private Cell location = new Cell();
+	private ArrayList<Cell> analyzedCells = new ArrayList<>();
+
+	private Cell cell1 = new Cell();
+	private Cell cell2 = new Cell();
+
 
 	private Codec codec = new SLCodec();
 	private jade.content.onto.Ontology ontology = XplorationOntology.getInstance();
@@ -57,11 +64,26 @@ public class AgRover4 extends Agent {
 		location.setY(Integer.parseInt(arg2));
 		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
+		
+		//TODO delete these two cells, they are meant for testing
+		cell1.setX(4);
+		cell1.setY(6);
+		cell1.setMineral("A");
+	
+		cell2.setX(1);
+		cell2.setY(3);
+		cell2.setMineral("C");
+		
+		analyzedCells.add(cell1);
+		analyzedCells.add(cell2);
+		
 
 		//Cell Analysis for Terrain Simulator 
 		cellAnalysis(location);
 		//roverRegistration for Map Simulator
 		roverRegistration(location);
+		// map broadcast //TODO eventually before/after every movement
+//		broadcastCurrentMap(analyzedCells); //TODO
 	} 
 
 	private void cellAnalysis(Cell myCell){

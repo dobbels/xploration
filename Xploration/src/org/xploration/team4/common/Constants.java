@@ -14,6 +14,7 @@ public class Constants {
 	
 	public final static String TERRAIN_SIMULATOR = "terrainSimulator";
 	public final static String MAP_SIMULATOR = "mapSimulator";
+	public final static String MOVEMENT_SIMULATOR = "movementSimulator";
 	
 	//Coordinates for Rover - Terrain Simulator protocol
 	public final static int xCoord = 1;
