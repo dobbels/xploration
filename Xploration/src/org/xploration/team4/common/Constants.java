@@ -14,6 +14,7 @@ public class Constants {
 	
 	public final static String TERRAIN_SIMULATOR = "terrainSimulator";
 	public final static String MAP_SIMULATOR = "mapSimulator";
+	public final static String MOVEMENT_SIMULATOR = "movementSimulator";
 	
 	//Coordinates for Rover - Terrain Simulator protocol
 	public final static int xCoord = 1;
@@ -22,6 +23,18 @@ public class Constants {
 	public final static boolean isExistingCoordinate(int dimX, int dimY, int x, int y) {
 		return (x > 0 && x <= dimX && y > 0 && y <= dimY &&
 				((x%2 == 0 && y%2 == 0) || (x%2 == 1 && y%2 == 1)));
+	}
+	
+	public final static boolean isNextPosition(int dimX, int dimY, int ix, int iy, int dx, int dy) {
+		//move up
+		
+		//move down
+		
+		//move left
+		
+		//move right
+			
+		return true;
 	}
 	
 	public final static Cell generateCoordinate(int dimX, int dimY) {
