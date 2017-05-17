@@ -32,11 +32,7 @@ public class AgRover4 extends Agent {
 	private static final long serialVersionUID = 1L;
 	public final static int TEAM_ID = 4;
 	
-
 	private Cell location = new Cell();
-	private int worldWidth;
-	private int worldHeight;
-	private Map map;
 
 	private Codec codec = new SLCodec();
 	private jade.content.onto.Ontology ontology = XplorationOntology.getInstance();
@@ -52,21 +48,18 @@ public class AgRover4 extends Agent {
 		Object[] args = getArguments();
 		//Type needed to be changed into String
 		//Integer type causes program to be crashed
+		//ONLY capsule coordinates
 		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
 		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
-		String arg3 = (String) args[2]; // Dimension of world X
-		String arg4 = (String) args[3]; // Dimension of world Y
 		
 		//Type conversions
 		location.setX(Integer.parseInt(arg1));
 		location.setY(Integer.parseInt(arg2));
-		worldWidth = Integer.parseInt(arg3);
-		worldHeight = Integer.parseInt(arg4);
 		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 
 		//Cell Analysis for Terrain Simulator 
-		//cellAnalysis(location);
+		cellAnalysis(location);
 		//roverRegistration for Map Simulator
 		roverRegistration(location);
 	} 

@@ -19,15 +19,14 @@ import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 
 public class Capsule4 extends Agent {
-	
-
-	
+		
 	private static final long serialVersionUID = 1L;
 	private Cell location = new Cell();
 	private int worldWidth;
 	private int worldHeight;
-	private Map map;
-
+	Map worldMap = new Map();
+	
+	
 	//sources: 
 	//  http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
 	//  https://www.iro.umontreal.ca/~vaucher/Agents/Jade/Ontologies.htm
@@ -36,37 +35,37 @@ public class Capsule4 extends Agent {
 	protected void setup()
 	{
 		System.out.println(getLocalName()+": HAS ENTERED");
-		
+		/*
+		worldMap.printWorldMap();
+		try {
+			System.out.println("Testing world map mineral: "+ worldMap.getMineral(4, 10));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+			
 		Object[] args = getArguments();
 		//Type needed to be changed into String
 		//Integer type causes program to be crashed
+		//ONLY Capsule coordinates
 		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
 		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
-		String arg3 = (String) args[2]; // Dimension of world X
-		String arg4 = (String) args[3]; // Dimension of world Y
+
 		
 		//Type conversions
 		location.setX(Integer.parseInt(arg1));
-		location.setY(Integer.parseInt(arg2));
-		worldWidth = Integer.parseInt(arg3);
-		worldHeight = Integer.parseInt(arg4);
-		
-		try {
-			map = new Map(worldWidth, worldHeight);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+		location.setY(Integer.parseInt(arg2));		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
 		
-        addBehaviour(deployRover());
+        //addBehaviour(deployRover());
         capsuleRegistration(location);
         
 		// Add a behavior to handle requests form rover
-//		addBehaviour(mainBehaviour());
+        //	addBehaviour(mainBehaviour());
 	}
 	
 	private Behaviour mainBehaviour() {
@@ -87,7 +86,7 @@ public class Capsule4 extends Agent {
 
 		};
 	}
-	
+	//TODO This function causes a name problem an agent name problem
 	private Behaviour deployRover() {
 		return new OneShotBehaviour() {
             
@@ -104,7 +103,7 @@ public class Capsule4 extends Agent {
                 try {
                 	String teamName = "Rover4";
 					String className = this.getClass().getPackage().getName()+".AgRover4";
-                    Object[] args = new Object[]{x, y, map.getWidth(), map.getHeight()};
+                    Object[] args = new Object[]{x, y, worldMap.getWidth(), worldMap.getHeight()};
                     a = cnt.createNewAgent(teamName, className, args);
                     a.start();
                 } catch (StaleProxyException e) {
