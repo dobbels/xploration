@@ -1,51 +1,93 @@
 package org.xploration.team4.platform;
 
 import org.xploration.ontology.Cell;
+import org.xploration.team4.common.Constants;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 public class Map {
+			
+	private ArrayList<ArrayList<Cell>> worldMap = new ArrayList<ArrayList<Cell>>();
+	//File Location
+	private final static String MAP_FILE = "C:\\Users\\asus\\git\\xploration\\Xploration\\src\\org\\xploration\\MAP_FILE.txt";
+			
+	//worldMap construction from a read txt file
+	public Map(){
 		
-	public int m,n;
-	private Cell [][] multi;
-	
-	//Creating all the cell objects within the map
-	public Map(int width, int height){
-		multi = new Cell [height][width];
-		for(int i = 0; i < height;i ++ ){
-			for(int j = 0; j<width ; j++){
-				Cell temp =new Cell();
-                temp.setX(i+1);
-                temp.setY(j+1);
-                temp.setMineral("A");//TODO read from file
-				multi[i][j] = temp;
+		File file = new File(MAP_FILE);
+		BufferedReader reader = null;
+
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			String text = null;		    		    
+			//text has the lines
+			while ((text = reader.readLine()) != null)
+			{	
+				int row = 0;
+				ArrayList<Cell> myRow = new ArrayList<Cell>();		    	
+				for(int i = 0; i <text.length(); i++){
+					//Filling the row
+					Cell myCell = new Cell();
+					myCell.setMineral(text.substring(i, i+1));
+					myCell.setX(row);
+					myCell.setY(i);
+					myRow.add(myCell);
+				}				
+				//Filling the 2D arrayList
+				worldMap.add(myRow);
+				row ++;
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+
+		finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {}
 		}
-		//Map 3X3 sizes with A,B,C,D minerals
-//		multi[0][0].setMineral(""); multi[0][1].setMineral(""); multi[0][2].setMineral(""); multi[0][3].setMineral("");
-//		multi[1][0].setMineral(""); multi[1][1].setMineral("A"); multi[1][2].setMineral(""); multi[1][3].setMineral("C");
-//		multi[2][0].setMineral(""); multi[2][1].setMineral(""); multi[2][2].setMineral("B"); multi[2][3].setMineral(""); 
-//		multi[3][0].setMineral(""); multi[3][1].setMineral("D"); multi[3][2].setMineral(""); multi[3][3].setMineral("B");
 	}
-	
+	public void printWorldMap(){
+		//Doesn't display the last mineral in the even lines. Because length is 10 not 9
+		//But it stores the text file correctly
+		for(int i = 0; i<worldMap.size(); i++){			
+			for(int j = 0; j<worldMap.get(0).size(); j++){
+				System.out.printf("%s ", worldMap.get(i).get(j).getMineral());
+			}
+			System.out.println();
+		}		
+	}
+
     public Cell getCell(int x, int y) throws Exception {
         if(x%2 == y%2)
-            return multi[x-1][y-1];
+            return worldMap.get(x-1).get(y-1);
         else throw new Exception("Not a cell");
     }
-
+    
+    public String getMineral(int x, int y) throws Exception {
+        if(x%2 == y%2)
+            return worldMap.get(x-1).get(y-1).getMineral();
+        else throw new Exception("Not a cell");
+    }
+    
     public void putMineral(int x, int y, String m) throws Exception {
         if(x%2 == y%2)
-            multi[x-1][y-1].setMineral(m);
+            worldMap.get(x-1).get(y-1).setMineral(m);
         else throw new Exception("Not a cell");
     }
 
     public int getWidth() {
-        return multi[0].length;
+        return worldMap.size();
     }
-
-
+    
     public int getHeight() {
-        return multi.length;
+        return worldMap.get(1).size();
     }
 }
 
