@@ -26,6 +26,18 @@ public class Constants {
 				((x%2 == 0 && y%2 == 0) || (x%2 == 1 && y%2 == 1)));
 	}
 	
+	public final static boolean isNextPosition(int dimX, int dimY, int ix, int iy, int dx, int dy) {
+		//move up
+		
+		//move down
+		
+		//move left
+		
+		//move right
+			
+		return true;
+	}
+	
 	public final static Cell generateCoordinate(int dimX, int dimY) {
 		int randomX = 0;
 		int randomY = 0;
