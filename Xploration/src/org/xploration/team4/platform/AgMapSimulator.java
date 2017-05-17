@@ -33,7 +33,6 @@ import org.xploration.team4.common.*;
 
 public class AgMapSimulator extends Agent {
 
-//	File file = new File("C:\\Users\\asus\\workspace");
 	private static final long serialVersionUID = 1L;
 
 	private static final Ontology ontology = XplorationOntology.getInstance();
@@ -60,10 +59,9 @@ public class AgMapSimulator extends Agent {
 			e.printStackTrace();
 			System.out.println("MAP SIMULATOR REGISTRATION EXCEPTION is detected!"); 
 		}
-
-		//createMap();		
+		
 		addBehaviour(roverRequestListener());
-		addBehaviour(capsuleRequestListener());
+		addBehaviour(capsuleRequestListener());		
 	}
 	
 	private Behaviour roverRequestListener() {
@@ -73,7 +71,6 @@ public class AgMapSimulator extends Agent {
 				
 				//RoverRegistrationService Protocol
 				ACLMessage msg = blockingReceive(MessageTemplate.MatchProtocol(XplorationOntology.ROVERREGISTRATIONSERVICE));
-
 
 				if (msg != null )
 				{
@@ -134,7 +131,7 @@ public class AgMapSimulator extends Agent {
 									//Storing the message sender agent
 									AID fromAgent = msg.getSender();
 
-									System.out.println(getLocalName()+": capsule Registration INFORM is received from " + 
+									System.out.println(getLocalName()+": Capsule Registration INFORM is received from " + 
 											(msg.getSender()).getLocalName());
 								}
 							}
@@ -146,59 +143,4 @@ public class AgMapSimulator extends Agent {
 			}
 		};
 	}
-		
-	/*
-	private void createMap(){
-		//TODO Actual Map starts from 1 not 0
-		ArrayList<ArrayList<Cell>> myMap = new ArrayList<ArrayList<Cell>>();
-
-		//File Location
-		File file = new File("C:\\Users\\asus\\git\\xploration\\Xploration\\src\\org\\xploration");
-		BufferedReader reader = null;
-
-		try {
-			reader = new BufferedReader(new FileReader(file));
-			String text = null;		    		    
-			//text has the lines
-			while ((text = reader.readLine()) != null)
-			{	
-				int row = 0;
-				ArrayList<Cell> myRow = new ArrayList<Cell>();		    	
-				for(int i = 0; i <text.length(); i++){
-					//Filling the row
-					Cell myCell = new Cell();
-					myCell.setMineral(text.substring(i, i+1));
-					myCell.setX(i);
-					myCell.setY(row);
-					myRow.add(myCell);
-				}
-				row ++;
-				//Filling the 2D arrayList
-				myMap.add(myRow);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-
-		finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			} catch (IOException e) {}
-		}	
-
-		for(int i = 0; i<myMap.size(); i++){
-			for(int j = 0; j<myMap.get(0).size(); j++){
-				System.out.printf("%s ", myMap.get(i).get(j).getMineral());
-			}
-			System.out.println();
-		}		
-		System.out.println("HEBELE "+ myMap.get(7).get(7).getMineral());
-	}
-	
-*/
-
-
-
 }
