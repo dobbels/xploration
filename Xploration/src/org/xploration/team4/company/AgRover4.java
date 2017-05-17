@@ -65,6 +65,7 @@ public class AgRover4 extends Agent {
 		missionLength = Integer.parseInt(arg5);
 		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
+		System.out.println(getLocalName()+": missionLength: "+ arg5);
 
 		//Cell Analysis for Terrain Simulator 
 		cellAnalysis(location);
