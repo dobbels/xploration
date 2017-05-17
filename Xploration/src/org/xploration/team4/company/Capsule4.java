@@ -24,6 +24,7 @@ public class Capsule4 extends Agent {
 	private Cell location = new Cell();
 	private int worldWidth;
 	private int worldHeight;
+	private int missionLength;
 	Map worldMap = new Map();
 	
 	
@@ -51,12 +52,18 @@ public class Capsule4 extends Agent {
 		//ONLY Capsule coordinates
 		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
 		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
+		//TODO undo changes gokhan. mapDimension arguments should be used. It doesn't make sense to use the whole worldmap here. 
+		//TODO the same kind of things in AgRover4. 
+		String arg5 = (String) args[4]; // the mission length
 
 		
 		//Type conversions
 		location.setX(Integer.parseInt(arg1));
-		location.setY(Integer.parseInt(arg2));		
+		location.setY(Integer.parseInt(arg2));
+		missionLength = Integer.parseInt(arg5);
+		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
+		System.out.println(getLocalName()+": missionLength: "+ arg5);
 		
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
