@@ -1,14 +1,19 @@
 package org.xploration.team4.common;
 
 import org.xploration.ontology.Cell;
+import org.xploration.ontology.Team;
+import org.xploration.ontology.RoverRegistrationInfo;
+import org.xploration.ontology.Team;
 
 public class Constants {
 	
 	public final static String REGISTRATION_DESK_NAME = "registrationDesk";
 	
 	public final static int TEAM_ID = 4;
+	public static Team myTeam;
 	
 	public final static String TERRAIN_SIMULATOR = "terrainSimulator";
+	public final static String MAP_SIMULATOR = "mapSimulator";
 	
 	//Coordinates for Rover - Terrain Simulator protocol
 	public final static int xCoord = 1;
