@@ -26,18 +26,25 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+
+//TODO I'don't know why but this agent DOES NOT ENTER the system
+//On the internet, it says I need to enter class path but I didn't get it completely
 public class AgTerrainSimulator4 extends Agent {
 
 	private static final long serialVersionUID = 1L;
 
 	//For this sprint it remains always true, only INFORM case
 	boolean validPosition = true;
-	private int worldWidth = 10; //TODO get these from somewhere (mapsimulator?)
-	private int worldHeight = 10;
+		
+	Map worldMap = new Map();
+				
+	private int worldWidth = worldMap.getWidth() ; 
+	private int worldHeight = worldMap.getHeight();
 
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
-
+	
+	
 	protected void setup(){
 
 		System.out.println(getLocalName() + ": HAS ENTERED");
@@ -66,6 +73,8 @@ public class AgTerrainSimulator4 extends Agent {
 	private Behaviour cellRequestListener() {
 		return new CyclicBehaviour(this) {
 			
+			private static final long serialVersionUID = 11924124L;
+
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
@@ -104,9 +113,7 @@ public class AgTerrainSimulator4 extends Agent {
 								ACLMessage reply = msg.createReply();
 								reply.setLanguage(codec.getName());
 								reply.setOntology(ontology.getName());
-								
-								//Map object								
-								Map myMap = new Map(worldWidth, worldHeight);
+															
 								//Exact coordinates for the map
 								int m = claimedCell.getX();
 								int n = claimedCell.getY();
@@ -114,11 +121,12 @@ public class AgTerrainSimulator4 extends Agent {
 								try {
 									//Invalid Cell Condition
 									//Checking world boundaries	
-									//Checking whether there exists  a mineral or not for that cell																																
+									//Checking whether there exists  a mineral or not for that cell											
 									if(claimedCell.getX()>worldWidth || claimedCell.getY()>worldHeight || 
-											!(myMap.getCell(m,n).getMineral().equals("A") ||
-											myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")|| 
-											myMap.getCell(m, n).getMineral().equals("D")))
+											!(worldMap.getMineral(m,n).equals("A") ||
+											worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")|| 
+											worldMap.getMineral(m,n).equals("D")))
+									
 									{
 										reply.setContent("REFUSE");
 										reply.setPerformative(ACLMessage.REFUSE);
@@ -128,9 +136,10 @@ public class AgTerrainSimulator4 extends Agent {
 									}
 	
 									//Valid Cell Condition
-									else if(claimedCell.getX()<=worldWidth && claimedCell.getY()<=worldHeight && (myMap.getCell(m, n).getMineral().equals("A")
-											|| myMap.getCell(m, n).getMineral().equals("B") || myMap.getCell(m, n).getMineral().equals("C")||
-											myMap.getCell(m, n).getMineral().equals("D")))
+									
+									else if(claimedCell.getX()<=worldWidth && claimedCell.getY()<=worldHeight && (worldMap.getMineral(m,n).equals("A")
+											|| worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")||
+											worldMap.getMineral(m,n).equals("D")))
 									{								
 										reply.setContent("initial AGREE");
 										reply.setPerformative(ACLMessage.AGREE);
@@ -147,11 +156,8 @@ public class AgTerrainSimulator4 extends Agent {
 											ACLMessage inform = msg.createReply();
 											inform.setPerformative(ACLMessage.INFORM);
 											getContentManager().fillContent(inform, cellAction);
-//											finalMsg.addReceiver(fromAgent);
-//											finalMsg.setLanguage(codec.getName());
-//											finalMsg.setOntology(ontology.getName());
 											send(inform);
-											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+myMap.getCell(m, n).getMineral());
+											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+worldMap.getCell(m, n).getMineral());
 										}								
 									}
 								} catch (Exception e) {
