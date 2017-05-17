@@ -30,7 +30,10 @@ import jade.lang.acl.ACLMessage;
 public class AgRover4 extends Agent {
 
 	//TODO It should not send the second or third request
-
+	private int worldWidth;
+	private int worldHeight;
+	private int missionLength;
+	
 	private static final long serialVersionUID = 1L;
 	public final static int TEAM_ID = 4;
 	
@@ -55,15 +58,21 @@ public class AgRover4 extends Agent {
 		Object[] args = getArguments();
 		//Type needed to be changed into String
 		//Integer type causes program to be crashed
-		//ONLY capsule coordinates
 		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
 		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
+		String arg3 = (String) args[2]; // WorldMap X dimension
+		String arg4 = (String) args[3]; // WorldMap Y dimension
+		String arg5 = (String) args[4]; // Mission length
 		
 		//Type conversions
 		location.setX(Integer.parseInt(arg1));
 		location.setY(Integer.parseInt(arg2));
+		worldWidth = Integer.parseInt(arg3);
+		worldHeight = Integer.parseInt(arg4);
+		missionLength = Integer.parseInt(arg5);
 		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
+		System.out.println(getLocalName()+": missionLength: "+ arg5);
 		
 		//TODO delete these two cells, they are meant for testing
 		cell1.setX(4);
@@ -77,7 +86,6 @@ public class AgRover4 extends Agent {
 		analyzedCells.add(cell1);
 		analyzedCells.add(cell2);
 		
-
 		//Cell Analysis for Terrain Simulator 
 		cellAnalysis(location);
 		//roverRegistration for Map Simulator
