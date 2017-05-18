@@ -6,8 +6,8 @@ import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.RoverRegistrationInfo;
 import org.xploration.ontology.XplorationOntology;
-import org.xploration.team4.platform.Map;
 import org.xploration.team4.common.Constants;
+import org.xploration.team4.common.Map;
 import org.xploration.ontology.Team;
 
 import jade.content.Concept;

@@ -1,7 +1,6 @@
-package org.xploration.team4.platform;
+package org.xploration.team4.common;
 
 import org.xploration.ontology.Cell;
-import org.xploration.team4.common.Constants;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,14 +15,18 @@ public class Map {
 	//worldMap construction from a read txt file
 	public Map(int dimX, int dimY){
 		Cell c;
-		for(int i = 0; i<getHeight(); i++){
-			
-			for(int j = 0; j<getWidth(); j++){
+		for(int i = 1; i<=dimX; i++){
+			ArrayList<Cell> tmp = new ArrayList<Cell>();
+			for (int z = 0; z < dimY; z++) {
+				tmp.add(null);
+			}
+			worldMap.add(i-1, tmp);
+			for(int j = 1; j<=dimY; j++){
 				if (i%2 == j%2) {
 					c = new Cell();
 					c.setX(i);
 					c.setY(j);
-					worldMap.get(i).set(j, c);
+					setCell(c);
 				}
 			}
 		}
@@ -32,9 +35,13 @@ public class Map {
 	public void printWorldMap(){
 		//Doesn't display the last mineral in the even lines. Because length is 10 not 9
 		//But it stores the text file correctly
+		System.out.println("Dimensions: " + getHeight() + " " + getWidth());
 		for(int i = 0; i<getHeight(); i++){			
 			for(int j = 0; j<getWidth(); j++){
-				System.out.printf("%s ", worldMap.get(i).get(j).getMineral());
+				if (i%2 == j%2) {
+					System.out.printf("(%d,%d) %s ",i+1, j+1, worldMap.get(i).get(j).getMineral());
+				}
+					
 			}
 			System.out.println();
 		}		
@@ -47,18 +54,27 @@ public class Map {
 	 * @return the content of worldmap. If x%2 == y%2 then this is a cell, otherwise null is returned. 
 	 */
     public Cell getCell(int x, int y){
-        return worldMap.get(y-1).get(x-1);
+        return worldMap.get(x-1).get(y-1);
     }
     
-    public String getMineral(int x, int y) throws Exception {
+    public void setCell(Cell c) {
+    	int x = c.getX();
+    	int y = c.getY();
+    	worldMap.get(x-1).set(y-1, c);
+    }
+    
+    public String getMineral(int x, int y) {
         if(y%2 == x%2)
-            return worldMap.get(y-1).get(x-1).getMineral();
-        else throw new Exception("Not a cell");
+            return worldMap.get(x-1).get(y-1).getMineral();
+        else {
+        	System.out.println("Illegal get mineral");
+        	return null;
+        }
     }
     
     public void putMineral(int x, int y, String m) {
         if(y%2 == x%2)
-            worldMap.get(y-1).get(x-1).setMineral(m);
+            worldMap.get(x-1).get(y-1).setMineral(m);
         else System.out.println("Attempt to put a mineral in a non-existing cell");
     }
 
