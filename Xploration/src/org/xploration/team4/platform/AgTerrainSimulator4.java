@@ -36,7 +36,7 @@ public class AgTerrainSimulator4 extends Agent {
 	//For this sprint it remains always true, only INFORM case
 	boolean validPosition = true;
 		
-	Map worldMap = new Map();
+	Map worldMap = (new MapReader()).readMap();
 				
 	private int worldWidth = worldMap.getWidth() ; 
 	private int worldHeight = worldMap.getHeight();
@@ -48,6 +48,9 @@ public class AgTerrainSimulator4 extends Agent {
 	protected void setup(){
 
 		System.out.println(getLocalName() + ": HAS ENTERED");
+		
+		System.out.println("TEST");
+		worldMap.printWorldMap();
 
 		//Register Language and Ontology
 		getContentManager().registerLanguage(codec);

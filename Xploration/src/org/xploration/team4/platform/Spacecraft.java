@@ -25,6 +25,11 @@ Dimension of world Y
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
+/**
+ * 
+ * This agent implements the behaviour of the spacecraft and also handles the registration service.
+ * TODO add all functionalities of the registration desk in here. 
+ */
 /*
  * ------------------------------ Test case Id: 1
  * 

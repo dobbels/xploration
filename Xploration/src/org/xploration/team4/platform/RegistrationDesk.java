@@ -78,7 +78,7 @@ public class RegistrationDesk extends Agent {
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-						MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
+								MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
 								MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));              
 				if (msg != null) {
 					// If an REGISTRATION request arrives
