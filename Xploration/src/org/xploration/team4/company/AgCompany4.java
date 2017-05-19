@@ -2,6 +2,7 @@ package org.xploration.team4.company;
 
 import org.xploration.ontology.*;
 import org.xploration.team4.common.Constants;
+import org.xploration.team4.common.MessageHandler;
 
 import jade.content.AgentAction;
 import jade.content.lang.Codec;
@@ -13,6 +14,7 @@ import jade.core.AID;
 import jade.domain.FIPAAgentManagement.*;
 import jade.domain.DFService;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 public class AgCompany4 extends Agent {
 	 
@@ -34,18 +36,19 @@ public class AgCompany4 extends Agent {
 		// Add a behavior to register to the registration desk
 		// IF registration is successful, it is saved in the boolean
 		// ELSE an error message is printed
-		addBehaviour(new SimpleBehaviour(this) //TODO should be cyclic to keep trying until a registration desk is found and registration is succesful? (for a certain amount of time maybe)
+		addBehaviour(new SimpleBehaviour(this)
 		{
 			
 			private static final long serialVersionUID = 1L;
 			private boolean registrationSuccess = false;
+			private boolean registrationFailure = false;
 //			private boolean timedOut = false;
 			AID ag;
 
 			public void action()
 			{   
 				// Only register if not registered yet  
-				if (!registrationSuccess) 
+				if (!(registrationSuccess || registrationFailure)) //TODO delete this. It is unnecessary as the behaviour is stopped in this case anyway?
 				{
 					// Creates the description for the type of agent to be searched in the yellow pages
 					DFAgentDescription dfd = new DFAgentDescription();
@@ -70,27 +73,34 @@ public class AgCompany4 extends Agent {
 								team.setTeamId(Constants.TEAM_ID);
 								RegistrationRequest regReq = new RegistrationRequest();
 								regReq.setTeam(team);
-//								AgentAction regReqAction = new Action(ag, regReq);
-								Action regReqAction = new Action(ag, regReq);
-								sendMessage(ACLMessage.REQUEST, regReqAction);
+								
+								send(MessageHandler.constructMessage(ag, ACLMessage.REQUEST, regReq, XplorationOntology.REGISTRATIONREQUEST));
+								
 								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
 								
 								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
-								ACLMessage ans = blockingReceive();
+								ACLMessage ans = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+												MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()), 
+												MessageTemplate.MatchProtocol(XplorationOntology.REGISTRATIONREQUEST))));
 								if (ans.getPerformative() == ACLMessage.REFUSE)
 								{
 									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");
+									registrationFailure = true;
 								}
 								else if (ans.getPerformative() == ACLMessage.NOT_UNDERSTOOD)
 								{
 									System.out.println(getLocalName()+"'S MESSAGE WAS NOT UNDERSTOOD");
+									registrationFailure = true;
 								}
 								else if (ans.getPerformative() == ACLMessage.AGREE) {
 									System.out.println(getLocalName()+": INITIAL AGREEMENT ON REGISTRATION");
-									ACLMessage ans2 = blockingReceive();
+									ACLMessage ans2 = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+											MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()), 
+											MessageTemplate.MatchProtocol(XplorationOntology.REGISTRATIONREQUEST))));
 									if (ans2.getPerformative() == ACLMessage.FAILURE)
 									{
 										System.out.println(getLocalName()+" REGISTRATION FAILED: ALREADY REGISTERED");
+										registrationFailure = true;
 									}
 									else if (ans2.getPerformative() == ACLMessage.INFORM)
 									{
@@ -100,36 +110,6 @@ public class AgCompany4 extends Agent {
 								}
 								
 								doWait(5000);
-								
-//								sendMessage(ACLMessage.REQUEST, regReqAction);
-//								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
-//								
-//								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
-//								ACLMessage ans3 = blockingReceive(); //TODO not do this? dangerous if registration desk not in yellow pages yet?
-//								if (ans3.getPerformative() == ACLMessage.REFUSE)
-//								{
-//									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");
-//								}
-//								else if (ans3.getPerformative() == ACLMessage.NOT_UNDERSTOOD)
-//								{
-//									System.out.println(getLocalName()+"'S MESSAGE WAS NOT UNDERSTOOD");
-//								}
-//								else if (ans3.getPerformative() == ACLMessage.AGREE) {
-//									System.out.println(getLocalName()+": INITIAL AGREEMENT ON REGISTRATION");
-//									ACLMessage ans4 = blockingReceive();
-//									if (ans4.getPerformative() == ACLMessage.FAILURE)
-//									{
-//										System.out.println(getLocalName()+" REGISTRATION FAILED: ALREADY REGISTERED");
-//									}
-//									else if (ans4.getPerformative() == ACLMessage.INFORM)
-//									{
-//										System.out.println(getLocalName()+": REGISTRATION SUCCESFUL");
-//										registrationSuccess = true;
-//									}
-//								}
-//								
-//								doWait(5000);
-
 							}
 							else
 							{
@@ -144,27 +124,11 @@ public class AgCompany4 extends Agent {
 					}
 				}
 			}
-			
-			void sendMessage(int performative, Action action) {
-				ACLMessage msg = new ACLMessage(performative);
-				
-				msg.setLanguage(codec.getName());
-                msg.setOntology(ontology.getName());
-                try 
-                {
-                	getContentManager().fillContent(msg, action);
-                	msg.addReceiver(ag);
-                	send(msg);
-                }
-                catch (Exception ex) 
-                { 
-                	ex.printStackTrace(); 
-                }
-			}
 
 			public boolean done ()
 			{
-				return registrationSuccess;
+				System.out.println("Registration succes? " + registrationSuccess + ", Registration failure? " + registrationFailure);
+				return registrationSuccess || registrationFailure;
 			}
 
 		});
