@@ -1,8 +1,9 @@
 package org.xploration.team4.platform;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 import org.xploration.team4.common.Constants;
-
+import org.xploration.team4.common.MessageHandler;
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.RegistrationRequest;
 import org.xploration.ontology.Team;
@@ -245,10 +246,7 @@ public class Spacecraft extends Agent {
 											// Add the team to the ArrayList 
 											registerationList.add(requestorTeam);
 											//INFORM message is sent
-											ACLMessage finalMsg = new ACLMessage(ACLMessage.INFORM);
-											finalMsg.addReceiver(fromAgent);
-											finalMsg.setLanguage(codec.getName());
-											finalMsg.setOntology(ontology.getName());
+											ACLMessage finalMsg = MessageHandler.constructMessage(fromAgent, ACLMessage.INFORM, XplorationOntology.REGISTRATIONREQUEST);
 											myAgent.send(finalMsg);
 											System.out.println(myAgent.getLocalName() + ": confirmation to registration. Success!");
 										}

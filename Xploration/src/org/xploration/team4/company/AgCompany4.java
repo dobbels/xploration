@@ -2,6 +2,7 @@ package org.xploration.team4.company;
 
 import org.xploration.ontology.*;
 import org.xploration.team4.common.Constants;
+import org.xploration.team4.common.MessageHandler;
 
 import jade.content.AgentAction;
 import jade.content.lang.Codec;
@@ -72,9 +73,9 @@ public class AgCompany4 extends Agent {
 								team.setTeamId(Constants.TEAM_ID);
 								RegistrationRequest regReq = new RegistrationRequest();
 								regReq.setTeam(team);
-
-								Action regReqAction = new Action(ag, regReq);
-								sendMessage(ACLMessage.REQUEST, regReqAction, XplorationOntology.REGISTRATIONREQUEST);
+								
+								send(MessageHandler.constructMessage(ag, ACLMessage.REQUEST, regReq, XplorationOntology.REGISTRATIONREQUEST));
+								
 								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
 								
 								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
@@ -109,36 +110,6 @@ public class AgCompany4 extends Agent {
 								}
 								
 								doWait(5000);
-								
-//								sendMessage(ACLMessage.REQUEST, regReqAction);
-//								System.out.println(getLocalName()+": SEND REGISTRATION REQUEST");
-//								
-//								//TODO how do we know if this is a message from the registration desk? should we add a specifier in the message or something? 
-//								ACLMessage ans3 = blockingReceive(); //TODO not do this? dangerous if registration desk not in yellow pages yet?
-//								if (ans3.getPerformative() == ACLMessage.REFUSE)
-//								{
-//									System.out.println(getLocalName()+" WAS REFUSED: TOO LATE TO REGISTER");
-//								}
-//								else if (ans3.getPerformative() == ACLMessage.NOT_UNDERSTOOD)
-//								{
-//									System.out.println(getLocalName()+"'S MESSAGE WAS NOT UNDERSTOOD");
-//								}
-//								else if (ans3.getPerformative() == ACLMessage.AGREE) {
-//									System.out.println(getLocalName()+": INITIAL AGREEMENT ON REGISTRATION");
-//									ACLMessage ans4 = blockingReceive();
-//									if (ans4.getPerformative() == ACLMessage.FAILURE)
-//									{
-//										System.out.println(getLocalName()+" REGISTRATION FAILED: ALREADY REGISTERED");
-//									}
-//									else if (ans4.getPerformative() == ACLMessage.INFORM)
-//									{
-//										System.out.println(getLocalName()+": REGISTRATION SUCCESFUL");
-//										registrationSuccess = true;
-//									}
-//								}
-//								
-//								doWait(5000);
-
 							}
 							else
 							{
@@ -152,24 +123,6 @@ public class AgCompany4 extends Agent {
 						e.printStackTrace();
 					}
 				}
-			}
-			
-			void sendMessage(int performative, Action action, String protocol) {
-				ACLMessage msg = new ACLMessage(performative);
-				
-				msg.setLanguage(codec.getName());
-                msg.setOntology(ontology.getName());
-                try 
-                {
-                	getContentManager().fillContent(msg, action);
-                	msg.addReceiver(ag);
-                	msg.setProtocol(protocol);
-                	send(msg);
-                }
-                catch (Exception ex) 
-                { 
-                	ex.printStackTrace(); 
-                }
 			}
 
 			public boolean done ()
