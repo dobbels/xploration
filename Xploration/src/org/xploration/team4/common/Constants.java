@@ -31,9 +31,13 @@ public class Constants {
 		
 		//move down
 		
-		//move left
+		//move left up
 		
-		//move right
+		//move left down
+		
+		//move right up
+		
+		//move right down
 			
 		return true;
 	}
