@@ -1,5 +1,6 @@
 package org.xploration.team4.platform;
 
+import java.awt.AlphaComposite;
 import java.util.Iterator;
 
 import org.xploration.ontology.Cell;
@@ -9,6 +10,7 @@ import org.xploration.ontology.MovementRequestService;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
 import org.xploration.team4.common.Constants;
+import org.xploration.team4.common.MessageHandler;
 
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -68,10 +70,7 @@ public class AgCommunicationSimulator extends Agent {
 
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
-				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-												MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
-												MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-												MessageTemplate.MatchProtocol(XplorationOntology.MAPBROADCASTSERVICE))))); 
+				ACLMessage msg = MessageHandler.blockingReceive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO); 
 				
 				// The ContentManager transforms the message content
 				ContentElement ce;

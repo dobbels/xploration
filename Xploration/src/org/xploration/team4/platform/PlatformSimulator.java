@@ -37,4 +37,6 @@ public class PlatformSimulator extends Agent {
 	
 	// TODO think of the case (in the beginning or in registration failure) when not everyone is registered. Don't count on those things.  
 	
+	// TODO to be able to use multiple repeating behaviours in the same agent we can use a simple behaviour with done() { return false; }. Then the behaviour is always put in the end of the queue and other behaviour have their turn. 
+
 }
