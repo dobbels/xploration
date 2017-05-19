@@ -35,4 +35,6 @@ public class PlatformSimulator extends Agent {
 	
 	// TODO do every behaviour of the simulators in parallel: put ourselves on yellow pages with four names
 	
+	// TODO think of the case (in the beginning or in registration failure) when not everyone is registered. Don't count on those things.  
+	
 }

@@ -79,7 +79,8 @@ public class RegistrationDesk extends Agent {
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
 								MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
-								MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));              
+								MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+								MessageTemplate.MatchProtocol(XplorationOntology.REGISTRATIONREQUEST)))));              
 				if (msg != null) {
 					// If an REGISTRATION request arrives
 					// it answers with the REFUSE, AGREE or NOT_UNDERSTOOD
