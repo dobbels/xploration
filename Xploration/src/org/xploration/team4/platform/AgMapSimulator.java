@@ -10,6 +10,7 @@ import org.xploration.ontology.CapsuleRegistrationInfo;
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.RoverRegistrationInfo;
+import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
 
 import jade.content.Concept;
@@ -95,7 +96,9 @@ public class AgMapSimulator extends Agent {
 											(msg.getSender()).getLocalName());
 									
 									RoverRegistrationInfo roverLoc = (RoverRegistrationInfo) conc;
-									Cell roverLocation = roverLoc.getCell();									
+									Cell roverLocation = roverLoc.getCell();		
+									Team team = roverLoc.getTeam();
+									int teamId = team.getTeamId();
 									System.out.println(getLocalName()+ ": Rover Location is " + roverLocation.getX() + "," + roverLocation.getY());
 								}
 							}
@@ -138,7 +141,9 @@ public class AgMapSimulator extends Agent {
 											(msg.getSender()).getLocalName());
 									
 									CapsuleRegistrationInfo capsuleLoc = (CapsuleRegistrationInfo) conc;
-									Cell capsuleLocation = capsuleLoc.getCell();									
+									Cell capsuleLocation = capsuleLoc.getCell();	
+									Team team = capsuleLoc.getTeam();
+									int teamId = team.getTeamId();
 									System.out.println(getLocalName()+ ": Capsule Location is " + capsuleLocation.getX() + "," + capsuleLocation.getY());
 								}
 							}
