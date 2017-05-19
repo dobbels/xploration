@@ -45,7 +45,6 @@ import jade.wrapper.StaleProxyException;
 /**
  * 
  * This agent implements the behaviour of the spacecraft and also handles the registration service.
- * TODO add all functionalities of the registration desk in here. 
  */
 /*
  * ------------------------------ Test case Id: 1
@@ -72,7 +71,7 @@ public class Spacecraft extends Agent {
 		
 		/******Registration Desk Fields*******/
 		// ArrayList to store Registered Agent Teams
-		private List<Team> registerationList = new ArrayList<Team>();
+		private List<Team> registerationList = new ArrayList<Team>(); //TODO use this list to deploy only the registered companies
 		// Registration Duration as 1 minute
 		private final int registrationPeriod = 6000;
 		Date registerTime;
@@ -190,10 +189,8 @@ public class Spacecraft extends Agent {
 				public void action() {
 					System.out.println(getLocalName() + ": registration listening behaviour started.");
 					//Using codec content language, ontology and request interaction protocol
-					ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-									MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
-									MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-									MessageTemplate.MatchProtocol(XplorationOntology.REGISTRATIONREQUEST)))));              
+					ACLMessage msg = MessageHandler.blockingReceive(myAgent, ACLMessage.REQUEST, XplorationOntology.REGISTRATIONREQUEST);
+					
 					if (msg != null) {
 						// If an REGISTRATION request arrives
 						// it answers with the REFUSE, AGREE or NOT_UNDERSTOOD
@@ -215,10 +212,9 @@ public class Spacecraft extends Agent {
 									Team requestorTeam = ((RegistrationRequest) conc).getTeam();
 									System.out.println(myAgent.getLocalName() + ": registration request for team: " + requestorTeam);  
 									
-									//Creating reply message objcet
+									//Creating reply message object. 
+									// Receiver, language, ontology and protocol are automatically set. 
 									ACLMessage reply = msg.createReply();
-									reply.setLanguage(codec.getName());
-									reply.setOntology(ontology.getName());
 									
 									//if company agent is still in the registration duration								
 									if ((new Date()).getTime() - registerTime.getTime() <= registrationPeriod) {                                           //Not get it Change 
@@ -233,10 +229,7 @@ public class Spacecraft extends Agent {
 										// Checks the ArrayList of teams
 										if (checkRegisteredBefore(registerationList, requestorTeam)) { 
 											//FAILURE message is sent										
-											ACLMessage finalMsg = new ACLMessage(ACLMessage.FAILURE);
-											finalMsg.addReceiver(fromAgent);                                
-											finalMsg.setLanguage(codec.getName());
-											finalMsg.setOntology(ontology.getName());
+											ACLMessage finalMsg = MessageHandler.constructMessage(fromAgent, ACLMessage.FAILURE, XplorationOntology.REGISTRATIONREQUEST);
 											myAgent.send(finalMsg);
 											System.out.println(
 													myAgent.getLocalName() + ": failure to registration. Agent has already registered before.");
@@ -267,10 +260,7 @@ public class Spacecraft extends Agent {
 						} catch ( NotUnderstoodException |CodecException | OntologyException e) {
 							//NOT_UNDERSTOOD message is sent
 							e.printStackTrace();
-							AID fromAgent = msg.getSender(); //TODO store this for later? 
 							ACLMessage reply = msg.createReply();
-							reply.setLanguage(codec.getName());
-							reply.setOntology(ontology.getName());
 							reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 							myAgent.send(reply);
 							System.out.println(myAgent.getLocalName() + ": NOT_UNDERSTOOD is sent");

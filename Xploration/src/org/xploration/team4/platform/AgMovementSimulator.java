@@ -5,6 +5,7 @@ import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
 import org.xploration.team4.common.Constants;
+import org.xploration.team4.common.MessageHandler;
 
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -68,9 +69,8 @@ public class AgMovementSimulator extends Agent{
 			public void action() {
 				// TODO Auto-generated method stub
 				
-				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-						MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
-								MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));
+				ACLMessage msg = MessageHandler.blockingReceive(myAgent, ACLMessage.REQUEST, XplorationOntology.MOVEMENTREQUESTINFO); 
+				 
 				if (msg != null) {
 					ContentElement ce;
 					try {

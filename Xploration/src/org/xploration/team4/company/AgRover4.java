@@ -8,6 +8,7 @@ import org.xploration.ontology.RoverRegistrationInfo;
 import org.xploration.ontology.XplorationOntology;
 import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
+import org.xploration.team4.common.MessageHandler;
 import org.xploration.ontology.Team;
 
 import jade.content.Concept;
@@ -130,27 +131,15 @@ public class AgRover4 extends Agent {
 
 							CellAnalysis cellAnalysis = new CellAnalysis();
 							cellAnalysis.setCell(myCell);
-
-							Action cellAction = new Action(agTerrain, cellAnalysis);
-
-							ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-
-							msg.setLanguage(codec.getName());
-							msg.setOntology(ontology.getName());
-							try{
-								getContentManager().fillContent(msg, cellAction);
-								msg.addReceiver(agTerrain);
-								send(msg);			                	
-							}
-							catch(Exception e){
-								System.out.println(getLocalName() + " Request Exception");
-							}
+							
+							ACLMessage msg = MessageHandler.constructMessage(agTerrain, ACLMessage.REQUEST, cellAnalysis, XplorationOntology.CELLANALYSIS);
+							send(msg);			                	
 	
 							System.out.println(getLocalName() + ": REQUEST is sent");
 							//doWait(1000);
 
 							//Returned answer from Terrain Simulation
-							ACLMessage ans = blockingReceive();
+							ACLMessage ans = MessageHandler.blockingReceive(myAgent, XplorationOntology.CELLANALYSIS);
 							if(ans!= null){	  
 								if(ans.getPerformative()==ACLMessage.REFUSE)
 								{
@@ -167,22 +156,13 @@ public class AgRover4 extends Agent {
 								{
 									System.out.println(getLocalName() + ": Initial AGREE is received");	  
 
-									ACLMessage finalMsg = blockingReceive();
-									if(finalMsg != null){
-										if(finalMsg.getPerformative()==ACLMessage.INFORM)
-										{										
-											System.out.println(getLocalName()+": INFORM is received!");
-											System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
-													+myCell.getX() + ","+ myCell.getY()+  ", " + myCell.getMineral() + ")");
-											claimingCell = true;											
-										}
-										else{
-											System.out.println(getLocalName() + " A problem occured, it should be informed");
-										}
-									}
-									else{//If no message arrives
-										block();
-									}
+									ACLMessage finalMsg = MessageHandler.blockingReceive(myAgent, ACLMessage.INFORM, XplorationOntology.CELLANALYSIS);
+									
+									System.out.println(getLocalName()+": INFORM is received!");
+									System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
+											+myCell.getX() + ","+ myCell.getY()+  ", " + myCell.getMineral() + ")");
+									claimingCell = true;											
+							
 								}						  						  						  
 							}else{
 								//If no message arrives
@@ -248,23 +228,10 @@ public class AgRover4 extends Agent {
 							//TODO Type should be integer or team
 							roverReg.setTeam(Constants.myTeam);
 
-							Action cellAction = new Action(agMapSimulator, roverReg);
-
-							ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-							
-							msg.setProtocol(XplorationOntology.ROVERREGISTRATIONSERVICE);
-							msg.setLanguage(codec.getName());
-							msg.setOntology(ontology.getName());
-							msg.addReceiver(agMapSimulator);
-							try{
-								getContentManager().fillContent(msg, cellAction);						
-								send(msg);	
-								System.out.println(getLocalName() + ": INFORM is sent");
-								roverRegistration = true;
-							}
-							catch(Exception e){
-								System.out.println(getLocalName() + " INFORM Exception");
-							}												
+							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.REQUEST, roverReg, XplorationOntology.ROVERREGISTRATIONINFO);
+							send(msg);	
+							System.out.println(getLocalName() + ": INFORM is sent");
+							roverRegistration = true;
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");

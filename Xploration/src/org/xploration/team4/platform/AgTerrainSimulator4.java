@@ -6,6 +6,7 @@ import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.XplorationOntology;
 import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
+import org.xploration.team4.common.MessageHandler;
 
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -81,10 +82,7 @@ public class AgTerrainSimulator4 extends Agent {
 
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
-				ACLMessage msg = blockingReceive(MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-												MessageTemplate.and(MessageTemplate.MatchOntology(ontology.getName()),
-												MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), 
-												MessageTemplate.MatchProtocol(XplorationOntology.REGISTRATIONREQUEST))))); 
+				ACLMessage msg = MessageHandler.blockingReceive(myAgent, ACLMessage.REQUEST, XplorationOntology.CELLANALYSIS);  
 				
 				if (msg != null )
 				{
@@ -116,8 +114,6 @@ public class AgTerrainSimulator4 extends Agent {
 
 								//Creating reply message
 								ACLMessage reply = msg.createReply();
-								reply.setLanguage(codec.getName());
-								reply.setOntology(ontology.getName());
 															
 								//Exact coordinates for the map
 								int m = claimedCell.getX();
@@ -187,7 +183,7 @@ public class AgTerrainSimulator4 extends Agent {
 				}
 				else{
 					//if no message arrives
-					block();
+					block(); //TODO why ??
 				}
 			}
 		};

@@ -8,7 +8,9 @@ import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
+import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 public class MessageHandler {
 	
@@ -54,5 +56,20 @@ public class MessageHandler {
         return msg;
 	}
 	
-	// also one to construct message and return it?
+	// TODO constructReplyMessage, 1 with and 1 without an action. 
+	
+	public static ACLMessage blockingReceive(Agent agent, int performative, String protocol) {
+		ACLMessage ans = agent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchProtocol(protocol), 
+								MessageTemplate.and(MessageTemplate.MatchPerformative(performative), 
+								MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+								MessageTemplate.MatchOntology(ontology.getName())))));
+		return ans;
+	}
+	
+	public static ACLMessage blockingReceive(Agent agent, String protocol) {
+		ACLMessage ans = agent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchProtocol(protocol),  
+								MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+								MessageTemplate.MatchOntology(ontology.getName()))));
+		return ans;
+	}
 }

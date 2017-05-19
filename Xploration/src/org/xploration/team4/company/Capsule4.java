@@ -3,6 +3,7 @@ package org.xploration.team4.company;
 import org.xploration.ontology.*;
 import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
+import org.xploration.team4.common.MessageHandler;
 
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
@@ -24,9 +25,7 @@ public class Capsule4 extends Agent {
 	private Cell location = new Cell();
 	private int worldWidth;
 	private int worldHeight;
-	private int missionLength;
-	//Map worldMap = new Map();
-	
+	private int missionLength;	
 	
 	//sources: 
 	//  http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
@@ -36,16 +35,7 @@ public class Capsule4 extends Agent {
 	protected void setup()
 	{
 		System.out.println(getLocalName()+": HAS ENTERED");
-		/*
-		worldMap.printWorldMap();
-		try {
-			System.out.println("Testing world map mineral: "+ worldMap.getMineral(4, 10));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
-			
+		
 		Object[] args = getArguments();
 		//Type needed to be changed into String
 		//Integer type causes program to be crashed
@@ -89,9 +79,6 @@ public class Capsule4 extends Agent {
 				System.out.println(getLocalName() + ": Just doing nothing");
 				doWait(5000);
 			}
-			
-			// TODO Add sendMessage to Constants files (+ agent argument)
-
 		};
 	}
 	//TODO This function causes a name problem an agent name problem
@@ -156,24 +143,11 @@ public class Capsule4 extends Agent {
 							capsuleReg.setCell(myCell);
 							//TODO: Type should be integer or team
 							capsuleReg.setTeam(Constants.myTeam);
-
-							Action cellAction = new Action(agMapSimulator, capsuleReg);
-
-							ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-
-							msg.setProtocol(XplorationOntology.CAPSULEREGISTRATIONSERVICE);
-							msg.setLanguage(codec.getName());
-							msg.setOntology(ontology.getName());
-							try{
-								getContentManager().fillContent(msg, cellAction);
-								msg.addReceiver(agMapSimulator);
-								send(msg);			
-								System.out.println(getLocalName() + ": INFORM is sent");
-								capsuleRegistration = true;
-							}
-							catch(Exception e){
-								System.out.println(getLocalName() + " INFORM Exception");
-							}					
+							
+							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.INFORM, capsuleReg, XplorationOntology.CAPSULEREGISTRATIONINFO);
+							send(msg);			
+							System.out.println(getLocalName() + ": INFORM is sent");
+							capsuleRegistration = true;
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
