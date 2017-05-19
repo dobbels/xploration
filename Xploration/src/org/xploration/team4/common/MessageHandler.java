@@ -56,7 +56,35 @@ public class MessageHandler {
         return msg;
 	}
 	
-	// TODO constructReplyMessage, 1 with and 1 without an action. 
+	public static ACLMessage constructReplyMessage(ACLMessage msg, int performative, AgentAction aa) {
+		cm.registerLanguage(codec);
+        cm.registerOntology(ontology);
+        
+		// Receiver, language, ontology and protocol are automatically set.
+		ACLMessage reply = msg.createReply();
+		reply.setPerformative(performative);
+		
+		Action action = new Action(msg.getSender(), aa);
+		
+		try {
+			cm.fillContent(reply, action);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return reply;
+	}
+	
+	public static ACLMessage constructReplyMessage(ACLMessage msg, int performative) {
+		cm.registerLanguage(codec);
+        cm.registerOntology(ontology);
+        
+		// Receiver, language, ontology and protocol are automatically set.
+		msg = msg.createReply();
+		msg.setPerformative(performative);
+		
+		return msg;
+	}
 	
 	public static ACLMessage blockingReceive(Agent agent, int performative, String protocol) {
 		ACLMessage ans = agent.blockingReceive(MessageTemplate.and(MessageTemplate.MatchProtocol(protocol), 

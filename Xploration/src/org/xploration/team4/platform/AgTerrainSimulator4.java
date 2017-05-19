@@ -111,9 +111,6 @@ public class AgTerrainSimulator4 extends Agent {
 								CellAnalysis ca = (CellAnalysis) conc;
 								Cell claimedCell = ca.getCell();
 //								System.out.println(claimedCell.getX() + "  " + claimedCell.getY());
-
-								//Creating reply message
-								ACLMessage reply = msg.createReply();
 															
 								//Exact coordinates for the map
 								int m = claimedCell.getX();
@@ -129,8 +126,8 @@ public class AgTerrainSimulator4 extends Agent {
 											worldMap.getMineral(m,n).equals("D")))
 									
 									{
-										reply.setContent("REFUSE");
-										reply.setPerformative(ACLMessage.REFUSE);
+										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
+//										reply.setContent("REFUSE");
 										myAgent.send(reply);
 										System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
 										doWait(3000);
@@ -142,8 +139,8 @@ public class AgTerrainSimulator4 extends Agent {
 											|| worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")||
 											worldMap.getMineral(m,n).equals("D")))
 									{								
-										reply.setContent("initial AGREE");
-										reply.setPerformative(ACLMessage.AGREE);
+										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.AGREE);
+//										reply.setContent("initial AGREE");
 										myAgent.send(reply);
 										System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 	
@@ -152,12 +149,9 @@ public class AgTerrainSimulator4 extends Agent {
 											CellAnalysis cellAnalysis = new CellAnalysis();
 											cellAnalysis.setCell(claimedCell);
 											
-											Action cellAction = new Action(fromAgent, cellAnalysis);
-
-											ACLMessage inform = msg.createReply();
-											inform.setPerformative(ACLMessage.INFORM);
-											getContentManager().fillContent(inform, cellAction);
+											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis);
 											send(inform);
+
 											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+worldMap.getCell(m, n).getMineral());
 										}								
 									}
@@ -173,10 +167,7 @@ public class AgTerrainSimulator4 extends Agent {
 					}catch(NotUnderstoodException |CodecException | OntologyException e){
 						//NOT_UNDERSTOOD message is sent
 						e.printStackTrace();
-						ACLMessage reply = msg.createReply();
-						reply.setLanguage(codec.getName());
-						reply.setOntology(ontology.getName());
-						reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+						ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.NOT_UNDERSTOOD); 
 						myAgent.send(reply);
 						System.out.println(myAgent.getLocalName() + ": NOT_UNDERSTOOD is sent");				
 					}

@@ -212,15 +212,9 @@ public class Spacecraft extends Agent {
 									Team requestorTeam = ((RegistrationRequest) conc).getTeam();
 									System.out.println(myAgent.getLocalName() + ": registration request for team: " + requestorTeam);  
 									
-									//Creating reply message object. 
-									// Receiver, language, ontology and protocol are automatically set. 
-									ACLMessage reply = msg.createReply();
-									
 									//if company agent is still in the registration duration								
-									if ((new Date()).getTime() - registerTime.getTime() <= registrationPeriod) {                                           //Not get it Change 
-										reply.setPerformative(ACLMessage.AGREE);
-										// The ContentManager transforms the java
-										// objects into strings
+									if ((new Date()).getTime() - registerTime.getTime() <= registrationPeriod) {                                           //Not get it Change
+										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.AGREE);
 										myAgent.send(reply);
 										//Initial Agreement condition is sent
 										System.out.println(myAgent.getLocalName() + ": Initial agreement is sent");
@@ -246,7 +240,7 @@ public class Spacecraft extends Agent {
 									}
 									else {
 										//REFUSE message is sent
-										reply.setPerformative(ACLMessage.REFUSE);
+										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
 										myAgent.send(reply);
 										System.out.println(myAgent.getLocalName() + ": Too late for Registration, refuse is sent");
 									}
@@ -260,8 +254,7 @@ public class Spacecraft extends Agent {
 						} catch ( NotUnderstoodException |CodecException | OntologyException e) {
 							//NOT_UNDERSTOOD message is sent
 							e.printStackTrace();
-							ACLMessage reply = msg.createReply();
-							reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+							ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.NOT_UNDERSTOOD);
 							myAgent.send(reply);
 							System.out.println(myAgent.getLocalName() + ": NOT_UNDERSTOOD is sent");
 						}
