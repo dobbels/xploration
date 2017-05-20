@@ -89,7 +89,7 @@ public class AgRover4 extends Agent {
 		analyzedCells.add(cell2);
 		
 		//Cell Analysis for Terrain Simulator 
-//		cellAnalysis(location);
+		cellAnalysis(location);
 		//roverRegistration for Map Simulator
 //		roverRegistration(location);
 		// map broadcast //TODO eventually before/after every movement

@@ -51,7 +51,7 @@ public class AgCommunicationSimulator extends Agent {
 			//Registration Description of Terrain Simulator
 			DFAgentDescription dfd = new DFAgentDescription(); 
 			ServiceDescription sd  = new ServiceDescription();
-			sd.setType(Constants.MOVEMENT_SIMULATOR);
+			sd.setType(Constants.COMMUNICATION_SIMULATOR);
 			sd.setName(getLocalName());
 			dfd.addServices(sd);	
 			DFService.register(this, dfd );  
@@ -70,37 +70,43 @@ public class AgCommunicationSimulator extends Agent {
 
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
-				ACLMessage msg = MessageHandler.blockingReceive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO); 
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO); 
 				
-				// The ContentManager transforms the message content
-				ContentElement ce;
-				try {
-					ce = getContentManager().extractContent(msg);
-
-					//print content of message for debugging
-					printContent(ce);
-					
-					//forward map to every rover in range	
-					ACLMessage forward = new ACLMessage(ACLMessage.INFORM);
-					//TODO is protocol and performative part of content?
-					forward.setProtocol(XplorationOntology.MAPBROADCASTSERVICE);
-					forward.setLanguage(codec.getName());
-					forward.setOntology(ontology.getName());
-					try{
-						getContentManager().fillContent(forward, ce);
-						//TODO send to every rover in range
-						// get location of rover who sent the message (msg.getSender, getLocation from movementsimulator ...)
-						// get every rover that is in range (given in config file)
-						// send to every of these rovers by doing different addReceiver() 
-						//send(forward);			                	
-					} catch(Exception e){
+				if (msg != null) {
+					// The ContentManager transforms the message content
+					ContentElement ce;
+					try {
+						ce = getContentManager().extractContent(msg);
+	
+						//print content of message for debugging
+						printContent(ce);
+						
+						//forward map to every rover in range	
+						ACLMessage forward = new ACLMessage(ACLMessage.INFORM);
+						//TODO is protocol and performative part of content?
+						forward.setProtocol(XplorationOntology.MAPBROADCASTSERVICE);
+						forward.setLanguage(codec.getName());
+						forward.setOntology(ontology.getName());
+						try{
+							getContentManager().fillContent(forward, ce);
+							//TODO send to every rover in range
+							// get location of rover who sent the message (msg.getSender, getLocation from movementsimulator ...)
+							// get every rover that is in range (given in config file)
+							// send to every of these rovers by doing different addReceiver() 
+							//send(forward);			                	
+						} catch(Exception e){
+							e.printStackTrace();
+						}
+	
+						System.out.println(getLocalName() + ": MAPBROADCAST is forwarded");
+	
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
-					System.out.println(getLocalName() + ": MAPBROADCAST is forwarded");
-
-				} catch (Exception e) {
-					e.printStackTrace();
+				}
+				else {
+					// Behaviour is blocked. Will be woken up again whenever the agent receives an ACLMessage.
+					block();
 				}
 			}
 

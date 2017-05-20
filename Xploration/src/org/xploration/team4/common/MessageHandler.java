@@ -100,4 +100,21 @@ public class MessageHandler {
 								MessageTemplate.MatchOntology(ontology.getName()))));
 		return ans;
 	}
+	
+
+	
+	public static ACLMessage receive(Agent agent, int performative, String protocol) {
+		ACLMessage ans = agent.receive(MessageTemplate.and(MessageTemplate.MatchProtocol(protocol), 
+								MessageTemplate.and(MessageTemplate.MatchPerformative(performative), 
+								MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+								MessageTemplate.MatchOntology(ontology.getName())))));
+		return ans;
+	}
+	
+	public static ACLMessage receive(Agent agent, String protocol) {
+		ACLMessage ans = agent.receive(MessageTemplate.and(MessageTemplate.MatchProtocol(protocol),  
+								MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
+								MessageTemplate.MatchOntology(ontology.getName()))));
+		return ans;
+	}
 }

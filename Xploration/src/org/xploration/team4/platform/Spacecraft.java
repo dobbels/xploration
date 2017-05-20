@@ -209,11 +209,7 @@ public class Spacecraft extends Agent {
 
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
-				ACLMessage msg = receive(MessageTemplate.and(MessageTemplate.MatchProtocol(XplorationOntology.REGISTRATIONREQUEST), 
-								MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), 
-								MessageTemplate.and(MessageTemplate.MatchLanguage(codec.getName()),
-								MessageTemplate.MatchOntology(ontology.getName()))))); 
-//						MessageHandler.blockingReceive(myAgent, ACLMessage.REQUEST, XplorationOntology.REGISTRATIONREQUEST); //TODO if receive() gives problems, solve this. blocking isn't possible if registrationdesk has to be terminated.
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.REQUEST, XplorationOntology.REGISTRATIONREQUEST);
 				
 				if (msg != null) {
 					// If an REGISTRATION request arrives
@@ -283,6 +279,10 @@ public class Spacecraft extends Agent {
 						myAgent.send(reply);
 						System.out.println(myAgent.getLocalName() + ": NOT_UNDERSTOOD is sent");
 					}
+				}
+				else {
+					// Behaviour is blocked. Will be woken up again whenever the agent receives an ACLMessage.
+					block();
 				}
 			}
 

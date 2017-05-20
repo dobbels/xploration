@@ -82,7 +82,7 @@ public class AgTerrainSimulator4 extends Agent {
 
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
-				ACLMessage msg = MessageHandler.blockingReceive(myAgent, ACLMessage.REQUEST, XplorationOntology.CELLANALYSIS);  
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.REQUEST, XplorationOntology.CELLANALYSIS);  
 				
 				if (msg != null )
 				{
@@ -174,7 +174,7 @@ public class AgTerrainSimulator4 extends Agent {
 				}
 				else{
 					//if no message arrives
-					block(); //TODO why ??
+					block(); // The behaviour of an agent is woken up again whenever the agent receives an ACLMessage.
 				}
 			}
 		};
