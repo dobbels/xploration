@@ -74,7 +74,7 @@ public class AgMapSimulator extends Agent {
 			public void action() {
 				
 				//RoverRegistrationService Protocol
-				ACLMessage msg = MessageHandler.blockingReceive(myAgent, XplorationOntology.ROVERREGISTRATIONINFO);
+				ACLMessage msg = MessageHandler.receive(myAgent, XplorationOntology.ROVERREGISTRATIONINFO);
 
 				if (msg != null )
 				{
@@ -111,7 +111,11 @@ public class AgMapSimulator extends Agent {
 							System.out.println("Message Exception is detected!");
 						}
 					}
-				}					
+				}
+				else {
+					// Behaviour is blocked. Will be woken up again whenever the agent receives an ACLMessage.
+					block();
+				}
 			}
 		};		
 	}

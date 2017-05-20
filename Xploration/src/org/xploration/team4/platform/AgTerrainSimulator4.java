@@ -26,11 +26,8 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 
 
-//TODO I'don't know why but this agent DOES NOT ENTER the system
-//On the internet, it says I need to enter class path but I didn't get it completely
 public class AgTerrainSimulator4 extends Agent {
 
 	private static final long serialVersionUID = 1L;
