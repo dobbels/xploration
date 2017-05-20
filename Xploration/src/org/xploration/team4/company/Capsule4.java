@@ -23,8 +23,8 @@ public class Capsule4 extends Agent {
 		
 	private static final long serialVersionUID = 1L;
 	private Cell location = new Cell();
-	private int worldWidth;
-	private int worldHeight;
+	private int mapDimX;
+	private int mapDimY;
 	private int missionLength;	
 	
 	//sources: 
@@ -39,19 +39,19 @@ public class Capsule4 extends Agent {
 		Object[] args = getArguments();
 		//Type needed to be changed into String
 		//Integer type causes program to be crashed
-		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
-		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
-		String arg3 = (String) args[2]; // World map X dimension
-		String arg4 = (String) args[3]; // World map Y dimension
-		String arg5 = (String) args[4]; // the mission length
+		int arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
+		int arg2 = (int) args[1]; // Landing of Capsule Y-coordinate 
+		int arg3 = (int) args[2]; // World map X dimension
+		int arg4 = (int) args[3]; // World map Y dimension
+		int arg5 = (int) args[4]; // the mission length
 
 		
 		//Type conversions
-		location.setX(Integer.parseInt(arg1));
-		location.setY(Integer.parseInt(arg2));
-		worldWidth = Integer.parseInt(arg3);
-		worldHeight = Integer.parseInt(arg4);
-		missionLength = Integer.parseInt(arg5);
+		location.setX(arg1);
+		location.setY(arg2);
+		mapDimX = arg3;
+		mapDimY = arg4;
+		missionLength = arg5;
 		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
@@ -59,28 +59,12 @@ public class Capsule4 extends Agent {
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
 		
-        //addBehaviour(deployRover());
+        addBehaviour(deployRover());
         capsuleRegistration(location);
         
-		// Add a behavior to handle requests form rover
-        //	addBehaviour(mainBehaviour());
+        // TODO When registration succeeds, the rover will be deployed? Or just start right away?
 	}
 	
-	private Behaviour mainBehaviour() {
-		return new CyclicBehaviour(this) 
-		{
-			
-			private static final long serialVersionUID = 1L;
-			
-			AID ag;
-			
-			public void action()
-			{   
-				System.out.println(getLocalName() + ": Just doing nothing");
-				doWait(5000);
-			}
-		};
-	}
 	//TODO This function causes a name problem an agent name problem
 	private Behaviour deployRover() {
 		return new OneShotBehaviour() {
@@ -98,7 +82,7 @@ public class Capsule4 extends Agent {
                 try {
                 	String teamName = "Rover4";
 					String className = this.getClass().getPackage().getName()+".AgRover4";
-                    Object[] args = new Object[]{x, y, worldWidth, worldHeight};
+                    Object[] args = new Object[]{x, y, mapDimX, mapDimY, missionLength};
                     a = cnt.createNewAgent(teamName, className, args);
                     a.start();
                 } catch (StaleProxyException e) {
@@ -164,6 +148,11 @@ public class Capsule4 extends Agent {
 			public boolean done() {
 				return capsuleRegistration;
 			}
+			
+//			public int onEnd() {
+//				addBehaviour(deployRover());
+//				return super.onEnd();
+//			}
 		});
 	}
 }

@@ -60,18 +60,18 @@ public class AgRover4 extends Agent {
 		Object[] args = getArguments();
 		//Type needed to be changed into String
 		//Integer type causes program to be crashed
-		String arg1 = (String) args[0]; // Landing of Capsule X-coordinate 
-		String arg2 = (String) args[1]; // Landing of Capsule Y-coordinate 
-		String arg3 = (String) args[2]; // WorldMap X dimension
-		String arg4 = (String) args[3]; // WorldMap Y dimension
-		String arg5 = (String) args[4]; // Mission length
+		int arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
+		int arg2 = (int) args[1]; // Landing of Capsule Y-coordinate 
+		int arg3 = (int) args[2]; // World map X dimension
+		int arg4 = (int) args[3]; // World map Y dimension
+		int arg5 = (int) args[4]; // the mission length
 		
 		//Type conversions
-		location.setX(Integer.parseInt(arg1));
-		location.setY(Integer.parseInt(arg2));
-		worldWidth = Integer.parseInt(arg3);
-		worldHeight = Integer.parseInt(arg4);
-		missionLength = Integer.parseInt(arg5);
+		location.setX(arg1);
+		location.setY(arg2);
+		worldWidth = arg3;
+		worldHeight = arg4;
+		missionLength = arg5;
 		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
@@ -89,11 +89,11 @@ public class AgRover4 extends Agent {
 		analyzedCells.add(cell2);
 		
 		//Cell Analysis for Terrain Simulator 
-		cellAnalysis(location);
+//		cellAnalysis(location);
 		//roverRegistration for Map Simulator
-		roverRegistration(location);
+//		roverRegistration(location);
 		// map broadcast //TODO eventually before/after every movement
-		broadcastCurrentMap(analyzedCells); //TODO
+//		broadcastCurrentMap(analyzedCells); //TODO
 	} 
 
 	private void cellAnalysis(Cell myCell){
