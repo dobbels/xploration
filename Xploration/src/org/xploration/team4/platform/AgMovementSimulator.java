@@ -1,5 +1,7 @@
 package org.xploration.team4.platform;
 
+import java.util.HashMap;
+
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.Team;
@@ -37,6 +39,9 @@ public class AgMovementSimulator extends Agent{
 	public int initialX = 1;
 	public int initialY = 3;
 	
+	private HashMap<Integer, AID> teamAID = new HashMap<Integer, AID>();
+	private HashMap<Integer, Cell> roversPosition = new HashMap<Integer, Cell>();
+	
 	
 	public void setup() {
 		
@@ -53,6 +58,25 @@ public class AgMovementSimulator extends Agent{
 			dfd.addServices(sd);
 			// Registers its description in the DF
 			DFService.register(this, dfd);
+			
+			//fill hashmap for testing purposes
+			Cell cell1 = new Cell();
+			cell1.setX(1);
+			cell1.setY(1);
+			Cell cell2 = new Cell();
+			cell2.setX(1);
+			cell2.setY(3);
+			Cell cell3 = new Cell();
+			cell3.setX(5);
+			cell3.setY(5);
+			Cell cell4 = new Cell();
+			cell4.setX(1);
+			cell4.setY(7);
+			roversPosition.put(1, cell1);
+			roversPosition.put(2, cell2);
+			roversPosition.put(3, cell3);
+			roversPosition.put(4, cell4);
+			
 			System.out.println(getLocalName() + ": registered in the DF");
 		} catch (FIPAException e) {
 			e.printStackTrace();

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.xploration.ontology.CapsuleRegistrationInfo;
 import org.xploration.ontology.Cell;
@@ -38,6 +39,8 @@ public class AgMapSimulator extends Agent {
 
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
+	private HashMap<Integer, AID> teamAID = new HashMap<Integer, AID>();
+	private HashMap<Integer, Cell> roversPosition = new HashMap<Integer, Cell>();
 
 	protected void setup(){
 
@@ -98,6 +101,8 @@ public class AgMapSimulator extends Agent {
 									Cell roverLocation = roverLoc.getCell();		
 									Team team = roverLoc.getTeam();
 									int teamId = team.getTeamId();
+									teamAID.put(teamId, fromAgent);
+									roversPosition.put(teamId, roverLocation);
 									System.out.println(getLocalName()+ ": Rover Location is " + roverLocation.getX() + "," + roverLocation.getY());
 								}
 							}
