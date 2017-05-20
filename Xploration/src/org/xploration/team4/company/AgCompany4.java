@@ -36,9 +36,15 @@ public class AgCompany4 extends Agent {
 		// Add a behavior to register to the registration desk
 		// IF registration is successful, it is saved in the boolean
 		// ELSE an error message is printed
-		addBehaviour(new SimpleBehaviour(this)
+		addBehaviour(register());
+		
+		// To test if registration desk correctly sends FAILURE
+//		addBehaviour(register());
+	}
+	
+	private SimpleBehaviour register() {
+		return new SimpleBehaviour(this)
 		{
-			
 			private static final long serialVersionUID = 1L;
 			private boolean registrationSuccess = false;
 			private boolean registrationFailure = false;
@@ -127,10 +133,14 @@ public class AgCompany4 extends Agent {
 
 			public boolean done ()
 			{
-				System.out.println("Registration succes? " + registrationSuccess + ", Registration failure? " + registrationFailure);
 				return registrationSuccess || registrationFailure;
 			}
 
-		});
+            public int onEnd() {
+            	System.out.println(getLocalName() + ": committing suicide");
+                myAgent.doDelete();
+                return super.onEnd();
+			}
+		};
 	}
 }

@@ -1,6 +1,5 @@
 package org.xploration.team4.platform;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.MessageHandler;
@@ -27,7 +26,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentController;
 /*
  * Capsules creation
@@ -62,6 +60,8 @@ import jade.wrapper.StaleProxyException;
 public class Spacecraft extends Agent {
 		// private static final long serialVersionUID = 1L;
 		
+	
+		private static final long serialVersionUID = 1L;
 		private static final Ontology ontology = XplorationOntology.getInstance();
 		private Codec codec = new SLCodec();
 		
@@ -71,16 +71,16 @@ public class Spacecraft extends Agent {
 		
 		/******Registration Desk Fields*******/
 		// ArrayList to store Registered Agent Teams
-		private List<Team> registerationList = new ArrayList<Team>(); //TODO use this list to deploy only the registered companies
+		private List<Team> registrationList = new ArrayList<Team>(); //TODO use this list to deploy only the registered companies
 		// Registration Duration as 1 minute
-		private final int registrationPeriod = 6000;
+		private final int registrationPeriod = 60000;
 		Date registerTime;
 
 		boolean checkRegisteredBefore(List<Team> registerationList, Team requestorTeam) {
 			boolean check = false;
-
+			//TODO ? actually AID should be checked, not team number ?
 			for (int i = 0; i < registerationList.size(); i++) {
-				if (registerationList.get(i) == requestorTeam) {
+				if (registerationList.get(i).getTeamId() == requestorTeam.getTeamId()) {
 					check = true;
 				}
 			}
@@ -118,7 +118,7 @@ public class Spacecraft extends Agent {
 //			addBehaviour(createCapsule()); //TODO uncomment ! just for testing purposes! 
 		}
 
-		private OneShotBehaviour createCapsule() {
+		private OneShotBehaviour createCapsules() {
 			return new OneShotBehaviour(this) {
 
 				private static final long serialVersionUID = -3422396939743596002L;
@@ -210,7 +210,7 @@ public class Spacecraft extends Agent {
 											+ (msg.getSender()).getLocalName());
 									//Getting Requestor Team 
 									Team requestorTeam = ((RegistrationRequest) conc).getTeam();
-									System.out.println(myAgent.getLocalName() + ": registration request for team: " + requestorTeam);  
+									System.out.println(myAgent.getLocalName() + ": registration request for team: " + requestorTeam.getTeamId());  
 									
 									//if company agent is still in the registration duration								
 									if ((new Date()).getTime() - registerTime.getTime() <= registrationPeriod) {                                           //Not get it Change
@@ -221,7 +221,7 @@ public class Spacecraft extends Agent {
 										
 										// if the team has already registered before
 										// Checks the ArrayList of teams
-										if (checkRegisteredBefore(registerationList, requestorTeam)) { 
+										if (checkRegisteredBefore(registrationList, requestorTeam)) { 
 											//FAILURE message is sent										
 											ACLMessage finalMsg = MessageHandler.constructMessage(fromAgent, ACLMessage.FAILURE, XplorationOntology.REGISTRATIONREQUEST);
 											myAgent.send(finalMsg);
@@ -231,7 +231,8 @@ public class Spacecraft extends Agent {
 										else {
 											// if the team hasn't registered yet
 											// Add the team to the ArrayList 
-											registerationList.add(requestorTeam);
+											registrationList.add(requestorTeam);
+											System.out.println(getLocalName() + ": " + registrationList.toString());
 											//INFORM message is sent
 											ACLMessage finalMsg = MessageHandler.constructMessage(fromAgent, ACLMessage.INFORM, XplorationOntology.REGISTRATIONREQUEST);
 											myAgent.send(finalMsg);
