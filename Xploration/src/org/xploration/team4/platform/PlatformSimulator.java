@@ -30,6 +30,7 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -58,6 +59,8 @@ public class PlatformSimulator extends Agent {
 	private int worldDimensionY = worldMap.getWidth(); 
 	private int worldDimensionX = worldMap.getHeight();
 	
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory(); //TODO use for listening threads. Why not..
+	
 	/***COMM_SIM***/
 	
 	/***MAP_SIM***/
@@ -68,6 +71,8 @@ public class PlatformSimulator extends Agent {
 	private HashMap<Integer, AID> teamAID = new HashMap<Integer, AID>();
 	private HashMap<Integer, Cell> roversPosition = new HashMap<Integer, Cell>();
 	
+	private int movingTime = 2000;
+	
 	//TODO what to do with this?
 	public int initialX = 1;
 	public int initialY = 3;
@@ -75,6 +80,7 @@ public class PlatformSimulator extends Agent {
 	/***TERRAIN_SIM***/
 	//For this sprint it remains always true, only INFORM case //TODO change this
 	boolean validPosition = true;
+	private int analyzingTime = 2000; // in milliseconds
 	
 		
 	protected void setup(){
@@ -165,13 +171,15 @@ public class PlatformSimulator extends Agent {
 		addBehaviour(cellAnalysisRequestListener());
 	}
 		
+	/*
+	 * All of the behaviours below sleep the whole time. When a message arrives they all wake up and the right behaviour handles the message.
+	 */
 	private Behaviour mapBroadcastListener() {
 		return new CyclicBehaviour(this) {
 			
 			private static final long serialVersionUID = -4555719000913759629L;
 
 			public void action() {
-				System.out.println("behaviour 1"); //TODO delete, was just to test collective listening
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO); 
 				
@@ -240,7 +248,6 @@ public class PlatformSimulator extends Agent {
 			private static final long serialVersionUID = -1383552485084791798L;
 
 			public void action() {
-				System.out.println("behaviour 2"); //TODO delete, was just to test collective listening
 				//RoverRegistrationService Protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, XplorationOntology.ROVERREGISTRATIONINFO);
 
@@ -294,7 +301,6 @@ public class PlatformSimulator extends Agent {
 			private static final long serialVersionUID = 5731197496710703895L;
 
 			public void action() {
-				System.out.println("behaviour 3"); //TODO delete, was just to test collective listening
 				//capsuleRegistrationService Protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, XplorationOntology.CAPSULEREGISTRATIONINFO);
 
@@ -346,8 +352,6 @@ public class PlatformSimulator extends Agent {
 
 			@Override
 			public void action() {
-				// TODO Auto-generated method stub
-				System.out.println("behaviour 4"); //TODO delete, was just to test collective listening
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.REQUEST, XplorationOntology.MOVEMENTREQUESTINFO); 
 				 
 				if (msg != null) {
@@ -395,7 +399,6 @@ public class PlatformSimulator extends Agent {
 			private static final long serialVersionUID = 11924124L;
 
 			public void action() {
-				System.out.println("behaviour 5"); //TODO delete, was just to test collective listening
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.REQUEST, XplorationOntology.CELLANALYSIS);  
 				
@@ -442,7 +445,7 @@ public class PlatformSimulator extends Agent {
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
 										myAgent.send(reply);
 										System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
-										doWait(3000);
+//										doWait(3000);
 									}
 	
 									//Valid Cell Condition
@@ -460,6 +463,8 @@ public class PlatformSimulator extends Agent {
 										if(validPosition){
 											CellAnalysis cellAnalysis = new CellAnalysis();
 											cellAnalysis.setCell(worldMap.getCell(m, n));
+											
+											doWait(analyzingTime); //TODO does this work?
 											
 											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis);
 											send(inform);

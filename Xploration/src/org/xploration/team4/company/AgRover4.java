@@ -171,8 +171,27 @@ public class AgRover4 extends Agent {
 									ACLMessage finalMsg = MessageHandler.blockingReceive(myAgent, ACLMessage.INFORM, XplorationOntology.CELLANALYSIS);
 									
 									System.out.println(getLocalName()+": INFORM is received!");
-									System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
-											+myCell.getX() + ","+ myCell.getY()+  ", " + myCell.getMineral() + ")");
+									
+									ContentElement ce;
+			                        try {
+			                            ce = getContentManager().extractContent(finalMsg);
+
+			                            // We expect an action inside the message
+			                            if (ce instanceof Action) {
+			                                Action agAction = (Action) ce;
+			                                Concept conc = agAction.getAction();
+
+			                                if (conc instanceof CellAnalysis) {
+			                                    Cell cell = ((CellAnalysis) conc).getCell();
+												//TODO set mineral in our representation of map. Is this the way to go?
+			                                    analyzedCells.add(cell);
+			                                    System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
+														+cell.getX() + ","+ cell.getY()+  ", " + cell.getMineral() + ")");
+			                                }
+			                            }
+			                        } catch (Exception e) {
+			                            e.printStackTrace();
+			                        }
 									claimingCell = true;											
 							
 								}						  						  						  
