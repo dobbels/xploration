@@ -134,13 +134,25 @@ public class Map {
 		return c;
 	}
     
+    public boolean compareCelltoDestination(Cell dest, int dx, int dy) {
+    	return dest.getX() == dx && dest.getY() == dy;
+    }
+    
     public boolean isNextPosition(int ix, int iy, int dx, int dy) {
-    	String direction;
+    	Cell c = calculateNextPosition(ix, iy, "up");
+    	if (compareCelltoDestination(c, dx, dy)) return true;
+    	c = calculateNextPosition(ix, iy, "down");
+    	if (compareCelltoDestination(c, dx, dy)) return true;
+    	c = calculateNextPosition(ix, iy, "leftUp");
+    	if (compareCelltoDestination(c, dx, dy)) return true;
+    	c = calculateNextPosition(ix, iy, "leftDown");
+    	if (compareCelltoDestination(c, dx, dy)) return true;
+    	c = calculateNextPosition(ix, iy, "rightUp");
+    	if (compareCelltoDestination(c, dx, dy)) return true;
+    	c = calculateNextPosition(ix, iy, "rightDown");
+    	if (compareCelltoDestination(c, dx, dy)) return true;
     	
-    	
-    	
-    	
-    	return true;
+    	return false;
     }
 }
 

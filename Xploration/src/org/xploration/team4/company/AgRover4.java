@@ -6,6 +6,7 @@ import java.util.Iterator;
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.MapBroadcastInfo;
+import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.RoverRegistrationInfo;
 import org.xploration.ontology.XplorationOntology;
 import org.xploration.team4.common.Constants;
@@ -409,6 +410,91 @@ public class AgRover4 extends Agent {
 			}			
 		});
 
+	}
+	
+	private void movementRequest() {
+		addBehaviour(new SimpleBehaviour(this) {
+			AID agMovementSim;
+			private boolean movementRequested = false;
+			@Override
+			public void action() {
+				// TODO Auto-generated method stub
+				if (!movementRequested) {
+					//Creates description for the AGENT TERRAIN SIMULATOR to be searched
+					DFAgentDescription dfd = new DFAgentDescription();     
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType(XplorationOntology.MOVEMENTREQUESTSERVICE);
+					dfd.addServices(sd);
+					
+					try {
+						// It finds agents of the required type
+						DFAgentDescription[] result = new DFAgentDescription[20];
+						result = DFService.search(myAgent, dfd);
+
+						// Gets the first occurrence, if there was success
+						if (result.length > 0) {
+							//System.out.println(result[0].getName());
+							agMovementSim = (AID) result[0].getName();	
+							System.out.println(getLocalName()+ ": movement simulator agent is found");
+							
+							MovementRequestInfo mri = new MovementRequestInfo();
+							Cell destination = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
+							destination.setX(destination.getX());
+							destination.setY(destination.getY());
+							Team team = new Team();
+							team.setTeamId(TEAM_ID);
+							mri.setCell(destination);
+							mri.setTeam(team);
+							
+							ACLMessage msg = MessageHandler.constructMessage(agMovementSim, ACLMessage.REQUEST, mri, XplorationOntology.MOVEMENTREQUESTINFO);
+							send(msg);			                	
+	
+							System.out.println(getLocalName() + ": REQUEST is sent");
+							
+							ACLMessage ans = MessageHandler.blockingReceive(myAgent, XplorationOntology.MOVEMENTREQUESTINFO);
+							if (ans != null) {
+								if (ans.getPerformative() == ACLMessage.REFUSE) {
+									System.out.println(getLocalName() + ": REFUSED due to Invalid Cell");
+									movementRequested = true;
+								}
+
+								else if(ans.getPerformative()== ACLMessage.NOT_UNDERSTOOD) {
+									System.out.println(getLocalName() + ": NOT UNDERSTOOD the message");
+									movementRequested = true;
+								}
+								else if(ans.getPerformative()== ACLMessage.AGREE) {
+									System.out.println(getLocalName() + ": Initial AGREE was received");	  
+
+									ACLMessage finalMsg = MessageHandler.blockingReceive(myAgent, XplorationOntology.MOVEMENTREQUESTINFO);
+									if (finalMsg.getPerformative() == ACLMessage.INFORM) {
+										System.out.println(getLocalName() + ": INFORM was received, movement accepted");
+										location = destination;
+										movementRequested = true;
+									}
+									else if (finalMsg.getPerformative() == ACLMessage.FAILURE) {
+										System.out.println(getLocalName() + ": FAILURE was received, collision");
+										movementRequested = true;
+									}
+								}
+							}
+						}
+					}
+					catch (Exception e) {
+						System.out.println(getLocalName() + "Exception is detected!");
+						e.printStackTrace();
+					}
+
+					
+				}
+			}
+
+			@Override
+			public boolean done() {
+				// TODO Auto-generated method stub
+				return movementRequested;
+			}
+			
+		});
 	}
 }
 
