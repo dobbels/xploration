@@ -8,7 +8,12 @@ import org.xploration.ontology.Team;
 public class Constants {
 	
 	public final static int TEAM_ID = 4;
+	
 	public static Team myTeam;
+	
+//	static {
+//		myTeam.setTeamId(TEAM_ID);
+//	}
 	
 	public final static String REGISTRATION_DESK_NAME = "registrationDesk";
 //	public final static String TERRAIN_SIMULATOR = "terrainSimulator";

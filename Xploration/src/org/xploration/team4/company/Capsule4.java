@@ -37,15 +37,27 @@ public class Capsule4 extends Agent {
 		System.out.println(getLocalName()+": HAS ENTERED");
 		
 		Object[] args = getArguments();
-		//Type needed to be changed into String
-		//Integer type causes program to be crashed
-		int arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
-		int arg2 = (int) args[1]; // Landing of Capsule Y-coordinate 
-		int arg3 = (int) args[2]; // World map X dimension
-		int arg4 = (int) args[3]; // World map Y dimension
-		int arg5 = (int) args[4]; // the mission length
-
+		int arg1; 
+		int arg2; 
+		int arg3;
+		int arg4;
+		int arg5;
 		
+		if (args[0] instanceof String) { // To be able to pass arguments in command line
+			arg1 = Integer.parseInt((String) args[0]); // Landing of Capsule X-coordinate
+			arg2 = Integer.parseInt((String) args[1]); // Landing of Capsule Y-coordinate 
+			arg3 = Integer.parseInt((String) args[2]); // World map X dimension
+			arg4 = Integer.parseInt((String) args[3]); // World map Y dimension
+			arg5 = Integer.parseInt((String) args[4]); // the mission length
+		}
+		else {
+			arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
+			arg2 = (int) args[1]; // Landing of Capsule Y-coordinate 
+			arg3 = (int) args[2]; // World map X dimension
+			arg4 = (int) args[3]; // World map Y dimension
+			arg5 = (int) args[4]; // the mission length
+		}
+				
 		//Type conversions
 		location.setX(arg1);
 		location.setY(arg2);
@@ -59,10 +71,7 @@ public class Capsule4 extends Agent {
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
 		
-        addBehaviour(deployRover());
         capsuleRegistration(location);
-        
-        // TODO When registration succeeds, the rover will be deployed? Or just start right away?
 	}
 	
 	//TODO This function causes a name problem an agent name problem
@@ -125,13 +134,17 @@ public class Capsule4 extends Agent {
 
 							CapsuleRegistrationInfo capsuleReg = new CapsuleRegistrationInfo();
 							capsuleReg.setCell(myCell);
-							//TODO: Type should be integer or team
-							capsuleReg.setTeam(Constants.myTeam);
+							Team team = new Team();
+							team.setTeamId(Constants.TEAM_ID);
+							capsuleReg.setTeam(team);
 							
 							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.INFORM, capsuleReg, XplorationOntology.CAPSULEREGISTRATIONINFO);
 							send(msg);			
 							System.out.println(getLocalName() + ": INFORM is sent");
 							capsuleRegistration = true;
+							
+							// Now the rover can be deployed
+							addBehaviour(deployRover());
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");

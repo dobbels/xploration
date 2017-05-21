@@ -9,7 +9,6 @@ import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
 import org.xploration.ontology.MapBroadcastInfo;
 import org.xploration.ontology.MovementRequestInfo;
-import org.xploration.ontology.MovementRequestService;
 import org.xploration.ontology.RoverRegistrationInfo;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
@@ -29,7 +28,6 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -37,7 +35,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 
 public class PlatformSimulator extends Agent {
 	
@@ -64,11 +61,12 @@ public class PlatformSimulator extends Agent {
 	/***COMM_SIM***/
 	
 	/***MAP_SIM***/
-	private ArrayList<Team> registeredRovers = new ArrayList<>();
-	private ArrayList<Team> registeredCapsules = new ArrayList<>();
+	// registered rovers and capsules are implicit. Use .hasKey() to know if registered. 
+	private HashMap<Integer, AID> capsuleAID = new HashMap<>();
+	private HashMap<Integer, Cell> capsulePositions = new HashMap<>();
 	
 	/***MOVEMENT_SIM + MAP_SIM***/
-	private HashMap<Integer, AID> teamAID = new HashMap<Integer, AID>();
+	private HashMap<Integer, AID> roverAID = new HashMap<Integer, AID>();
 	private HashMap<Integer, Cell> roversPosition = new HashMap<Integer, Cell>();
 	
 	private int movingTime = 2000;
@@ -275,9 +273,8 @@ public class PlatformSimulator extends Agent {
 									RoverRegistrationInfo roverLoc = (RoverRegistrationInfo) conc;
 									Cell roverLocation = roverLoc.getCell();		
 									Team team = roverLoc.getTeam();
-									int teamId = team.getTeamId();
-									teamAID.put(teamId, fromAgent);
-									roversPosition.put(teamId, roverLocation);
+									roverAID.put(team.getTeamId(), fromAgent);
+									roversPosition.put(team.getTeamId(), roverLocation);
 									System.out.println(getLocalName()+ ": Rover Location is " + roverLocation.getX() + "," + roverLocation.getY());
 								}
 							}
@@ -328,11 +325,13 @@ public class PlatformSimulator extends Agent {
 									CapsuleRegistrationInfo capsuleLoc = (CapsuleRegistrationInfo) conc;
 									Cell capsuleLocation = capsuleLoc.getCell();	
 									Team team = capsuleLoc.getTeam();
-									int teamId = team.getTeamId();
+									capsuleAID.put(team.getTeamId(), fromAgent);
+									capsulePositions.put(team.getTeamId(), capsuleLocation);
 									System.out.println(getLocalName()+ ": Capsule Location is " + capsuleLocation.getX() + "," + capsuleLocation.getY());
 								}
 							}
 						}catch(Exception e){
+							e.printStackTrace();
 							System.out.println("Message Exception is detected!");
 						}
 					}

@@ -256,10 +256,11 @@ public class AgRover4 extends Agent {
 							
 							RoverRegistrationInfo roverReg = new RoverRegistrationInfo();
 							roverReg.setCell(myCell);
-							//TODO Type should be integer or team
-							roverReg.setTeam(Constants.myTeam);
+							Team team = new Team();
+							team.setTeamId(Constants.TEAM_ID);
+							roverReg.setTeam(team);
 
-							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.REQUEST, roverReg, XplorationOntology.ROVERREGISTRATIONINFO);
+							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.INFORM, roverReg, XplorationOntology.ROVERREGISTRATIONINFO);
 							send(msg);	
 							System.out.println(getLocalName() + ": INFORM is sent");
 							roverRegistration = true;
