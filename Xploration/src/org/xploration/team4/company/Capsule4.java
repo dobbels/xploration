@@ -1,10 +1,14 @@
 package org.xploration.team4.company;
 
+import java.util.Iterator;
+
 import org.xploration.ontology.*;
 import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
 import org.xploration.team4.common.MessageHandler;
 
+import jade.content.Concept;
+import jade.content.ContentElement;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
@@ -26,6 +30,8 @@ public class Capsule4 extends Agent {
 	private int mapDimX;
 	private int mapDimY;
 	private int missionLength;	
+	
+	private Map localWorldMap;
 	
 	//sources: 
 	//  http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
@@ -65,6 +71,8 @@ public class Capsule4 extends Agent {
 		mapDimY = arg4;
 		missionLength = arg5;
 		
+		localWorldMap = new Map(mapDimX, mapDimY);
+		
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
 		
@@ -84,6 +92,10 @@ public class Capsule4 extends Agent {
             public void action() {
                 int x = location.getX();
                 int y = location.getY();
+                
+        		// to test sprint 3.7: capsule should not get broadcast
+        		x = 9;
+        		y = 9;
 
                 AgentContainer cnt = getContainerController();
                 AgentController a;
@@ -145,6 +157,8 @@ public class Capsule4 extends Agent {
 							
 							// Now the rover can be deployed
 							addBehaviour(deployRover());
+							
+							listenForMaps();
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
@@ -167,6 +181,53 @@ public class Capsule4 extends Agent {
 //				return super.onEnd();
 //			}
 		});
+	}
+	
+	private void listenForMaps(){
+
+		addBehaviour (new CyclicBehaviour(this)
+		{						  			
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void action() {				
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO);
+				
+				if (msg != null) {
+					System.out.println(getLocalName() + ": received map broadcast");
+					
+					// The ContentManager transforms the message content
+					ContentElement ce;
+					try {
+						ce = getContentManager().extractContent(msg);
+						
+						if (ce instanceof Action) {
+							Concept conc = ((Action) ce).getAction();
+							
+							if (conc instanceof MapBroadcastInfo) {
+								MapBroadcastInfo mbi = (MapBroadcastInfo) conc;
+								org.xploration.ontology.Map map = mbi.getMap();
+								Iterator it = map.getAllCellList();
+								Cell c;
+								while (it.hasNext()) {
+									c = (Cell) it.next();
+									localWorldMap.setCell(c);
+								}
+								System.out.println(getLocalName() + ": new local world map");
+								localWorldMap.printWorldMap();
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				else {
+					// Behaviour is blocked. Will be woken up again whenever the agent receives an ACLMessage.
+					block();
+				}
+			}			
+		});
+
 	}
 }
 

@@ -44,8 +44,6 @@ public class PlatformSimulator extends Agent {
 	// TODO every listening behaviour you put in a thread (http://jade.tilab.com/doc/api/jade/core/behaviours/ThreadedBehaviourFactory.html),
 	//			you can just do blockingReceive() ! If there are any problems with messages that don't arrive, then this might be the solution.
 	
-	// TODO (to be able to use multiple repeating behaviours in the same agent we can use a simple behaviour with done() { return false; }. Then the behaviour is always put in the end of the queue and other behaviour have their turn.) 
-
 	private static final long serialVersionUID = 1L;
 	//TODO eventually maybe the difference between variables of 'different' simulators is not important anymore.
 	/***COMMON***/
@@ -64,6 +62,7 @@ public class PlatformSimulator extends Agent {
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory(); //TODO use for listening threads. Why not..
 	
 	/***COMM_SIM***/
+	private int communciationRange = 3;
 	
 	/***MAP_SIM***/
 	// registered rovers and capsules are implicit. Use .hasKey() to know if registered. 
@@ -138,24 +137,22 @@ public class PlatformSimulator extends Agent {
 		 * Out of Movement Simulator
 		 */
 		//fill hashmap for testing purposes
-		/*
-		Cell cell1 = new Cell();
-		cell1.setX(1);
-		cell1.setY(1);
-		Cell cell2 = new Cell();
-		cell2.setX(1);
-		cell2.setY(3);
-		Cell cell3 = new Cell();
-		cell3.setX(5);
-		cell3.setY(5);
-		Cell cell4 = new Cell();
-		cell4.setX(1);
-		cell4.setY(7);
-		roversPosition.put(1, cell1);
-		roversPosition.put(2, cell2);
-		roversPosition.put(3, cell3);
-		roversPosition.put(4, cell4);
-		*/
+//		Cell cell1 = new Cell();
+//		cell1.setX(1);
+//		cell1.setY(1);
+//		Cell cell2 = new Cell();
+//		cell2.setX(1);
+//		cell2.setY(3);
+//		Cell cell3 = new Cell();
+//		cell3.setX(5);
+//		cell3.setY(5);
+//		Cell cell4 = new Cell();
+//		cell4.setX(1);
+//		cell4.setY(7);
+//		roversPosition.put(1, cell1);
+//		roversPosition.put(2, cell2);
+//		roversPosition.put(3, cell3);
+//		roversPosition.put(4, cell4);
 		
 		addBehaviours();
 	}
@@ -185,36 +182,36 @@ public class PlatformSimulator extends Agent {
 
 			public void action() {
 				//Using codec content language, ontology and request interaction protocol
-				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO); 
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO);
 				
 				if (msg != null) {
+					System.out.println(getLocalName() + ": received map broadcast");
+					
 					// The ContentManager transforms the message content
 					ContentElement ce;
 					try {
 						ce = getContentManager().extractContent(msg);
-	
-						//print content of message for debugging
 						printContent(ce);
 						
-						//forward map to every rover in range	
-						ACLMessage forward = new ACLMessage(ACLMessage.INFORM); //TODO use MessageHandler
-						//TODO is protocol and performative part of content?
-						forward.setProtocol(XplorationOntology.MAPBROADCASTINFO);
-						forward.setLanguage(codec.getName());
-						forward.setOntology(ontology.getName());
-						try{
-							getContentManager().fillContent(forward, ce);
-							//TODO send to every rover in range
-							// get location of rover who sent the message (msg.getSender, getLocation from movementsimulator ...)
-							// get every rover and capsule that is in range (given in config file -> ?)
-							// send to every of these rovers by doing different addReceiver()
-							//send(forward);			                	
-						} catch(Exception e){
-							e.printStackTrace();
+						AID fromAgent = msg.getSender();
+						Cell location = roversPosition.get(AIDToTeamId.get(fromAgent));
+						
+//						System.out.println(location.getX() + " " + location.getY());
+						ArrayList<AID> inRange = getAllInRange(location);
+						// Not send map back to sender
+						inRange.remove(fromAgent);
+						System.out.println("                                                                     " + inRange.size());
+						if (!inRange.isEmpty()) {
+							ACLMessage forward = MessageHandler.constructReceiverlessMessage(ACLMessage.INFORM, (Action) ce, XplorationOntology.MAPBROADCASTINFO);
+							for (AID aid : inRange) {
+								forward.addReceiver(aid);
+							}
+							send(forward);
+							System.out.println(getLocalName() + ": MAPBROADCAST is forwarded");
+						} 
+						else {
+							System.out.println(getLocalName() + ": No others in range of rover " + AIDToTeamId.get(msg.getSender()));
 						}
-	
-						System.out.println(getLocalName() + ": MAPBROADCAST is forwarded");
-	
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -224,6 +221,48 @@ public class PlatformSimulator extends Agent {
 					block();
 				}
 			}
+
+			private ArrayList<AID> getAllInRange(Cell location) {
+				ArrayList<AID> inRange = new ArrayList<AID>();
+				for (Integer teamid : roversPosition.keySet()) {
+					Cell other = roversPosition.get(teamid); 
+					if (inRangeFrom(location, other)) {
+						inRange.add(roverAID.get(teamid));
+					}
+				}
+				for (Integer teamid : capsulePositions.keySet()) {
+					Cell other = capsulePositions.get(teamid);
+					if (inRangeFrom(location, other))
+						inRange.add(capsuleAID.get(teamid));
+				}
+				return inRange;
+			}
+			
+			private boolean inRangeFrom(Cell rover, Cell other) {
+		    	// In these calculations it is assumed that the map is spherical, so
+				// from the left side, you can go directly to the rigth side and so on. 
+		    	int x = rover.getX();
+		    	int y = rover.getY();
+		    	
+		    	int x_other = other.getX();
+		    	int y_other = other.getY();
+		    	
+		    	int distance = distance(x,y,x_other,y_other);
+		    	
+		    	return (0 <= distance && distance <= Constants.COMMUNICATION_RANGE);
+			}
+			
+			public int distance(int x, int y, int x_other, int y_other) {
+		        int rightDiff = (worldDimensionY + y_other - y) % worldDimensionY;
+		        int leftDiff = (worldDimensionY + y - y_other) % worldDimensionY;
+		        int upDiff = (worldDimensionX + x - x_other) % worldDimensionX;
+		        int downDiff = (worldDimensionX + x_other - x) % worldDimensionX;
+
+		        int distY = Math.min(rightDiff, leftDiff);
+		        int distX = Math.min(upDiff, downDiff);
+
+		        return distY + Math.max(0, (distX - distY) / 2);
+		    }
 
 			private void printContent(ContentElement ce) {
 				Action agAction = (Action) ce;
@@ -239,7 +278,7 @@ public class PlatformSimulator extends Agent {
 				Cell c;
 				while (it.hasNext()) {
 					c = (Cell) it.next();
-					System.out.println(getLocalName() + "  x: " + c.getX() + " y: "+ "  min: " + c.getMineral());
+					System.out.println(getLocalName() + "  x: " + c.getX() + " y: "+ c.getY() +"  mineral: " + c.getMineral());
 				}
 
 			}
