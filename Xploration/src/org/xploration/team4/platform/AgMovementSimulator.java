@@ -54,7 +54,7 @@ public class AgMovementSimulator extends Agent{
 			DFAgentDescription dfd = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
 			sd.setName(this.getName());
-			sd.setType(Constants.MOVEMENT_SIMULATOR);
+//			sd.setType(Constants.MOVEMENT_SIMULATOR);
 			dfd.addServices(sd);
 			// Registers its description in the DF
 			DFService.register(this, dfd);

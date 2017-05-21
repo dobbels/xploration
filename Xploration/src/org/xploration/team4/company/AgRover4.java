@@ -58,13 +58,25 @@ public class AgRover4 extends Agent {
 		getContentManager().registerOntology(ontology);
 		
 		Object[] args = getArguments();
-		//Type needed to be changed into String
-		//Integer type causes program to be crashed
-		int arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
-		int arg2 = (int) args[1]; // Landing of Capsule Y-coordinate 
-		int arg3 = (int) args[2]; // World map X dimension
-		int arg4 = (int) args[3]; // World map Y dimension
-		int arg5 = (int) args[4]; // the mission length
+		int arg1; 
+		int arg2; 
+		int arg3;
+		int arg4;
+		int arg5;
+		if (args[0] instanceof String) { // To be able to pass arguments in command line
+			arg1 = Integer.parseInt((String) args[0]); // Landing of Capsule X-coordinate
+			arg2 = Integer.parseInt((String) args[1]); // Landing of Capsule Y-coordinate 
+			arg3 = Integer.parseInt((String) args[2]); // World map X dimension
+			arg4 = Integer.parseInt((String) args[3]); // World map Y dimension
+			arg5 = Integer.parseInt((String) args[4]); // the mission length
+		}
+		else {
+			arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
+			arg2 = (int) args[1]; // Landing of Capsule Y-coordinate 
+			arg3 = (int) args[2]; // World map X dimension
+			arg4 = (int) args[3]; // World map Y dimension
+			arg5 = (int) args[4]; // the mission length
+		}
 		
 		//Type conversions
 		location.setX(arg1);
@@ -113,7 +125,7 @@ public class AgRover4 extends Agent {
 					//Creates description for the AGENT TERRAIN SIMULATOR to be searched
 					DFAgentDescription dfd = new DFAgentDescription();     
 					ServiceDescription sd = new ServiceDescription();
-					sd.setType(Constants.TERRAIN_SIMULATOR);
+					sd.setType(XplorationOntology.TERRAINSIMULATOR);
 					dfd.addServices(sd);
 
 					try {
@@ -207,7 +219,7 @@ public class AgRover4 extends Agent {
 					DFAgentDescription dfd = new DFAgentDescription();     
 					ServiceDescription sd = new ServiceDescription();
 					
-					sd.setType(Constants.MAP_SIMULATOR);
+					sd.setType(XplorationOntology.ROVERREGISTRATIONSERVICE);
 					dfd.addServices(sd);
 
 					try {

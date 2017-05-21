@@ -55,7 +55,7 @@ public class AgMapSimulator extends Agent {
 			DFAgentDescription dfd = new DFAgentDescription(); 
 			ServiceDescription sd  = new ServiceDescription();
 			//
-			sd.setType(Constants.MAP_SIMULATOR);
+//			sd.setType(Constants.MAP_SIMULATOR);
 			sd.setName(getLocalName());
 			dfd.addServices(sd);	
 			DFService.register(this, dfd);  

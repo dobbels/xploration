@@ -82,7 +82,7 @@ public class Capsule4 extends Agent {
                 try {
                 	String teamName = "Rover4";
 					String className = this.getClass().getPackage().getName()+".AgRover4";
-                    Object[] args = new Object[]{x, y, mapDimX, mapDimY, missionLength};
+					Object[] args = new Object[]{x, y, mapDimX, mapDimY, missionLength};
                     a = cnt.createNewAgent(teamName, className, args);
                     a.start();
                 } catch (StaleProxyException e) {
@@ -107,7 +107,7 @@ public class Capsule4 extends Agent {
 					//Creates description for the AGENT MAP SIMULATOR to be searched
 					DFAgentDescription dfd = new DFAgentDescription();     
 					ServiceDescription sd = new ServiceDescription();
-					sd.setType(Constants.MAP_SIMULATOR);
+					sd.setType(XplorationOntology.CAPSULEREGISTRATIONSERVICE);
 					dfd.addServices(sd);
 
 					try {

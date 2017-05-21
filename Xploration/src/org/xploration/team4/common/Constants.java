@@ -11,10 +11,10 @@ public class Constants {
 	public static Team myTeam;
 	
 	public final static String REGISTRATION_DESK_NAME = "registrationDesk";
-	public final static String TERRAIN_SIMULATOR = "terrainSimulator";
-	public final static String MAP_SIMULATOR = "mapSimulator";
-	public final static String MOVEMENT_SIMULATOR = "movementSimulator";
-	public final static String COMMUNICATION_SIMULATOR = "communicationSimulator";
+//	public final static String TERRAIN_SIMULATOR = "terrainSimulator";
+//	public final static String MAP_SIMULATOR = "mapSimulator";
+//	public final static String MOVEMENT_SIMULATOR = "movementSimulator";
+//	public final static String COMMUNICATION_SIMULATOR = "communicationSimulator";
 	
 	
 	//Coordinates for Rover - Terrain Simulator protocol

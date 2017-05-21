@@ -51,7 +51,7 @@ public class AgCommunicationSimulator extends Agent {
 			//Registration Description of Terrain Simulator
 			DFAgentDescription dfd = new DFAgentDescription(); 
 			ServiceDescription sd  = new ServiceDescription();
-			sd.setType(Constants.COMMUNICATION_SIMULATOR);
+//			sd.setType(Constants.COMMUNICATION_SIMULATOR);
 			sd.setName(getLocalName());
 			dfd.addServices(sd);	
 			DFService.register(this, dfd );  

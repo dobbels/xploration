@@ -40,7 +40,7 @@ import jade.lang.acl.MessageTemplate;
 
 public class PlatformSimulator extends Agent {
 	
-	// TODO think of the case (in the beginning or in registration failure) when not everyone is registered. Don't count on those things.  
+	// TODO think of the case (in the beginning or in registration failure) when not everyone/no one is registered. Don't count on those things.  
 	
 	// TODO every listening behaviour you put in a thread (http://jade.tilab.com/doc/api/jade/core/behaviours/ThreadedBehaviourFactory.html),
 	//			you can just do blockingReceive() ! If there are any problems with messages that don't arrive, then this might be the solution.
@@ -88,10 +88,64 @@ public class PlatformSimulator extends Agent {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
-		setupCommunciationSim();
-		setupMapSim();
-		setupMovementSim();
-		setupTerrainSim();
+		try
+		{
+			DFAgentDescription dfd = new DFAgentDescription();
+			
+			ServiceDescription sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(org.xploration.ontology.XplorationOntology.TERRAINSIMULATOR);
+			dfd.addServices(sd);
+			
+			sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(org.xploration.ontology.XplorationOntology.MAPBROADCASTSERVICE);
+			dfd.addServices(sd);
+			
+			sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(org.xploration.ontology.XplorationOntology.MOVEMENTREQUESTSERVICE);
+			dfd.addServices(sd);
+			
+			sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(org.xploration.ontology.XplorationOntology.CAPSULEREGISTRATIONSERVICE);
+			dfd.addServices(sd);
+			
+			sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(org.xploration.ontology.XplorationOntology.ROVERREGISTRATIONSERVICE);
+			dfd.addServices(sd);
+			
+			DFService.register(this, dfd);
+			
+		} 
+		catch (FIPAException e)
+		{
+			System.out.println("REGISTRATION EXCEPTION is detected!"); 
+			e.printStackTrace();
+		}
+		
+		/*
+		 * Out of Movement Simulator
+		 */
+		//fill hashmap for testing purposes
+		Cell cell1 = new Cell();
+		cell1.setX(1);
+		cell1.setY(1);
+		Cell cell2 = new Cell();
+		cell2.setX(1);
+		cell2.setY(3);
+		Cell cell3 = new Cell();
+		cell3.setX(5);
+		cell3.setY(5);
+		Cell cell4 = new Cell();
+		cell4.setX(1);
+		cell4.setY(7);
+		roversPosition.put(1, cell1);
+		roversPosition.put(2, cell2);
+		roversPosition.put(3, cell3);
+		roversPosition.put(4, cell4);
 		
 		addBehaviours();
 	}
@@ -110,94 +164,14 @@ public class PlatformSimulator extends Agent {
 		/***TERRAIN_SIM***/
 		addBehaviour(cellAnalysisRequestListener());
 	}
-	
-	protected void setupCommunciationSim() {
-		try{
-			//Registration Description of Terrain Simulator
-			DFAgentDescription dfd = new DFAgentDescription(); 
-			ServiceDescription sd  = new ServiceDescription();
-			sd.setType(Constants.COMMUNICATION_SIMULATOR);
-			sd.setName(getLocalName());
-			dfd.addServices(sd);	
-			DFService.register(this, dfd );  
-		}catch (FIPAException e){ 
-			e.printStackTrace();
-			System.out.println("REGISTRATION EXCEPTION is detected!"); 
-		}
-	}
-
-	protected void setupMapSim() {
-		try{
-			//Registration Description of Map Simulator
-			DFAgentDescription dfd = new DFAgentDescription(); 
-			ServiceDescription sd  = new ServiceDescription();
-			//
-			sd.setType(Constants.MAP_SIMULATOR);
-			sd.setName(getLocalName());
-			dfd.addServices(sd);	
-			DFService.register(this, dfd);  
-		}catch (FIPAException e){ 
-			e.printStackTrace();
-			System.out.println("MAP SIMULATOR REGISTRATION EXCEPTION is detected!"); 
-		}
-	}
-
-	protected void setupMovementSim() {
-		try {
-			// Creating registrationDesk description
-			DFAgentDescription dfd = new DFAgentDescription();
-			ServiceDescription sd = new ServiceDescription();
-			sd.setName(this.getName());
-			sd.setType(Constants.MOVEMENT_SIMULATOR);
-			dfd.addServices(sd);
-			// Registers its description in the DF
-			DFService.register(this, dfd);
-			
-			//fill hashmap for testing purposes
-			Cell cell1 = new Cell();
-			cell1.setX(1);
-			cell1.setY(1);
-			Cell cell2 = new Cell();
-			cell2.setX(1);
-			cell2.setY(3);
-			Cell cell3 = new Cell();
-			cell3.setX(5);
-			cell3.setY(5);
-			Cell cell4 = new Cell();
-			cell4.setX(1);
-			cell4.setY(7);
-			roversPosition.put(1, cell1);
-			roversPosition.put(2, cell2);
-			roversPosition.put(3, cell3);
-			roversPosition.put(4, cell4);
-			
-			System.out.println(getLocalName() + ": registered in the DF");
-		} catch (FIPAException e) {
-			e.printStackTrace();
-		}
-	}
-
-	protected void setupTerrainSim() {
-		try{
-			//Registration Description of Terrain Simulator
-			DFAgentDescription dfd = new DFAgentDescription(); 
-			ServiceDescription sd  = new ServiceDescription();
-			sd.setType(Constants.TERRAIN_SIMULATOR);
-			sd.setName(getLocalName());
-			dfd.addServices(sd);	
-			DFService.register(this, dfd );  
-		}catch (FIPAException e){ 
-			e.printStackTrace();
-			System.out.println("REGISTRATION EXCEPTION is detected!"); 
-		}
-	}
-	
+		
 	private Behaviour mapBroadcastListener() {
 		return new CyclicBehaviour(this) {
 			
 			private static final long serialVersionUID = -4555719000913759629L;
 
 			public void action() {
+				System.out.println("behaviour 1"); //TODO delete, was just to test collective listening
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO); 
 				
@@ -211,9 +185,9 @@ public class PlatformSimulator extends Agent {
 						printContent(ce);
 						
 						//forward map to every rover in range	
-						ACLMessage forward = new ACLMessage(ACLMessage.INFORM);
+						ACLMessage forward = new ACLMessage(ACLMessage.INFORM); //TODO use MessageHandler
 						//TODO is protocol and performative part of content?
-						forward.setProtocol(XplorationOntology.MAPBROADCASTSERVICE);
+						forward.setProtocol(XplorationOntology.MAPBROADCASTINFO);
 						forward.setLanguage(codec.getName());
 						forward.setOntology(ontology.getName());
 						try{
@@ -266,7 +240,7 @@ public class PlatformSimulator extends Agent {
 			private static final long serialVersionUID = -1383552485084791798L;
 
 			public void action() {
-				
+				System.out.println("behaviour 2"); //TODO delete, was just to test collective listening
 				//RoverRegistrationService Protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, XplorationOntology.ROVERREGISTRATIONINFO);
 
@@ -320,7 +294,7 @@ public class PlatformSimulator extends Agent {
 			private static final long serialVersionUID = 5731197496710703895L;
 
 			public void action() {
-				
+				System.out.println("behaviour 3"); //TODO delete, was just to test collective listening
 				//capsuleRegistrationService Protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, XplorationOntology.CAPSULEREGISTRATIONINFO);
 
@@ -373,7 +347,7 @@ public class PlatformSimulator extends Agent {
 			@Override
 			public void action() {
 				// TODO Auto-generated method stub
-				
+				System.out.println("behaviour 4"); //TODO delete, was just to test collective listening
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.REQUEST, XplorationOntology.MOVEMENTREQUESTINFO); 
 				 
 				if (msg != null) {
@@ -421,6 +395,7 @@ public class PlatformSimulator extends Agent {
 			private static final long serialVersionUID = 11924124L;
 
 			public void action() {
+				System.out.println("behaviour 5"); //TODO delete, was just to test collective listening
 				//Using codec content language, ontology and request interaction protocol
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.REQUEST, XplorationOntology.CELLANALYSIS);  
 				
@@ -459,12 +434,11 @@ public class PlatformSimulator extends Agent {
 								try {
 									//Invalid Cell Condition
 									//Checking world boundaries	
-									//Checking whether there exists  a mineral or not for that cell											
-									if(claimedCell.getX()>worldDimensionY || claimedCell.getY()>worldDimensionX || 
-											!(worldMap.getMineral(m,n).equals("A") ||
-											worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")|| 
-											worldMap.getMineral(m,n).equals("D")))
-									
+									//Checking whether there exists  a mineral or not for that cell	//TODO not really necessary, this 2nd check?
+//									!(worldMap.getMineral(m,n).equals("A") ||
+//											worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")|| 
+//											worldMap.getMineral(m,n).equals("D"))
+									if(claimedCell.getX()>worldDimensionY || claimedCell.getY()>worldDimensionX || !(claimedCell.getX()%2 == claimedCell.getY()%2))
 									{
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
 //										reply.setContent("REFUSE");

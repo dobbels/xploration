@@ -59,7 +59,7 @@ public class AgTerrainSimulator4 extends Agent {
 			//Registration Description of Terrain Simulator
 			DFAgentDescription dfd = new DFAgentDescription(); 
 			ServiceDescription sd  = new ServiceDescription();
-			sd.setType(Constants.TERRAIN_SIMULATOR);
+//			sd.setType(Constants.TERRAIN_SIMULATOR);
 			sd.setName(getLocalName());
 			dfd.addServices(sd);	
 			DFService.register(this, dfd );  
