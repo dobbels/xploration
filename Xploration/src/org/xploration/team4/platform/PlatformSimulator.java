@@ -199,7 +199,7 @@ public class PlatformSimulator extends Agent {
 						ArrayList<AID> inRange = getAllInRange(location);
 						// Not send map back to sender
 						inRange.remove(fromAgent);
-						
+						System.out.println("                                                                     " + inRange.size());
 						if (!inRange.isEmpty()) {
 							ACLMessage forward = MessageHandler.constructReceiverlessMessage(ACLMessage.INFORM, (Action) ce, XplorationOntology.MAPBROADCASTINFO);
 							for (AID aid : inRange) {
@@ -238,8 +238,8 @@ public class PlatformSimulator extends Agent {
 			}
 			
 			private boolean inRangeFrom(Cell rover, Cell other) {
-		    	// In these calculations the borders of the map are not taken into account
-				// It is assumed that all positions of rovers and capsules are positions within the board 
+		    	// In these calculations it is assumed that the map is spherical, so
+				// from the left side, you can go directly to the rigth side and so on. 
 		    	int x = rover.getX();
 		    	int y = rover.getY();
 		    	
