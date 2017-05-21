@@ -63,6 +63,7 @@ public class AgRover4 extends Agent {
 		int arg3;
 		int arg4;
 		int arg5;
+		
 		if (args[0] instanceof String) { // To be able to pass arguments in command line
 			arg1 = Integer.parseInt((String) args[0]); // Landing of Capsule X-coordinate
 			arg2 = Integer.parseInt((String) args[1]); // Landing of Capsule Y-coordinate 
@@ -100,17 +101,16 @@ public class AgRover4 extends Agent {
 		analyzedCells.add(cell1);
 		analyzedCells.add(cell2);
 		
-		//Cell Analysis for Terrain Simulator 
-		cellAnalysis(location);
+		//TODO start analyzing after you registered, only broadcast your map if there's something in it 
 		//roverRegistration for Map Simulator
-//		roverRegistration(location);
+		roverRegistration(location);
 		// map broadcast //TODO eventually before/after every movement
 //		broadcastCurrentMap(analyzedCells); //TODO
 	} 
 
-	private void cellAnalysis(Cell myCell){
+	private void analyzeCell(Cell myCell){
 
-		addBehaviour (new SimpleBehaviour(this)
+		addBehaviour (new SimpleBehaviour(this) //TODO can also be OneShotBehaviour?
 		{						  			
 			private static final long serialVersionUID = 1L;
 
@@ -263,6 +263,9 @@ public class AgRover4 extends Agent {
 							send(msg);	
 							System.out.println(getLocalName() + ": INFORM is sent");
 							roverRegistration = true;
+							
+							// Analyze first cell 
+							analyzeCell(location);
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
@@ -283,7 +286,7 @@ public class AgRover4 extends Agent {
 		});
 	}
 	
-	// This behaviour broadcasts a map to every rover in range. The behaviour will be started after every movement.  
+	// This behaviour broadcasts a map to every rover in range. The behaviour will be started after every movement/analyzing of cell/5 seconds (to be decided).  
 	private void broadcastCurrentMap(ArrayList<Cell> cells){
 
 //		addBehaviour (new OneShotBehaviour(this)
