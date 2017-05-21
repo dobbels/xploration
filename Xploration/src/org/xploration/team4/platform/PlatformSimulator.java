@@ -425,7 +425,6 @@ public class PlatformSimulator extends Agent {
 
 								CellAnalysis ca = (CellAnalysis) conc;
 								Cell claimedCell = ca.getCell();
-//								System.out.println(claimedCell.getX() + "  " + claimedCell.getY());
 															
 								//Exact coordinates for the map
 								int m = claimedCell.getX();
@@ -441,7 +440,6 @@ public class PlatformSimulator extends Agent {
 									if(claimedCell.getX()>worldDimensionY || claimedCell.getY()>worldDimensionX || !(claimedCell.getX()%2 == claimedCell.getY()%2))
 									{
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
-//										reply.setContent("REFUSE");
 										myAgent.send(reply);
 										System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
 										doWait(3000);
@@ -449,25 +447,25 @@ public class PlatformSimulator extends Agent {
 	
 									//Valid Cell Condition
 									
-									else if(claimedCell.getX()<=worldDimensionY && claimedCell.getY()<=worldDimensionX && (worldMap.getMineral(m,n).equals("A")
-											|| worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")||
-											worldMap.getMineral(m,n).equals("D")))
+//									else if(claimedCell.getX()<=worldDimensionY && claimedCell.getY()<=worldDimensionX && (worldMap.getMineral(m,n).equals("A")
+//											|| worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")||
+//											worldMap.getMineral(m,n).equals("D")))
+									else
 									{								
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.AGREE);
-//										reply.setContent("initial AGREE");
 										myAgent.send(reply);
 										System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 	
 										//Only INFORM case
 										if(validPosition){
 											CellAnalysis cellAnalysis = new CellAnalysis();
-											cellAnalysis.setCell(claimedCell);
+											cellAnalysis.setCell(worldMap.getCell(m, n));
 											
 											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis);
 											send(inform);
 
 											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+worldMap.getCell(m, n).getMineral());
-										}								
+										}	
 									}
 								} catch (Exception e) {
 									e.printStackTrace();
