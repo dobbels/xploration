@@ -431,17 +431,17 @@ public class PlatformSimulator extends Agent {
 										(msg.getSender()).getLocalName());
 
 								CellAnalysis ca = (CellAnalysis) conc;
-								Cell claimedCell = ca.getCell();
+								Cell cellToAnalyze = ca.getCell();
 															
 								//Exact coordinates for the map
-								int m = claimedCell.getX();
-								int n = claimedCell.getY();
+								int m = cellToAnalyze.getX();
+								int n = cellToAnalyze.getY();
 								
 								try {
 									//Invalid Cell Condition
 									//Checking world boundaries
 									//Check if existing cell within world
-									if(claimedCell.getX()>worldDimensionY || claimedCell.getY()>worldDimensionX || !(claimedCell.getX()%2 == claimedCell.getY()%2))
+									if(cellToAnalyze.getX()>worldDimensionY || cellToAnalyze.getY()>worldDimensionX || !(cellToAnalyze.getX()%2 == cellToAnalyze.getY()%2))
 									{
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
 										myAgent.send(reply);
@@ -457,7 +457,7 @@ public class PlatformSimulator extends Agent {
 										System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 	
 										//Only INFORM case
-										if(!isValidPosition(AIDToTeamId.get(fromAgent), claimedCell)){
+										if(!isValidPosition(AIDToTeamId.get(fromAgent), cellToAnalyze)){
 											doWait(2*analyzingTime); // because this rover is cheating
 											
 											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.FAILURE);
