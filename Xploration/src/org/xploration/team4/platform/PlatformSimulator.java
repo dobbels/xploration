@@ -56,6 +56,10 @@ public class PlatformSimulator extends Agent {
 	private int worldDimensionY = worldMap.getWidth(); 
 	private int worldDimensionX = worldMap.getHeight();
 	
+	enum State {
+		MOVING, OTHER
+	}
+	
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory(); //TODO use for listening threads. Why not..
 	
 	/***COMM_SIM***/
@@ -76,10 +80,9 @@ public class PlatformSimulator extends Agent {
 	public int initialY = 3;
 	
 	/***TERRAIN_SIM***/
-	//For this sprint it remains always true, only INFORM case //TODO change this
-	boolean validPosition = true;
 	private int analyzingTime = 2000; // in milliseconds
-	
+	private HashMap<AID, Integer> AIDToTeamId = new HashMap<AID, Integer>();
+	private HashMap<Integer, State>	roverState = new HashMap<>();
 		
 	protected void setup(){
 
@@ -200,8 +203,8 @@ public class PlatformSimulator extends Agent {
 							getContentManager().fillContent(forward, ce);
 							//TODO send to every rover in range
 							// get location of rover who sent the message (msg.getSender, getLocation from movementsimulator ...)
-							// get every rover that is in range (given in config file)
-							// send to every of these rovers by doing different addReceiver() 
+							// get every rover and capsule that is in range (given in config file -> ?)
+							// send to every of these rovers by doing different addReceiver()
 							//send(forward);			                	
 						} catch(Exception e){
 							e.printStackTrace();
@@ -274,7 +277,9 @@ public class PlatformSimulator extends Agent {
 									Cell roverLocation = roverLoc.getCell();		
 									Team team = roverLoc.getTeam();
 									roverAID.put(team.getTeamId(), fromAgent);
+									AIDToTeamId.put(fromAgent, team.getTeamId());
 									roversPosition.put(team.getTeamId(), roverLocation);
+									roverState.put(team.getTeamId(), State.OTHER);
 									System.out.println(getLocalName()+ ": Rover Location is " + roverLocation.getX() + "," + roverLocation.getY());
 								}
 							}
@@ -434,11 +439,8 @@ public class PlatformSimulator extends Agent {
 								
 								try {
 									//Invalid Cell Condition
-									//Checking world boundaries	
-									//Checking whether there exists  a mineral or not for that cell	//TODO not really necessary, this 2nd check?
-//									!(worldMap.getMineral(m,n).equals("A") ||
-//											worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")|| 
-//											worldMap.getMineral(m,n).equals("D"))
+									//Checking world boundaries
+									//Check if existing cell within world
 									if(claimedCell.getX()>worldDimensionY || claimedCell.getY()>worldDimensionX || !(claimedCell.getX()%2 == claimedCell.getY()%2))
 									{
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
@@ -448,10 +450,6 @@ public class PlatformSimulator extends Agent {
 									}
 	
 									//Valid Cell Condition
-									
-//									else if(claimedCell.getX()<=worldDimensionY && claimedCell.getY()<=worldDimensionX && (worldMap.getMineral(m,n).equals("A")
-//											|| worldMap.getMineral(m,n).equals("B") || worldMap.getMineral(m,n).equals("C")||
-//											worldMap.getMineral(m,n).equals("D")))
 									else
 									{								
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.AGREE);
@@ -459,7 +457,15 @@ public class PlatformSimulator extends Agent {
 										System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 	
 										//Only INFORM case
-										if(validPosition){
+										if(!isValidPosition(AIDToTeamId.get(fromAgent), claimedCell)){
+											doWait(2*analyzingTime); // because this rover is cheating
+											
+											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.FAILURE);
+											send(inform);
+
+											System.out.println(myAgent.getLocalName() + ": FAILURE is sent to team "+ AIDToTeamId.get(fromAgent));
+										}
+										else {
 											CellAnalysis cellAnalysis = new CellAnalysis();
 											cellAnalysis.setCell(worldMap.getCell(m, n));
 											
@@ -468,7 +474,7 @@ public class PlatformSimulator extends Agent {
 											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis);
 											send(inform);
 
-											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral "+worldMap.getCell(m, n).getMineral());
+											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral " + worldMap.getCell(m, n).getMineral());
 										}	
 									}
 								} catch (Exception e) {
@@ -492,6 +498,14 @@ public class PlatformSimulator extends Agent {
 					//if no message arrives
 					block(); // The behaviour of an agent is woken up again whenever the agent receives an ACLMessage.
 				}
+			}
+			
+			private boolean isValidPosition(int team, Cell location) {
+				Cell actualLocation = roversPosition.get(team);
+				return (actualLocation.getX() == location.getX() && 
+						actualLocation.getY() == location.getY() &&
+						roverState.get(team) != State.MOVING);
+				//TODO also check if rover is not analyzing while moving, or analysing cell other than the one currently located at
 			}
 		};
 	}

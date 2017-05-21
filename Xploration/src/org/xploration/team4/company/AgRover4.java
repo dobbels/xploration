@@ -166,34 +166,40 @@ public class AgRover4 extends Agent {
 								}
 								else if(ans.getPerformative()== ACLMessage.AGREE)
 								{
-									System.out.println(getLocalName() + ": Initial AGREE is received");	  
+									System.out.println(getLocalName() + ": Initial AGREE was received");	  
 
-									ACLMessage finalMsg = MessageHandler.blockingReceive(myAgent, ACLMessage.INFORM, XplorationOntology.CELLANALYSIS);
-									
-									System.out.println(getLocalName()+": INFORM is received!");
-									
-									ContentElement ce;
-			                        try {
-			                            ce = getContentManager().extractContent(finalMsg);
+									ACLMessage finalMsg = MessageHandler.blockingReceive(myAgent, XplorationOntology.CELLANALYSIS);
 
-			                            // We expect an action inside the message
-			                            if (ce instanceof Action) {
-			                                Action agAction = (Action) ce;
-			                                Concept conc = agAction.getAction();
+									switch (finalMsg.getPerformative()) {
+										case ACLMessage.INFORM:
+											System.out.println(getLocalName()+": INFORM is received!");
+											
+											ContentElement ce;
+					                        try {
+					                            ce = getContentManager().extractContent(finalMsg);
 
-			                                if (conc instanceof CellAnalysis) {
-			                                    Cell cell = ((CellAnalysis) conc).getCell();
-												//TODO set mineral in our representation of map. Is this the way to go?
-			                                    analyzedCells.add(cell);
-			                                    System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
-														+cell.getX() + ","+ cell.getY()+  ", " + cell.getMineral() + ")");
-			                                }
-			                            }
-			                        } catch (Exception e) {
-			                            e.printStackTrace();
-			                        }
-									claimingCell = true;											
-							
+					                            // We expect an action inside the message
+					                            if (ce instanceof Action) {
+					                                Action agAction = (Action) ce;
+					                                Concept conc = agAction.getAction();
+
+					                                if (conc instanceof CellAnalysis) {
+					                                    Cell cell = ((CellAnalysis) conc).getCell();
+														//TODO set mineral in our representation of map. Is this the way to go?
+					                                    analyzedCells.add(cell);
+					                                    System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
+																+cell.getX() + ","+ cell.getY()+  ", " + cell.getMineral() + ")");
+					                                }
+					                            }
+					                        } catch (Exception e) {
+					                            e.printStackTrace();
+					                        }
+											claimingCell = true;											
+											break;
+										case ACLMessage.FAILURE:
+											System.out.println(getLocalName()+": FAILURE was received!");
+											claimingCell = true;
+									}							
 								}						  						  						  
 							}else{
 								//If no message arrives
