@@ -64,7 +64,7 @@ public class PlatformSimulator extends Agent {
 	private ArrayList<Team> registeredRovers = new ArrayList<>();
 	private ArrayList<Team> registeredCapsules = new ArrayList<>();
 	
-	/***MOVEMENT_SIM***/
+	/***MOVEMENT_SIM + MAP_SIM***/
 	private HashMap<Integer, AID> teamAID = new HashMap<Integer, AID>();
 	private HashMap<Integer, Cell> roversPosition = new HashMap<Integer, Cell>();
 	
@@ -390,8 +390,8 @@ public class PlatformSimulator extends Agent {
 								Team team = ((MovementRequestInfo) conc).getTeam();
 								Cell destination = ((MovementRequestInfo) conc).getCell();
 								//TODO communicate internally the dimensions of map
-								if (Constants.isExistingCoordinate(worldDimensionX, worldDimensionY, destination.getX(), destination.getY()) 
-										&& Constants.isNextPosition(worldDimensionX, worldDimensionY, initialX, initialY, destination.getX(), destination.getY())) {
+								if (Constants.isExistingCoordinate(worldMap.getWidth(), worldMap.getHeight(), destination.getX(), destination.getY()) 
+										&& worldMap.isNextPosition(roversPosition.get(team.getTeamId()).getX(), roversPosition.get(team.getTeamId()).getY(), destination.getX(), destination.getY())) {
 									
 								}
 							}

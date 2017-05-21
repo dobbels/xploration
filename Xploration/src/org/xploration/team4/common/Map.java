@@ -85,6 +85,63 @@ public class Map {
     public int getHeight() {
         return worldMap.size();
     }
+    
+    public Cell calculateNextPosition(int ix, int iy, String direction) {
+    	int newx = 0, newy = 0;
+    	Cell c = new Cell();
+		//move up
+    	if (direction.equals("up")) {
+    		newx = ix - 2;
+    		newy = iy;
+    	}
+		//move down
+    	if (direction.equals("down")) {
+			newx = ix + 2;
+			newy = iy;
+    	}
+		//move left up
+    	if (direction.equals("leftUp")) {
+			newx = ix - 1;
+			newy = iy - 1;
+    	}
+		//move left down
+    	if (direction.equals("leftDown")) {
+			newx = ix + 1;
+			newy = iy - 1;
+    	}
+		//move right up
+    	if (direction.equals("rightUp")) {
+			newx = ix - 1;
+			newy = iy + 1;
+    	}
+		//move right down
+    	if (direction.equals("rightDown")) {
+			newx = ix + 1;
+			newy = iy + 1;
+    	}
+		
+		if (newx <= 0 || newx > getWidth()) {
+			newx = Math.abs(Math.abs(newx) - getWidth());
+		}
+		
+		if (newy <= 0 || newy > getHeight()) {
+			newy = Math.abs(Math.abs(newy) - getHeight());
+		}
+		
+		c.setX(newx);
+		c.setY(newy);
+		
+		return c;
+	}
+    
+    public boolean isNextPosition(int ix, int iy, int dx, int dy) {
+    	String direction;
+    	
+    	
+    	
+    	
+    	return true;
+    }
 }
 
 
