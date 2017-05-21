@@ -199,7 +199,7 @@ public class PlatformSimulator extends Agent {
 						ArrayList<AID> inRange = getAllInRange(location);
 						// Not send map back to sender
 						inRange.remove(fromAgent);
-						System.out.println("                                                                     " + inRange.size());
+						System.out.println("Number of rovers/capsules in range: " + inRange.size());
 						if (!inRange.isEmpty()) {
 							ACLMessage forward = MessageHandler.constructReceiverlessMessage(ACLMessage.INFORM, (Action) ce, XplorationOntology.MAPBROADCASTINFO);
 							for (AID aid : inRange) {
