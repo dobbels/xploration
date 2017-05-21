@@ -3,6 +3,7 @@ package org.xploration.team4.platform;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import org.xploration.ontology.CapsuleRegistrationInfo;
 import org.xploration.ontology.Cell;
@@ -137,6 +138,7 @@ public class PlatformSimulator extends Agent {
 		 * Out of Movement Simulator
 		 */
 		//fill hashmap for testing purposes
+		/*
 		Cell cell1 = new Cell();
 		cell1.setX(1);
 		cell1.setY(1);
@@ -153,6 +155,7 @@ public class PlatformSimulator extends Agent {
 		roversPosition.put(2, cell2);
 		roversPosition.put(3, cell3);
 		roversPosition.put(4, cell4);
+		*/
 		
 		addBehaviours();
 	}
@@ -374,7 +377,34 @@ public class PlatformSimulator extends Agent {
 								//TODO communicate internally the dimensions of map
 								if (Constants.isExistingCoordinate(worldMap.getWidth(), worldMap.getHeight(), destination.getX(), destination.getY()) 
 										&& worldMap.isNextPosition(roversPosition.get(team.getTeamId()).getX(), roversPosition.get(team.getTeamId()).getY(), destination.getX(), destination.getY())) {
+									ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.AGREE);
+									myAgent.send(reply);
+									System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 									
+									//wait for n seconds
+									try {
+										roverState.replace(team.getTeamId(), State.MOVING);
+										TimeUnit.SECONDS.sleep(Constants.WAITING_TIME);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+									//TODO collision detection
+									
+									//send inform message and update rover position
+									roverState.replace(team.getTeamId(), State.OTHER);
+									roversPosition.replace(team.getTeamId(), destination);
+									ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM);
+									send(inform);
+
+									System.out.println(myAgent.getLocalName() + ": INFORM is sent with destination cell " + destination.getX() + " " + destination.getY());
+								}
+								else {
+									//invalid postion
+									ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
+									myAgent.send(reply);
+									System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
 								}
 							}
 							else {
@@ -387,6 +417,9 @@ public class PlatformSimulator extends Agent {
 					} catch (NotUnderstoodException | CodecException | OntologyException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+						ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.NOT_UNDERSTOOD); 
+						myAgent.send(reply);
+						System.out.println(myAgent.getLocalName() + ": NOT_UNDERSTOOD is sent");	
 					}
 				}
 				else{

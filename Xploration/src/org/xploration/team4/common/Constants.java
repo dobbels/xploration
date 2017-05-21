@@ -9,6 +9,8 @@ public class Constants {
 	
 	public final static int TEAM_ID = 4;
 	
+	public final static int WAITING_TIME = 2;
+	
 	public static Team myTeam;
 	
 //	static {
