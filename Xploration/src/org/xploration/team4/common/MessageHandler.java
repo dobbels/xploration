@@ -56,6 +56,27 @@ public class MessageHandler {
         return msg;
 	}
 	
+	public static ACLMessage constructReceiverlessMessage(int performative, Action action, String protocol) {
+		cm.registerLanguage(codec);
+        cm.registerOntology(ontology);
+        
+		ACLMessage msg = new ACLMessage(performative);
+		
+		msg.setLanguage(codec.getName());
+        msg.setOntology(ontology.getName());
+        try 
+        {
+        	cm.fillContent(msg, action);
+        	msg.setProtocol(protocol);
+        }
+        catch (Exception ex) 
+        { 
+        	ex.printStackTrace(); 
+        }
+        
+        return msg;
+	}
+	
 	public static ACLMessage constructReplyMessage(ACLMessage msg, int performative, AgentAction aa) {
 		cm.registerLanguage(codec);
         cm.registerOntology(ontology);
