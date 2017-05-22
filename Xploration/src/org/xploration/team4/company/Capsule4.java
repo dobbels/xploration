@@ -94,8 +94,8 @@ public class Capsule4 extends Agent {
                 int y = location.getY();
                 
         		// to test sprint 3.7: capsule should not get broadcast
-        		x = 9;
-        		y = 9;
+//        		x = 5;
+//        		y = 7;
 
                 AgentContainer cnt = getContainerController();
                 AgentController a;

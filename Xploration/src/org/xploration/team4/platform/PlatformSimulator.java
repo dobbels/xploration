@@ -421,13 +421,8 @@ public class PlatformSimulator extends Agent {
 									System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 									
 									//wait for n seconds
-									try {
-										roverState.replace(team.getTeamId(), State.MOVING);
-										TimeUnit.SECONDS.sleep(Constants.WAITING_TIME);
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
+									roverState.replace(team.getTeamId(), State.MOVING);
+									doWait(movingTime);
 									
 									//TODO collision detection
 									
@@ -529,7 +524,9 @@ public class PlatformSimulator extends Agent {
 										System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 	
 										//Only INFORM case
-										if(!isValidPosition(AIDToTeamId.get(fromAgent), cellToAnalyze)){
+										int teamID = AIDToTeamId.get(fromAgent);
+										if(!(isValidPosition(teamID, cellToAnalyze) && roverState.get(teamID) != State.MOVING)){
+											System.out.println(getLocalName()+ ": Either rover " + AIDToTeamId.get(fromAgent) + " is moving while analyzing or it is not in the location asked to analyze.");
 											doWait(2*analyzingTime); // because this rover is cheating
 											
 											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.FAILURE);
@@ -574,10 +571,10 @@ public class PlatformSimulator extends Agent {
 			
 			private boolean isValidPosition(int team, Cell location) {
 				Cell actualLocation = roversPosition.get(team);
+				System.out.println("Valid position? " + (actualLocation.getX() == location.getX() && 
+						actualLocation.getY() == location.getY()));
 				return (actualLocation.getX() == location.getX() && 
-						actualLocation.getY() == location.getY() &&
-						roverState.get(team) != State.MOVING);
-				//TODO also check if rover is not analyzing while moving, or analysing cell other than the one currently located at
+						actualLocation.getY() == location.getY());
 			}
 		};
 	}

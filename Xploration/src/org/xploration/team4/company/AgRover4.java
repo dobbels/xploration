@@ -97,16 +97,16 @@ public class AgRover4 extends Agent {
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
 		
 		//TODO delete these two cells, they are meant for testing
-		cell1.setX(4);
-		cell1.setY(6);
-		cell1.setMineral("A");
-	
-		cell2.setX(1);
-		cell2.setY(3);
-		cell2.setMineral("C");
-		
-		analyzedCells.add(cell1);
-		analyzedCells.add(cell2);
+//		cell1.setX(4);
+//		cell1.setY(6);
+//		cell1.setMineral("A");
+//	
+//		cell2.setX(1);
+//		cell2.setY(3);
+//		cell2.setMineral("C");
+//		
+//		analyzedCells.add(cell1);
+//		analyzedCells.add(cell2);
 		
 		//roverRegistration for Map Simulator
 		roverRegistration(location);
@@ -199,7 +199,17 @@ public class AgRover4 extends Agent {
 					                        } catch (Exception e) {
 					                            e.printStackTrace();
 					                        }
-											claimingCell = true;											
+											claimingCell = true;	
+
+											// map broadcast
+											broadcastCurrentMap(analyzedCells);
+											
+											//Test if we get failure to this message. TODO delete
+											Cell notLocation = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
+											notLocation.setX(notLocation.getX());
+											notLocation.setY(notLocation.getY());
+											analyzeCell(notLocation);
+											
 											break;
 										case ACLMessage.FAILURE:
 											System.out.println(getLocalName()+": FAILURE was received!");
@@ -277,9 +287,9 @@ public class AgRover4 extends Agent {
 							roverRegistration = true;
 							
 							listenForMaps();
-							// map broadcast //TODO only do before/after every movement
-							broadcastCurrentMap(analyzedCells);
-							// Analyze first cell 
+
+
+							movementRequest(); // TODO analyze cell happens in this behaviour for testing
 							analyzeCell(location);
 						}
 						else{
@@ -414,6 +424,7 @@ public class AgRover4 extends Agent {
 	
 	private void movementRequest() {
 		addBehaviour(new SimpleBehaviour(this) {
+			private static final long serialVersionUID = 1L;
 			AID agMovementSim;
 			private boolean movementRequested = false;
 			@Override
@@ -439,6 +450,8 @@ public class AgRover4 extends Agent {
 							
 							MovementRequestInfo mri = new MovementRequestInfo();
 							Cell destination = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
+							//TODO uncomment when you want to test sprint 3.6
+//							destination = localWorldMap.calculateNextPosition(destination.getX(), destination.getY(), "up");
 							destination.setX(destination.getX());
 							destination.setY(destination.getY());
 							Team team = new Team();
@@ -470,6 +483,8 @@ public class AgRover4 extends Agent {
 										System.out.println(getLocalName() + ": INFORM was received, movement accepted");
 										location = destination;
 										movementRequested = true;
+										// Analyze this cell 
+										analyzeCell(location);
 									}
 									else if (finalMsg.getPerformative() == ACLMessage.FAILURE) {
 										System.out.println(getLocalName() + ": FAILURE was received, collision");
