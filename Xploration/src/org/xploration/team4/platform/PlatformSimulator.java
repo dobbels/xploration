@@ -193,24 +193,38 @@ public class PlatformSimulator extends Agent {
 						ce = getContentManager().extractContent(msg);
 						printContent(ce);
 						
-						AID fromAgent = msg.getSender();
-						Cell location = roversPosition.get(AIDToTeamId.get(fromAgent));
-						
-//						System.out.println(location.getX() + " " + location.getY());
-						ArrayList<AID> inRange = getAllInRange(location);
-						// Not send map back to sender
-						inRange.remove(fromAgent);
-						System.out.println("Number of rovers/capsules in range: " + inRange.size());
-						if (!inRange.isEmpty()) {
-							ACLMessage forward = MessageHandler.constructReceiverlessMessage(ACLMessage.INFORM, (Action) ce, XplorationOntology.MAPBROADCASTINFO);
-							for (AID aid : inRange) {
-								forward.addReceiver(aid);
+						if (ce instanceof Action) {
+							Concept conc = ((Action) ce).getAction();
+							if (conc instanceof MapBroadcastInfo) {
+								
+								MapBroadcastInfo mbi = (MapBroadcastInfo) conc;
+								
+								AID fromAgent = msg.getSender();
+								Cell location = roversPosition.get(AIDToTeamId.get(fromAgent));
+								
+		//						System.out.println(location.getX() + " " + location.getY());
+								ArrayList<AID> inRange = getAllInRange(location);
+								// Not send map back to sender
+								inRange.remove(fromAgent);
+								System.out.println("Number of rovers/capsules in range: " + inRange.size());
+								if (!inRange.isEmpty()) {
+									for (AID aid : inRange) {
+										ACLMessage forward = MessageHandler.constructMessage(aid, ACLMessage.INFORM, mbi, XplorationOntology.MAPBROADCASTINFO);
+										send(forward);
+//										System.out.println(aid);
+									}
+									System.out.println(getLocalName() + ": MAPBROADCAST is forwarded");
+								} 
+								else {
+									System.out.println(getLocalName() + ": No others in range of rover " + AIDToTeamId.get(msg.getSender()));
+								}
+						    }
+							else {
+								System.out.println(getLocalName() + ": Error when unpacking broadcast");
 							}
-							send(forward);
-							System.out.println(getLocalName() + ": MAPBROADCAST is forwarded");
-						} 
+						}
 						else {
-							System.out.println(getLocalName() + ": No others in range of rover " + AIDToTeamId.get(msg.getSender()));
+							System.out.println(getLocalName() + ": Error when unpacking broadcast");
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -411,24 +425,24 @@ public class PlatformSimulator extends Agent {
 								AID fromAgent = msg.getSender();
 								System.out.println(myAgent.getLocalName() + ": received movement request from "
 										+ (msg.getSender()).getLocalName());
-								Team team = ((MovementRequestInfo) conc).getTeam();
 								Cell destination = ((MovementRequestInfo) conc).getCell();
+								int team = AIDToTeamId.get(fromAgent);
 								//TODO communicate internally the dimensions of map
 								if (Constants.isExistingCoordinate(worldMap.getWidth(), worldMap.getHeight(), destination.getX(), destination.getY()) 
-										&& worldMap.isNextPosition(roversPosition.get(team.getTeamId()).getX(), roversPosition.get(team.getTeamId()).getY(), destination.getX(), destination.getY())) {
+										&& worldMap.isNextPosition(roversPosition.get(team).getX(), roversPosition.get(team).getY(), destination.getX(), destination.getY())) {
 									ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.AGREE);
 									myAgent.send(reply);
 									System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 									
 									//wait for n seconds
-									roverState.replace(team.getTeamId(), State.MOVING);
+									roverState.replace(team, State.MOVING);
 									doWait(movingTime);
 									
 									//TODO collision detection
 									
 									//send inform message and update rover position
-									roverState.replace(team.getTeamId(), State.OTHER);
-									roversPosition.replace(team.getTeamId(), destination);
+									roverState.replace(team, State.OTHER);
+									roversPosition.replace(team, destination);
 									ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM);
 									send(inform);
 

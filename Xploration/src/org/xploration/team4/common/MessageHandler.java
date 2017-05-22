@@ -1,5 +1,7 @@
 package org.xploration.team4.common;
 
+import java.util.ArrayList;
+
 import org.xploration.ontology.XplorationOntology;
 
 import jade.content.AgentAction;
@@ -56,14 +58,23 @@ public class MessageHandler {
         return msg;
 	}
 	
-	public static ACLMessage constructReceiverlessMessage(int performative, Action action, String protocol) {
+	/*
+	 * NOT WORKING
+	 */
+	public static ACLMessage constructBroadcastMessage(ArrayList<AID> inRange, int performative, AgentAction agaction, String protocol) {
 		cm.registerLanguage(codec);
         cm.registerOntology(ontology);
         
 		ACLMessage msg = new ACLMessage(performative);
 		
+		for (AID aid : inRange) {
+			msg.addReceiver(aid);
+		}
 		msg.setLanguage(codec.getName());
         msg.setOntology(ontology.getName());
+        
+        Action action = new Action();
+        action.setAction(agaction);
         try 
         {
         	cm.fillContent(msg, action);

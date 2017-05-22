@@ -288,7 +288,6 @@ public class AgRover4 extends Agent {
 							
 							listenForMaps();
 
-
 							movementRequest(); // TODO analyze cell happens in this behaviour for testing
 							analyzeCell(location);
 						}

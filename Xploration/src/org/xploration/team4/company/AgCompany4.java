@@ -59,7 +59,7 @@ public class AgCompany4 extends Agent {
 					// Creates the description for the type of agent to be searched in the yellow pages
 					DFAgentDescription dfd = new DFAgentDescription();
 					ServiceDescription sd = new ServiceDescription();
-					sd.setType(Constants.REGISTRATION_DESK_NAME);
+					sd.setType(XplorationOntology.REGISTRATIONDESK);
 					dfd.addServices(sd);
 	
 					try

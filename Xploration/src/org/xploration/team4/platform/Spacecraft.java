@@ -103,7 +103,7 @@ public class Spacecraft extends Agent {
 			DFAgentDescription dfd = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
 			sd.setName(this.getName());
-			sd.setType(Constants.REGISTRATION_DESK_NAME);
+			sd.setType(XplorationOntology.REGISTRATIONDESK);
 			dfd.addServices(sd);
 			// Registers its description in the DF
 			DFService.register(this, dfd);
