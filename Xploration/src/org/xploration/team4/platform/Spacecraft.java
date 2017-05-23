@@ -20,6 +20,7 @@ import jade.core.*;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -71,14 +72,15 @@ public class Spacecraft extends Agent {
 	
 	/******Registration Desk Fields*******/
 	// ArrayList to store Registered Agent Teams
-	private List<Team> registrationList = new ArrayList<Team>(); //TODO use this list to deploy only the registered companies
+	private List<Team> registrationList = new ArrayList<Team>();
 	// Registration Duration as 1 minute
 	private final int registrationPeriod = 15000;
 	Date registerTime;
+	
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 
 	boolean checkRegisteredBefore(List<Team> registerationList, Team requestorTeam) {
 		boolean check = false;
-		//TODO ? actually AID should be checked, not team number ?
 		for (int i = 0; i < registerationList.size(); i++) {
 			if (registerationList.get(i).getTeamId() == requestorTeam.getTeamId()) {
 				check = true;
@@ -112,7 +114,8 @@ public class Spacecraft extends Agent {
 			e.printStackTrace();
 		}
 		// Behaviour is addded to the setup() method
-		addBehaviour(registrationListener());
+		Behaviour b = registrationListener();
+		addBehaviour(tbf.wrap(b));
 		/***END RD SETUP***/
 		
 		addBehaviour(createCapsulesAfterRegistration());
@@ -126,6 +129,7 @@ public class Spacecraft extends Agent {
 				System.out.println(getLocalName() + ": Registration desk shutdown");
 		        removeBehaviour(registrationListener());
 		        // TODO remove registrationDesk from the yellow pages?
+		        // TODO does this also work with a threaded behaviour?
 		      } 
 		    });
 	}

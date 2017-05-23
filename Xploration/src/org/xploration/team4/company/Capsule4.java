@@ -33,6 +33,8 @@ public class Capsule4 extends Agent {
 	
 	private Map localWorldMap;
 	
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+	
 	//sources: 
 	//  http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
 	//  https://www.iro.umontreal.ca/~vaucher/Agents/Jade/Ontologies.htm
@@ -185,7 +187,7 @@ public class Capsule4 extends Agent {
 	
 	private void listenForMaps(){
 
-		addBehaviour (new CyclicBehaviour(this)
+		addBehaviour (tbf.wrap(new CyclicBehaviour(this)
 		{						  			
 			private static final long serialVersionUID = 1L;
 
@@ -226,7 +228,7 @@ public class Capsule4 extends Agent {
 					block();
 				}
 			}			
-		});
+		}));
 
 	}
 }

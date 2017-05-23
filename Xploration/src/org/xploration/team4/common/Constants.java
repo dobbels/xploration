@@ -17,13 +17,7 @@ public class Constants {
 //		myTeam.setTeamId(TEAM_ID);
 //	}
 	
-	public final static int COMMUNICATION_RANGE = 5;
-	
-//	public final static String REGISTRATION_DESK_NAME = "registrationDesk";
-//	public final static String TERRAIN_SIMULATOR = "terrainSimulator";
-//	public final static String MAP_SIMULATOR = "mapSimulator";
-//	public final static String MOVEMENT_SIMULATOR = "movementSimulator";
-//	public final static String COMMUNICATION_SIMULATOR = "communicationSimulator";
+	public final static int COMMUNICATION_RANGE = 3;
 	
 	
 	//Coordinates for Rover - Terrain Simulator protocol

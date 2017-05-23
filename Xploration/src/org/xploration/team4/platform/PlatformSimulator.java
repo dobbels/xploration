@@ -59,7 +59,7 @@ public class PlatformSimulator extends Agent {
 		MOVING, OTHER
 	}
 	
-	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory(); //TODO use for listening threads. Why not..
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 	
 	/***COMM_SIM***/
 	private int communciationRange = 3;
@@ -133,43 +133,23 @@ public class PlatformSimulator extends Agent {
 			e.printStackTrace();
 		}
 		
-		/*
-		 * Out of Movement Simulator
-		 */
-		//fill hashmap for testing purposes
-//		Cell cell1 = new Cell();
-//		cell1.setX(1);
-//		cell1.setY(1);
-//		Cell cell2 = new Cell();
-//		cell2.setX(1);
-//		cell2.setY(3);
-//		Cell cell3 = new Cell();
-//		cell3.setX(5);
-//		cell3.setY(5);
-//		Cell cell4 = new Cell();
-//		cell4.setX(1);
-//		cell4.setY(7);
-//		roversPosition.put(1, cell1);
-//		roversPosition.put(2, cell2);
-//		roversPosition.put(3, cell3);
-//		roversPosition.put(4, cell4);
-		
-		addBehaviours();
-	}
-	
-	protected void addBehaviours() {
 		/***COMM_SIM***/
-		addBehaviour(mapBroadcastListener());
+		Behaviour bb = mapBroadcastListener();
+		addBehaviour(tbf.wrap(bb));	
 		
 		/***MAP_SIM***/
-		addBehaviour(roverRegistrationListener());
-		addBehaviour(capsuleRegistrationListener());	
+		Behaviour rb = roverRegistrationListener();
+		Behaviour cb = capsuleRegistrationListener();
+		addBehaviour(tbf.wrap(rb));
+		addBehaviour(tbf.wrap(cb));	
 		
 		/***MOVEMENT_SIM***/
-		addBehaviour(MovementListener());
+		Behaviour mb = movementListener();
+		addBehaviour(tbf.wrap(mb));
 		
 		/***TERRAIN_SIM***/
-		addBehaviour(cellAnalysisRequestListener());
+		Behaviour cab = cellAnalysisRequestListener();
+		addBehaviour(tbf.wrap(cab));
 	}
 		
 	/*
@@ -405,7 +385,7 @@ public class PlatformSimulator extends Agent {
 		};
 	}
 	
-	private Behaviour MovementListener() {
+	private Behaviour movementListener() {
 		return new CyclicBehaviour(this) {
 			
 			private static final long serialVersionUID = -8872722866521058972L;

@@ -24,6 +24,7 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -50,6 +51,7 @@ public class AgRover4 extends Agent {
 	private Cell cell1 = new Cell();
 	private Cell cell2 = new Cell();
 
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 
 	private Codec codec = new SLCodec();
 	private jade.content.onto.Ontology ontology = XplorationOntology.getInstance();
@@ -376,7 +378,7 @@ public class AgRover4 extends Agent {
 	
 	private void listenForMaps(){
 
-		addBehaviour (new CyclicBehaviour(this)
+		addBehaviour (tbf.wrap(new CyclicBehaviour(this)
 		{						  			
 			private static final long serialVersionUID = 1L;
 
@@ -417,7 +419,7 @@ public class AgRover4 extends Agent {
 					block();
 				}
 			}			
-		});
+		}));
 
 	}
 	
