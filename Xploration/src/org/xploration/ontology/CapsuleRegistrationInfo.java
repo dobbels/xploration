@@ -8,20 +8,9 @@ import jade.core.*;
 /**
 * Protege name: CapsuleRegistrationInfo
 * @author ontology bean generator
-* @version 2017/05/10, 22:02:17
+* @version 2017/05/22, 22:38:38
 */
 public class CapsuleRegistrationInfo implements AgentAction {
-
-   /**
-* Protege name: team
-   */
-   private Team team;
-   public void setTeam(Team value) { 
-    this.team=value;
-   }
-   public Team getTeam() {
-     return this.team;
-   }
 
    /**
 * Protege name: cell
@@ -32,6 +21,17 @@ public class CapsuleRegistrationInfo implements AgentAction {
    }
    public Cell getCell() {
      return this.cell;
+   }
+
+   /**
+* Protege name: team
+   */
+   private Team team;
+   public void setTeam(Team value) { 
+    this.team=value;
+   }
+   public Team getTeam() {
+     return this.team;
    }
 
 }

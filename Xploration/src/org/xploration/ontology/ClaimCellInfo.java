@@ -6,22 +6,11 @@ import jade.util.leap.*;
 import jade.core.*;
 
 /**
-* Protege name: RoverRegistrationInfo
+* Protege name: ClaimCellInfo
 * @author ontology bean generator
 * @version 2017/05/22, 22:38:38
 */
-public class RoverRegistrationInfo implements AgentAction {
-
-   /**
-* Protege name: cell
-   */
-   private Cell cell;
-   public void setCell(Cell value) { 
-    this.cell=value;
-   }
-   public Cell getCell() {
-     return this.cell;
-   }
+public class ClaimCellInfo implements AgentAction {
 
    /**
 * Protege name: team
@@ -32,6 +21,17 @@ public class RoverRegistrationInfo implements AgentAction {
    }
    public Team getTeam() {
      return this.team;
+   }
+
+   /**
+* Protege name: map
+   */
+   private Map map;
+   public void setMap(Map value) { 
+    this.map=value;
+   }
+   public Map getMap() {
+     return this.map;
    }
 
 }

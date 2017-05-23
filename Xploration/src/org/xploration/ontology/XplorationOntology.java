@@ -9,7 +9,7 @@ import jade.core.CaseInsensitiveString;
 
 /** file: XplorationOntology.java
  * @author ontology bean generator
- * @version 2017/05/10, 22:02:17
+ * @version 2017/05/22, 22:38:38
  */
 public class XplorationOntology extends jade.content.onto.Ontology  {
   //NAME
@@ -23,40 +23,47 @@ public class XplorationOntology extends jade.content.onto.Ontology  {
 
 
    // VOCABULARY
-    public static final String ROVERREGISTRATIONINFO_CELL="cell";
-    public static final String ROVERREGISTRATIONINFO_TEAM="team";
-    public static final String ROVERREGISTRATIONINFO="RoverRegistrationInfo";
-    public static final String MOVEMENTREQUESTINFO_CELL="cell";
-    public static final String MOVEMENTREQUESTINFO_TEAM="team";
-    public static final String MOVEMENTREQUESTINFO="MovementRequestInfo";
-    public static final String REGISTRATIONREQUEST_TEAM="team";
-    public static final String REGISTRATIONREQUEST="RegistrationRequest";
-    public static final String MAPBROADCASTINFO_MAP="map";
-    public static final String MAPBROADCASTINFO="MapBroadcastInfo";
     public static final String CELLANALYSIS_CELL="cell";
     public static final String CELLANALYSIS="CellAnalysis";
-    public static final String CAPSULEREGISTRATIONINFO_CELL="cell";
+    public static final String ROVERREGISTRATIONINFO_TEAM="team";
+    public static final String ROVERREGISTRATIONINFO_CELL="cell";
+    public static final String ROVERREGISTRATIONINFO="RoverRegistrationInfo";
+    public static final String REGISTRATIONREQUEST_TEAM="team";
+    public static final String REGISTRATIONREQUEST="RegistrationRequest";
+    public static final String CLAIMCELLINFO_MAP="map";
+    public static final String CLAIMCELLINFO_TEAM="team";
+    public static final String CLAIMCELLINFO="ClaimCellInfo";
+    public static final String MOVEMENTREQUESTINFO_TEAM="team";
+    public static final String MOVEMENTREQUESTINFO_CELL="cell";
+    public static final String MOVEMENTREQUESTINFO="MovementRequestInfo";
     public static final String CAPSULEREGISTRATIONINFO_TEAM="team";
+    public static final String CAPSULEREGISTRATIONINFO_CELL="cell";
     public static final String CAPSULEREGISTRATIONINFO="CapsuleRegistrationInfo";
-    public static final String MOVEMENTREQUESTSERVICE_MOVEMENTREQUESTINFO="movementRequestInfo";
-    public static final String MOVEMENTREQUESTSERVICE="MovementRequestService";
-    public static final String REGISTRATIONDESK="RegistrationDesk";
-    public static final String MAPBROADCASTSERVICE_MAPBROADCASTINFO="mapBroadcastInfo";
-    public static final String MAPBROADCASTSERVICE="MapBroadcastService";
-    public static final String TERRAINSIMULATOR="TerrainSimulator";
-    public static final String CELL_MINERAL="mineral";
-    public static final String CELL_Y="y";
-    public static final String CELL_X="x";
-    public static final String CELL="Cell";
-    public static final String CAPSULEREGISTRATIONSERVICE_CAPSULEREGISTRATIONINFO="capsuleRegistrationInfo";
-    public static final String CAPSULEREGISTRATIONSERVICE="CapsuleRegistrationService";
-    public static final String MAP_CELLLIST="cellList";
-    public static final String MAP="Map";
-    public static final String SERVICE="Service";
-    public static final String ROVERREGISTRATIONSERVICE_ROVERREGISTRATIONINFO="roverRegistrationInfo";
-    public static final String ROVERREGISTRATIONSERVICE="RoverRegistrationService";
+    public static final String MAPBROADCASTINFO_MAP="map";
+    public static final String MAPBROADCASTINFO="MapBroadcastInfo";
+    public static final String SPACECRAFTCLAIMSERVICE_CLAIMCELLINFO="claimCellInfo";
+    public static final String SPACECRAFTCLAIMSERVICE="SpacecraftClaimService";
     public static final String TEAM_TEAMID="teamId";
     public static final String TEAM="Team";
+    public static final String MAP_CELLLIST="cellList";
+    public static final String MAP="Map";
+    public static final String CAPSULEREGISTRATIONSERVICE_CAPSULEREGISTRATIONINFO="capsuleRegistrationInfo";
+    public static final String CAPSULEREGISTRATIONSERVICE="CapsuleRegistrationService";
+    public static final String MAPBROADCASTSERVICE_MAPBROADCASTINFO="mapBroadcastInfo";
+    public static final String MAPBROADCASTSERVICE="MapBroadcastService";
+    public static final String REGISTRATIONDESK="RegistrationDesk";
+    public static final String TERRAINSIMULATOR="TerrainSimulator";
+    public static final String CELL_X="x";
+    public static final String CELL_Y="y";
+    public static final String CELL_MINERAL="mineral";
+    public static final String CELL="Cell";
+    public static final String ROVERREGISTRATIONSERVICE_ROVERREGISTRATIONINFO="roverRegistrationInfo";
+    public static final String ROVERREGISTRATIONSERVICE="RoverRegistrationService";
+    public static final String SERVICE="Service";
+    public static final String RADIOCLAIMSERVICE_CLAIMCELLINFO="claimCellInfo";
+    public static final String RADIOCLAIMSERVICE="RadioClaimService";
+    public static final String MOVEMENTREQUESTSERVICE_MOVEMENTREQUESTINFO="movementRequestInfo";
+    public static final String MOVEMENTREQUESTSERVICE="MovementRequestService";
 
   /**
    * Constructor
@@ -66,40 +73,46 @@ public class XplorationOntology extends jade.content.onto.Ontology  {
     try { 
 
     // adding Concept(s)
-    ConceptSchema teamSchema = new ConceptSchema(TEAM);
-    add(teamSchema, org.xploration.ontology.Team.class);
-    ConceptSchema roverRegistrationServiceSchema = new ConceptSchema(ROVERREGISTRATIONSERVICE);
-    add(roverRegistrationServiceSchema, org.xploration.ontology.RoverRegistrationService.class);
+    ConceptSchema movementRequestServiceSchema = new ConceptSchema(MOVEMENTREQUESTSERVICE);
+    add(movementRequestServiceSchema, org.xploration.ontology.MovementRequestService.class);
+    ConceptSchema radioClaimServiceSchema = new ConceptSchema(RADIOCLAIMSERVICE);
+    add(radioClaimServiceSchema, org.xploration.ontology.RadioClaimService.class);
     ConceptSchema serviceSchema = new ConceptSchema(SERVICE);
     add(serviceSchema, org.xploration.ontology.Service.class);
-    ConceptSchema mapSchema = new ConceptSchema(MAP);
-    add(mapSchema, org.xploration.ontology.Map.class);
-    ConceptSchema capsuleRegistrationServiceSchema = new ConceptSchema(CAPSULEREGISTRATIONSERVICE);
-    add(capsuleRegistrationServiceSchema, org.xploration.ontology.CapsuleRegistrationService.class);
+    ConceptSchema roverRegistrationServiceSchema = new ConceptSchema(ROVERREGISTRATIONSERVICE);
+    add(roverRegistrationServiceSchema, org.xploration.ontology.RoverRegistrationService.class);
     ConceptSchema cellSchema = new ConceptSchema(CELL);
     add(cellSchema, org.xploration.ontology.Cell.class);
     ConceptSchema terrainSimulatorSchema = new ConceptSchema(TERRAINSIMULATOR);
     add(terrainSimulatorSchema, org.xploration.ontology.TerrainSimulator.class);
-    ConceptSchema mapBroadcastServiceSchema = new ConceptSchema(MAPBROADCASTSERVICE);
-    add(mapBroadcastServiceSchema, org.xploration.ontology.MapBroadcastService.class);
     ConceptSchema registrationDeskSchema = new ConceptSchema(REGISTRATIONDESK);
     add(registrationDeskSchema, org.xploration.ontology.RegistrationDesk.class);
-    ConceptSchema movementRequestServiceSchema = new ConceptSchema(MOVEMENTREQUESTSERVICE);
-    add(movementRequestServiceSchema, org.xploration.ontology.MovementRequestService.class);
+    ConceptSchema mapBroadcastServiceSchema = new ConceptSchema(MAPBROADCASTSERVICE);
+    add(mapBroadcastServiceSchema, org.xploration.ontology.MapBroadcastService.class);
+    ConceptSchema capsuleRegistrationServiceSchema = new ConceptSchema(CAPSULEREGISTRATIONSERVICE);
+    add(capsuleRegistrationServiceSchema, org.xploration.ontology.CapsuleRegistrationService.class);
+    ConceptSchema mapSchema = new ConceptSchema(MAP);
+    add(mapSchema, org.xploration.ontology.Map.class);
+    ConceptSchema teamSchema = new ConceptSchema(TEAM);
+    add(teamSchema, org.xploration.ontology.Team.class);
+    ConceptSchema spacecraftClaimServiceSchema = new ConceptSchema(SPACECRAFTCLAIMSERVICE);
+    add(spacecraftClaimServiceSchema, org.xploration.ontology.SpacecraftClaimService.class);
 
     // adding AgentAction(s)
-    AgentActionSchema capsuleRegistrationInfoSchema = new AgentActionSchema(CAPSULEREGISTRATIONINFO);
-    add(capsuleRegistrationInfoSchema, org.xploration.ontology.CapsuleRegistrationInfo.class);
-    AgentActionSchema cellAnalysisSchema = new AgentActionSchema(CELLANALYSIS);
-    add(cellAnalysisSchema, org.xploration.ontology.CellAnalysis.class);
     AgentActionSchema mapBroadcastInfoSchema = new AgentActionSchema(MAPBROADCASTINFO);
     add(mapBroadcastInfoSchema, org.xploration.ontology.MapBroadcastInfo.class);
-    AgentActionSchema registrationRequestSchema = new AgentActionSchema(REGISTRATIONREQUEST);
-    add(registrationRequestSchema, org.xploration.ontology.RegistrationRequest.class);
+    AgentActionSchema capsuleRegistrationInfoSchema = new AgentActionSchema(CAPSULEREGISTRATIONINFO);
+    add(capsuleRegistrationInfoSchema, org.xploration.ontology.CapsuleRegistrationInfo.class);
     AgentActionSchema movementRequestInfoSchema = new AgentActionSchema(MOVEMENTREQUESTINFO);
     add(movementRequestInfoSchema, org.xploration.ontology.MovementRequestInfo.class);
+    AgentActionSchema claimCellInfoSchema = new AgentActionSchema(CLAIMCELLINFO);
+    add(claimCellInfoSchema, org.xploration.ontology.ClaimCellInfo.class);
+    AgentActionSchema registrationRequestSchema = new AgentActionSchema(REGISTRATIONREQUEST);
+    add(registrationRequestSchema, org.xploration.ontology.RegistrationRequest.class);
     AgentActionSchema roverRegistrationInfoSchema = new AgentActionSchema(ROVERREGISTRATIONINFO);
     add(roverRegistrationInfoSchema, org.xploration.ontology.RoverRegistrationInfo.class);
+    AgentActionSchema cellAnalysisSchema = new AgentActionSchema(CELLANALYSIS);
+    add(cellAnalysisSchema, org.xploration.ontology.CellAnalysis.class);
 
     // adding AID(s)
 
@@ -107,34 +120,40 @@ public class XplorationOntology extends jade.content.onto.Ontology  {
 
 
     // adding fields
-    teamSchema.add(TEAM_TEAMID, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-    roverRegistrationServiceSchema.add(ROVERREGISTRATIONSERVICE_ROVERREGISTRATIONINFO, roverRegistrationInfoSchema, ObjectSchema.MANDATORY);
-    mapSchema.add(MAP_CELLLIST, cellSchema, 1, ObjectSchema.UNLIMITED);
-    capsuleRegistrationServiceSchema.add(CAPSULEREGISTRATIONSERVICE_CAPSULEREGISTRATIONINFO, capsuleRegistrationInfoSchema, ObjectSchema.MANDATORY);
-    cellSchema.add(CELL_X, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-    cellSchema.add(CELL_Y, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-    cellSchema.add(CELL_MINERAL, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    mapBroadcastServiceSchema.add(MAPBROADCASTSERVICE_MAPBROADCASTINFO, mapBroadcastInfoSchema, ObjectSchema.MANDATORY);
     movementRequestServiceSchema.add(MOVEMENTREQUESTSERVICE_MOVEMENTREQUESTINFO, movementRequestInfoSchema, ObjectSchema.MANDATORY);
-    capsuleRegistrationInfoSchema.add(CAPSULEREGISTRATIONINFO_TEAM, teamSchema, ObjectSchema.OPTIONAL);
-    capsuleRegistrationInfoSchema.add(CAPSULEREGISTRATIONINFO_CELL, cellSchema, ObjectSchema.MANDATORY);
-    cellAnalysisSchema.add(CELLANALYSIS_CELL, cellSchema, ObjectSchema.MANDATORY);
+    radioClaimServiceSchema.add(RADIOCLAIMSERVICE_CLAIMCELLINFO, claimCellInfoSchema, ObjectSchema.OPTIONAL);
+    roverRegistrationServiceSchema.add(ROVERREGISTRATIONSERVICE_ROVERREGISTRATIONINFO, roverRegistrationInfoSchema, ObjectSchema.MANDATORY);
+    cellSchema.add(CELL_MINERAL, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    cellSchema.add(CELL_Y, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+    cellSchema.add(CELL_X, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+    mapBroadcastServiceSchema.add(MAPBROADCASTSERVICE_MAPBROADCASTINFO, mapBroadcastInfoSchema, ObjectSchema.MANDATORY);
+    capsuleRegistrationServiceSchema.add(CAPSULEREGISTRATIONSERVICE_CAPSULEREGISTRATIONINFO, capsuleRegistrationInfoSchema, ObjectSchema.MANDATORY);
+    mapSchema.add(MAP_CELLLIST, cellSchema, 1, ObjectSchema.UNLIMITED);
+    teamSchema.add(TEAM_TEAMID, (TermSchema)getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+    spacecraftClaimServiceSchema.add(SPACECRAFTCLAIMSERVICE_CLAIMCELLINFO, claimCellInfoSchema, ObjectSchema.OPTIONAL);
     mapBroadcastInfoSchema.add(MAPBROADCASTINFO_MAP, mapSchema, ObjectSchema.MANDATORY);
-    registrationRequestSchema.add(REGISTRATIONREQUEST_TEAM, teamSchema, ObjectSchema.OPTIONAL);
-    movementRequestInfoSchema.add(MOVEMENTREQUESTINFO_TEAM, teamSchema, ObjectSchema.OPTIONAL);
+    capsuleRegistrationInfoSchema.add(CAPSULEREGISTRATIONINFO_CELL, cellSchema, ObjectSchema.MANDATORY);
+    capsuleRegistrationInfoSchema.add(CAPSULEREGISTRATIONINFO_TEAM, teamSchema, ObjectSchema.OPTIONAL);
     movementRequestInfoSchema.add(MOVEMENTREQUESTINFO_CELL, cellSchema, ObjectSchema.MANDATORY);
-    roverRegistrationInfoSchema.add(ROVERREGISTRATIONINFO_TEAM, teamSchema, ObjectSchema.OPTIONAL);
+    movementRequestInfoSchema.add(MOVEMENTREQUESTINFO_TEAM, teamSchema, ObjectSchema.OPTIONAL);
+    claimCellInfoSchema.add(CLAIMCELLINFO_TEAM, teamSchema, ObjectSchema.OPTIONAL);
+    claimCellInfoSchema.add(CLAIMCELLINFO_MAP, mapSchema, ObjectSchema.MANDATORY);
+    registrationRequestSchema.add(REGISTRATIONREQUEST_TEAM, teamSchema, ObjectSchema.OPTIONAL);
     roverRegistrationInfoSchema.add(ROVERREGISTRATIONINFO_CELL, cellSchema, ObjectSchema.MANDATORY);
+    roverRegistrationInfoSchema.add(ROVERREGISTRATIONINFO_TEAM, teamSchema, ObjectSchema.OPTIONAL);
+    cellAnalysisSchema.add(CELLANALYSIS_CELL, cellSchema, ObjectSchema.MANDATORY);
 
     // adding name mappings
 
     // adding inheritance
-    roverRegistrationServiceSchema.addSuperSchema(serviceSchema);
-    capsuleRegistrationServiceSchema.addSuperSchema(serviceSchema);
-    terrainSimulatorSchema.addSuperSchema(serviceSchema);
-    mapBroadcastServiceSchema.addSuperSchema(serviceSchema);
-    registrationDeskSchema.addSuperSchema(serviceSchema);
     movementRequestServiceSchema.addSuperSchema(serviceSchema);
+    radioClaimServiceSchema.addSuperSchema(serviceSchema);
+    roverRegistrationServiceSchema.addSuperSchema(serviceSchema);
+    terrainSimulatorSchema.addSuperSchema(serviceSchema);
+    registrationDeskSchema.addSuperSchema(serviceSchema);
+    mapBroadcastServiceSchema.addSuperSchema(serviceSchema);
+    capsuleRegistrationServiceSchema.addSuperSchema(serviceSchema);
+    spacecraftClaimServiceSchema.addSuperSchema(serviceSchema);
 
    }catch (java.lang.Exception e) {e.printStackTrace();}
   }
