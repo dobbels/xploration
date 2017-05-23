@@ -68,13 +68,13 @@ public class Spacecraft extends Agent {
 	
 	private int mapDimensionX = 10;
 	private int mapDimensionY = 10;
-	private int missionLength = 10; // mission length in seconds
+	private int missionLength = Constants.MISSION_LENGTH; // mission length in seconds
 	
 	/******Registration Desk Fields*******/
 	// ArrayList to store Registered Agent Teams
 	private List<Team> registrationList = new ArrayList<Team>();
 	// Registration Duration as 1 minute
-	private final int registrationPeriod = 15000;
+	private final int registrationPeriod = Constants.REGISTRATION_WINDOW*1000; // in milliseconds
 	Date registerTime;
 	
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();

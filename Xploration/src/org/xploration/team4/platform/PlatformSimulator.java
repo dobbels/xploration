@@ -62,7 +62,7 @@ public class PlatformSimulator extends Agent {
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 	
 	/***COMM_SIM***/
-	private int communciationRange = 3;
+	private int communciationRange = Constants.COMMUNICATION_RANGE;
 	
 	/***MAP_SIM***/
 	// registered rovers and capsules are implicit. Use .hasKey() to know if registered. 
@@ -73,14 +73,14 @@ public class PlatformSimulator extends Agent {
 	private HashMap<Integer, AID> roverAID = new HashMap<Integer, AID>();
 	private HashMap<Integer, Cell> roversPosition = new HashMap<Integer, Cell>();
 	
-	private int movingTime = 2000;
+	private int movingTime = Constants.MOVEMENT_TIME*1000; // in milliseconds
 	
 	//TODO what to do with this?
 	public int initialX = 1;
 	public int initialY = 3;
 	
 	/***TERRAIN_SIM***/
-	private int analyzingTime = 2000; // in milliseconds
+	private int analyzingTime = Constants.ANALYSIS_TIME*1000; // in milliseconds
 	private HashMap<AID, Integer> AIDToTeamId = new HashMap<AID, Integer>();
 	private HashMap<Integer, State>	roverState = new HashMap<>();
 		
