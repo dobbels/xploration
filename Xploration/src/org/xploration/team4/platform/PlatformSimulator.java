@@ -3,11 +3,13 @@ package org.xploration.team4.platform;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.xploration.ontology.CapsuleRegistrationInfo;
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
+import org.xploration.ontology.ClaimCellInfo;
 import org.xploration.ontology.MapBroadcastInfo;
 import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.RoverRegistrationInfo;
@@ -29,6 +31,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -83,13 +86,14 @@ public class PlatformSimulator extends Agent {
 	private int analyzingTime = Constants.ANALYSIS_TIME*1000; // in milliseconds
 	private HashMap<AID, Integer> AIDToTeamId = new HashMap<AID, Integer>();
 	private HashMap<Integer, State>	roverState = new HashMap<>();
+	
 		
 	protected void setup(){
 
 		System.out.println(getLocalName() + ": HAS ENTERED");
 		
-		System.out.println("This is the worldmap:");
-		worldMap.printWorldMap();
+		//System.out.println("This is the worldmap:");
+		//worldMap.printWorldMap();
 
 		//Register Language and Ontology
 		getContentManager().registerLanguage(codec);
@@ -123,6 +127,11 @@ public class PlatformSimulator extends Agent {
 			sd.setName(this.getName());
 			sd.setType(org.xploration.ontology.XplorationOntology.ROVERREGISTRATIONSERVICE);
 			dfd.addServices(sd);
+						
+			sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(org.xploration.ontology.XplorationOntology.RADIOCLAIMSERVICE);
+			dfd.addServices(sd);
 			
 			DFService.register(this, dfd);
 			
@@ -150,6 +159,10 @@ public class PlatformSimulator extends Agent {
 		/***TERRAIN_SIM***/
 		Behaviour cab = cellAnalysisRequestListener();
 		addBehaviour(tbf.wrap(cab));
+		
+		/***NETWORK_SIM***/
+		Behaviour ccr = cellClaimRoverListener();
+		addBehaviour(tbf.wrap(ccr));
 	}
 		
 	/*
@@ -232,6 +245,8 @@ public class PlatformSimulator extends Agent {
 				return inRange;
 			}
 			
+			//I moved these two functions to outside of listener. I needed them 
+			/*
 			private boolean inRangeFrom(Cell rover, Cell other) {
 		    	// In these calculations it is assumed that the map is spherical, so
 				// from the left side, you can go directly to the rigth side and so on. 
@@ -257,7 +272,8 @@ public class PlatformSimulator extends Agent {
 
 		        return distY + Math.max(0, (distX - distY) / 2);
 		    }
-
+			*/
+			
 			private void printContent(ContentElement ce) {
 				Action agAction = (Action) ce;
 				Concept conc = agAction.getAction();
@@ -359,7 +375,7 @@ public class PlatformSimulator extends Agent {
 								{
 									//Storing the message sender agent
 									AID fromAgent = msg.getSender();
-
+									
 									System.out.println(getLocalName()+": Capsule Registration INFORM is received from " + 
 											(msg.getSender()).getLocalName());
 									
@@ -443,7 +459,6 @@ public class PlatformSimulator extends Agent {
 							throw new NotUnderstoodException(msg);
 						}
 					} catch (NotUnderstoodException | CodecException | OntologyException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 						ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.NOT_UNDERSTOOD); 
 						myAgent.send(reply);
@@ -572,4 +587,150 @@ public class PlatformSimulator extends Agent {
 			}
 		};
 	}
+	
+	
+	private Behaviour cellClaimRoverListener(){
+		return new CyclicBehaviour(this){
+			public void action(){
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
+				
+				if(msg != null){		
+					ContentElement ce;
+					
+					try{
+						ce = getContentManager().extractContent(msg);
+						
+						if(ce instanceof Action){
+							Concept conc = ((Action) ce).getAction();
+							if(conc instanceof ClaimCellInfo){			
+								
+								AID fromAgent = msg.getSender();
+								try{
+										System.out.println(getLocalName()+ ": INFORM is received about claim cell Info");
+										
+										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
+										Team claimedTeam = cellInfo.getTeam();
+										//TODO COULDN'T EXTRACT A MEANINGFUL MAP INFO
+										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
+										jade.util.leap.List myCellList = claimedMap.getCellList();
+										
+										//This is not meaningful info, I know But I couldn't access the cell in the list
+										System.out.println(getLocalName()+ ": " + myCellList.get(0));										
+										System.out.println(getLocalName()+ ": claimed team is: team" + claimedTeam.getTeamId() + " and " + 
+										//TODO ADD A MEANINGFUL MAP VALUE FOR DISPLAYING THE MESSSAGE
+										"claimed map is: ");
+											
+										//Information is passing to capsule
+										cellClaimToCapsule(cellInfo);																																						
+								}
+								catch(Exception e){
+									e.printStackTrace();
+									System.out.println(getLocalName()+ ": ERROR about extracting the message");
+								}
+							}
+							else{
+								System.out.println(getLocalName()+ ": ERROR about unpacking ClaimCellInfo");
+							}
+						}
+						else{
+							System.out.println(getLocalName()+ ": ERROR about unpacking ClaimCellInfo");
+						}
+					}
+					catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+				else{
+					//Empty message is ignored
+					block();
+				}			
+			}					
+	   };
+	}
+	
+	private void cellClaimToCapsule(ClaimCellInfo cellInfo){
+		addBehaviour (new CyclicBehaviour (this){
+
+			AID agCommunication;
+			Cell capsuleCell;
+			Cell roverCell;
+			private boolean claimCellToCapsule = false;
+
+			public void action(){
+
+				if(!claimCellToCapsule)
+				{		
+					Team checkTeam = cellInfo.getTeam();
+					//Finds the corresponding AID for that team ID
+					agCommunication = capsuleAID.get(checkTeam.getTeamId());
+					//Finds the capsule's located cell for that team ID
+					capsuleCell = capsulePositions.get(checkTeam.getTeamId());
+					//Finds the rover's located cell for that team ID
+					roverCell = roversPosition.get(checkTeam.getTeamId());
+					
+					//If capsule is NOT registered yet, platform simulator will not send any message
+					if(agCommunication != null){
+						//If the locations of rover or capsule is not stored 
+						if(capsuleCell != null && roverCell != null)
+						{
+							//Checking distance to capsule
+							if(inRangeFrom (capsuleCell, roverCell))
+							{
+								try{
+									ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, cellInfo, XplorationOntology.CLAIMCELLINFO);
+									send(msg);	
+									System.out.println(getLocalName() + ": INFORM is sent");
+									claimCellToCapsule = true;
+								}
+								catch(Exception e){
+									e.printStackTrace();
+									System.out.println(getLocalName() + ": INFORM couldn't sent");
+								}
+							}
+							else{
+								System.out.println(getLocalName()+ ": capsule is not close enough to deliver the message");
+								doWait(5000);
+							}
+						}
+						else{
+							System.out.println(getLocalName()+ ": either capsule or either location is not stored");
+							doWait(5000);
+						}
+					}
+					else{
+						System.out.println(getLocalName()+ ": capsule is not registered yet, cell claim info couldn't sent");
+						doWait(5000);
+					}
+				}
+			}			
+		});
+	}	
+	//I needed to use these two functions for checking the distance between capsule - rover
+	//Thats why I moved them to here and they are under comments in the listener
+	//If I could call them somehow in the listener, please let me know later
+	private boolean inRangeFrom(Cell rover, Cell other) {
+    	// In these calculations it is assumed that the map is spherical, so
+		// from the left side, you can go directly to the rigth side and so on. 
+    	int x = rover.getX();
+    	int y = rover.getY();
+    	
+    	int x_other = other.getX();
+    	int y_other = other.getY();
+    	
+    	int distance = distance(x,y,x_other,y_other);
+    	
+    	return (0 <= distance && distance <= Constants.COMMUNICATION_RANGE);
+	}
+	
+	public int distance(int x, int y, int x_other, int y_other) {
+        int rightDiff = (worldDimensionY + y_other - y) % worldDimensionY;
+        int leftDiff = (worldDimensionY + y - y_other) % worldDimensionY;
+        int upDiff = (worldDimensionX + x - x_other) % worldDimensionX;
+        int downDiff = (worldDimensionX + x_other - x) % worldDimensionX;
+
+        int distY = Math.min(rightDiff, leftDiff);
+        int distX = Math.min(upDiff, downDiff);
+
+        return distY + Math.max(0, (distX - distY) / 2);
+    }
 }
