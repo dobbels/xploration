@@ -15,6 +15,7 @@ import jade.content.onto.basic.Action;
 import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.domain.DFService;
+import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
@@ -80,8 +81,12 @@ public class Capsule4 extends Agent {
 		
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
-		
+        		
         capsuleRegistration(location);
+        
+		Behaviour rcl = listenRoverClaimCell();
+		addBehaviour(tbf.wrap(rcl));
+     
 	}
 	
 	//TODO This function causes a name problem an agent name problem
@@ -158,7 +163,8 @@ public class Capsule4 extends Agent {
 							capsuleRegistration = true;
 							
 							// Now the rover can be deployed
-							addBehaviour(deployRover());
+							//COMMENTED to prevent errors
+							//addBehaviour(deployRover());
 							
 							listenForMaps();
 						}
@@ -229,7 +235,120 @@ public class Capsule4 extends Agent {
 				}
 			}			
 		}));
+	}
+	//Listens for a claim cell information
+	private Behaviour listenRoverClaimCell(){
+		return new CyclicBehaviour(this){
 
+			public void action(){
+				
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
+				
+				if(msg != null){	
+					ContentElement ce;
+					
+					try{
+						ce = getContentManager().extractContent(msg);
+						
+						if(ce instanceof Action){
+							Concept conc = ((Action) ce).getAction();
+							if(conc instanceof ClaimCellInfo){			
+								
+								AID fromAgent = msg.getSender();
+								try{
+										System.out.println(getLocalName()+ ": INFORM is received");
+										
+										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
+										Team claimedTeam = cellInfo.getTeam();
+										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
+										jade.util.leap.List myCellList = claimedMap.getCellList();
+																				
+										System.out.println(getLocalName()+ ": claimed team Id is: team" + claimedTeam.getTeamId() + " and " + 
+										//TODO add the map value
+										"claimed map is: ");
+										try{
+											//Passes the information to the spacecraft
+											cellClaimToSpacecraft(cellInfo);
+										}catch(Exception e){
+											System.out.println(getLocalName()+ ": Cell claim to capsule Exception");
+										}										
+								}
+								catch(Exception e){
+									e.printStackTrace();
+									System.out.println(getLocalName()+ ": ERROR about extracting the message");
+								}
+							}
+							else{
+								System.out.println(getLocalName()+ ": ERROR about unpacking ClaimCellInfo");
+							}
+						}
+						else{
+							System.out.println(getLocalName()+ ": ERROR about unpacking ClaimCellInfo");
+						}
+					}
+					catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+				else{
+					//Empty message is ignored
+					block();
+				}			
+			}							
+	   };
+	}
+	   	   
+	//Passes information to the spacecraft
+	private void cellClaimToSpacecraft(ClaimCellInfo cellInfo){
+		addBehaviour (new CyclicBehaviour (this){
+
+			AID agCommunication;
+			private boolean claimCellToSpacecraft = false;
+
+			public void action(){
+
+				if(!claimCellToSpacecraft){
+					//Searching for an agent with SPACECRAFTCLAIMSERVICE
+					DFAgentDescription dfd = new DFAgentDescription();     
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType(XplorationOntology.SPACECRAFTCLAIMSERVICE);
+					dfd.addServices(sd);
+
+					try {
+						// It finds agents of the required type
+						DFAgentDescription[] result = new DFAgentDescription[20];
+						result = DFService.search(myAgent, dfd);
+
+						// Gets the first occurrence, if there was success
+						if (result.length > 0)
+						{
+							//System.out.println(result[0].getName());
+							agCommunication = (AID) result[0].getName();											
+							System.out.println(getLocalName()+ ": Spacecraft Claim Service is found");
+
+							try{
+								ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, cellInfo, XplorationOntology.CLAIMCELLINFO);
+								send(msg);	
+								System.out.println(getLocalName() + ": INFORM is sent");
+								claimCellToSpacecraft = true;
+							}
+							catch(Exception e){
+								e.printStackTrace();
+								System.out.println(getLocalName() + ": INFORM couldn't sent");
+							}
+						}
+						else{
+							System.out.println(getLocalName()+ ": No agent found yet!");
+							doWait(5000);
+						}
+					}
+					catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+			}		
+		});
 	}
 }
+
 
