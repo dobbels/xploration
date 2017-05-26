@@ -75,6 +75,33 @@ public class Scorer extends Agent {
 			e.printStackTrace();
 		}
 		
+		receiveMap();
+		
 		//TODO add behaviour(s) here
+	}
+	
+	void receiveMap() {
+		addBehaviour(new CyclicBehaviour(this) {
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void action() {
+				// TODO Auto-generated method stub
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
+				
+				if (msg!= null) {
+					
+				}
+				else {
+					// Behaviour is blocked. Will be woken up again whenever the agent receives an ACLMessage.
+					block();
+				}
+			}
+		});
+		
 	}
 }
