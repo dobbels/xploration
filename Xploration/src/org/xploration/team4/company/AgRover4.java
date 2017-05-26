@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
+import org.xploration.ontology.ClaimCellInfo;
 import org.xploration.ontology.MapBroadcastInfo;
 import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.RoverRegistrationInfo;
@@ -39,13 +40,13 @@ public class AgRover4 extends Agent {
 	private int worldDimY;
 	private int worldDimX;
 	private int missionLength;
-	
+
 	private static final long serialVersionUID = 1L;
 	public final static int TEAM_ID = 4;
-	
+
 	private Cell location = new Cell();
 	private ArrayList<Cell> analyzedCells = new ArrayList<>();
-	
+
 	private Map localWorldMap; 
 
 	private Cell cell1 = new Cell();
@@ -63,14 +64,14 @@ public class AgRover4 extends Agent {
 		//Register Language and Ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
-		
+
 		Object[] args = getArguments();
 		int arg1; 
 		int arg2; 
 		int arg3;
 		int arg4;
 		int arg5;
-		
+
 		if (args[0] instanceof String) { // To be able to pass arguments in command line
 			arg1 = Integer.parseInt((String) args[0]); // Landing of Capsule X-coordinate
 			arg2 = Integer.parseInt((String) args[1]); // Landing of Capsule Y-coordinate 
@@ -85,39 +86,42 @@ public class AgRover4 extends Agent {
 			arg4 = (int) args[3]; // World map Y dimension
 			arg5 = (int) args[4]; // the mission length
 		}
-		
+
 		//Type conversions
 		location.setX(arg1);
 		location.setY(arg2);
 		worldDimX = arg3;
 		worldDimY = arg4;
 		missionLength = arg5;
-		
+
 		localWorldMap = new Map(worldDimX, worldDimY);
-		
+
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
-		
+
 		//TODO delete these two cells, they are meant for testing
-//		cell1.setX(4);
-//		cell1.setY(6);
-//		cell1.setMineral("A");
-//	
-//		cell2.setX(1);
-//		cell2.setY(3);
-//		cell2.setMineral("C");
-//		
-//		analyzedCells.add(cell1);
-//		analyzedCells.add(cell2);
+		//		cell1.setX(4);
+		//		cell1.setY(6);
+		//		cell1.setMineral("A");
+		//	
+		//		cell2.setX(1);
+		//		cell2.setY(3);
+		//		cell2.setMineral("C");
+		//		
+		//		analyzedCells.add(cell1);
+		//		analyzedCells.add(cell2);
 		
+
 		//roverRegistration for Map Simulator
-		roverRegistration(location);
+		//CAUSED some ERRORS thats why under comment
+	    roverRegistration(location);	    
+		cellClaimFromRover();
 	} 
 
 	private void analyzeCell(Cell myCell){
 
 		addBehaviour (new SimpleBehaviour(this) //TODO can also be OneShotBehaviour?
-		{						  			
+				{						  			
 			private static final long serialVersionUID = 1L;
 
 			AID agTerrain;
@@ -149,10 +153,10 @@ public class AgRover4 extends Agent {
 
 							CellAnalysis cellAnalysis = new CellAnalysis();
 							cellAnalysis.setCell(myCell);
-							
+
 							ACLMessage msg = MessageHandler.constructMessage(agTerrain, ACLMessage.REQUEST, cellAnalysis, XplorationOntology.CELLANALYSIS);
 							send(msg);			                	
-	
+
 							System.out.println(getLocalName() + ": REQUEST is sent");
 							//doWait(1000);
 
@@ -177,45 +181,45 @@ public class AgRover4 extends Agent {
 									ACLMessage finalMsg = MessageHandler.blockingReceive(myAgent, XplorationOntology.CELLANALYSIS);
 
 									switch (finalMsg.getPerformative()) {
-										case ACLMessage.INFORM:
-											System.out.println(getLocalName()+": INFORM is received!");
-											
-											ContentElement ce;
-					                        try {
-					                            ce = getContentManager().extractContent(finalMsg);
+									case ACLMessage.INFORM:
+										System.out.println(getLocalName()+": INFORM is received!");
 
-					                            // We expect an action inside the message
-					                            if (ce instanceof Action) {
-					                                Action agAction = (Action) ce;
-					                                Concept conc = agAction.getAction();
+										ContentElement ce;
+										try {
+											ce = getContentManager().extractContent(finalMsg);
 
-					                                if (conc instanceof CellAnalysis) {
-					                                    Cell cell = ((CellAnalysis) conc).getCell();
-														//TODO set mineral in our representation of map. Is this the way to go?
-					                                    analyzedCells.add(cell);
-					                                    localWorldMap.setCell(cell);
-					                                    System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
-																+cell.getX() + ","+ cell.getY()+  ", " + cell.getMineral() + ")");
-					                                }
-					                            }
-					                        } catch (Exception e) {
-					                            e.printStackTrace();
-					                        }
-											claimingCell = true;	
+											// We expect an action inside the message
+											if (ce instanceof Action) {
+												Action agAction = (Action) ce;
+												Concept conc = agAction.getAction();
 
-											// map broadcast
-											broadcastCurrentMap(analyzedCells);
-											
-											//Test if we get failure to this message. TODO delete
-											Cell notLocation = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
-											notLocation.setX(notLocation.getX());
-											notLocation.setY(notLocation.getY());
-											analyzeCell(notLocation);
-											
-											break;
-										case ACLMessage.FAILURE:
-											System.out.println(getLocalName()+": FAILURE was received!");
-											claimingCell = true;
+												if (conc instanceof CellAnalysis) {
+													Cell cell = ((CellAnalysis) conc).getCell();
+													//TODO set mineral in our representation of map. Is this the way to go?
+													analyzedCells.add(cell);
+													localWorldMap.setCell(cell);
+													System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
+															+cell.getX() + ","+ cell.getY()+  ", " + cell.getMineral() + ")");
+												}
+											}
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
+										claimingCell = true;	
+
+										// map broadcast
+										broadcastCurrentMap(analyzedCells);
+
+										//Test if we get failure to this message. TODO delete
+										Cell notLocation = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
+										notLocation.setX(notLocation.getX());
+										notLocation.setY(notLocation.getY());
+										analyzeCell(notLocation);
+
+										break;
+									case ACLMessage.FAILURE:
+										System.out.println(getLocalName()+": FAILURE was received!");
+										claimingCell = true;
 									}							
 								}						  						  						  
 							}else{
@@ -241,10 +245,10 @@ public class AgRover4 extends Agent {
 				return claimingCell;
 			}        	       	
 
-		});
+				});
 
 	}
-	
+
 	private void roverRegistration(Cell myCell){	
 		addBehaviour (new SimpleBehaviour(this)
 		{	
@@ -253,14 +257,14 @@ public class AgRover4 extends Agent {
 			AID agMapSimulator;
 
 			private boolean roverRegistration = false;
-			
+
 			public void action(){
 				//A defensive check
 				if(!roverRegistration){
 					//Creates description for the AGENT MAP SIMULATOR to be searched
 					DFAgentDescription dfd = new DFAgentDescription();     
 					ServiceDescription sd = new ServiceDescription();
-					
+
 					sd.setType(XplorationOntology.ROVERREGISTRATIONSERVICE);
 					dfd.addServices(sd);
 
@@ -276,7 +280,7 @@ public class AgRover4 extends Agent {
 							agMapSimulator = (AID) result[0].getName();	
 							System.out.println(getLocalName()+ ": Map Simulator agent is found");
 
-							
+
 							RoverRegistrationInfo roverReg = new RoverRegistrationInfo();
 							roverReg.setCell(myCell);
 							Team team = new Team();
@@ -287,11 +291,12 @@ public class AgRover4 extends Agent {
 							send(msg);	
 							System.out.println(getLocalName() + ": INFORM is sent");
 							roverRegistration = true;
-							
+
 							listenForMaps();
 
-							movementRequest(); // TODO analyze cell happens in this behaviour for testing
-							analyzeCell(location);
+							//UNDER COMMENTS Because it causes some problems
+							//movementRequest(); // TODO analyze cell happens in this behaviour for testing
+							//analyzeCell(location);
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
@@ -303,7 +308,7 @@ public class AgRover4 extends Agent {
 						e.printStackTrace();
 					}
 				}
-				
+
 			}
 			//To stop behaviour
 			public boolean done() {
@@ -311,7 +316,7 @@ public class AgRover4 extends Agent {
 			}
 		});
 	}
-	
+
 	// This behaviour broadcasts a map to every rover in range. The behaviour will be started after every movement/analyzing of cell/5 seconds (to be decided).  
 	private void broadcastCurrentMap(ArrayList<Cell> cells){
 
@@ -339,23 +344,23 @@ public class AgRover4 extends Agent {
 					{
 						//System.out.println(result[0].getName());
 						agCommunication = (AID) result[0].getName();	
-						
+
 						//TODO change from here on 
-						
+
 						System.out.println(getLocalName()+ ": map broadcast service is found");
 
 						if (!analyzedCells.isEmpty()) {
 							MapBroadcastInfo mbi = new MapBroadcastInfo();
 							org.xploration.ontology.Map map = new org.xploration.ontology.Map();
-							
+
 							for (Cell c : analyzedCells) {
 								map.addCellList(c);
 							}
 							mbi.setMap(map);
-							
+
 							ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, mbi, XplorationOntology.MAPBROADCASTINFO);
 							send(msg);			                	
-							
+
 							System.out.println(getLocalName() + ": map broadcast INFORM is sent");
 							//doWait(1000);
 						}
@@ -375,7 +380,7 @@ public class AgRover4 extends Agent {
 		});
 
 	}
-	
+
 	private void listenForMaps(){
 
 		addBehaviour (tbf.wrap(new CyclicBehaviour(this)
@@ -385,18 +390,18 @@ public class AgRover4 extends Agent {
 			@Override
 			public void action() {				
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO);
-				
+
 				if (msg != null) {
 					System.out.println(getLocalName() + ": received map broadcast");
-					
+
 					// The ContentManager transforms the message content
 					ContentElement ce;
 					try {
 						ce = getContentManager().extractContent(msg);
-						
+
 						if (ce instanceof Action) {
 							Concept conc = ((Action) ce).getAction();
-							
+
 							if (conc instanceof MapBroadcastInfo) {
 								MapBroadcastInfo mbi = (MapBroadcastInfo) conc;
 								org.xploration.ontology.Map map = mbi.getMap();
@@ -422,7 +427,7 @@ public class AgRover4 extends Agent {
 		}));
 
 	}
-	
+
 	private void movementRequest() {
 		addBehaviour(new SimpleBehaviour(this) {
 			private static final long serialVersionUID = 1L;
@@ -437,7 +442,7 @@ public class AgRover4 extends Agent {
 					ServiceDescription sd = new ServiceDescription();
 					sd.setType(XplorationOntology.MOVEMENTREQUESTSERVICE);
 					dfd.addServices(sd);
-					
+
 					try {
 						// It finds agents of the required type
 						DFAgentDescription[] result = new DFAgentDescription[20];
@@ -448,23 +453,23 @@ public class AgRover4 extends Agent {
 							//System.out.println(result[0].getName());
 							agMovementSim = (AID) result[0].getName();	
 							System.out.println(getLocalName()+ ": movement simulator agent is found");
-							
+
 							MovementRequestInfo mri = new MovementRequestInfo();
 							Cell destination = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
 							//TODO uncomment when you want to test sprint 3.6
-//							destination = localWorldMap.calculateNextPosition(destination.getX(), destination.getY(), "up");
+							//							destination = localWorldMap.calculateNextPosition(destination.getX(), destination.getY(), "up");
 							destination.setX(destination.getX());
 							destination.setY(destination.getY());
 							Team team = new Team();
 							team.setTeamId(TEAM_ID);
 							mri.setCell(destination);
 							mri.setTeam(team);
-							
+
 							ACLMessage msg = MessageHandler.constructMessage(agMovementSim, ACLMessage.REQUEST, mri, XplorationOntology.MOVEMENTREQUESTINFO);
 							send(msg);			                	
-	
+
 							System.out.println(getLocalName() + ": REQUEST is sent");
-							
+
 							ACLMessage ans = MessageHandler.blockingReceive(myAgent, XplorationOntology.MOVEMENTREQUESTINFO);
 							if (ans != null) {
 								if (ans.getPerformative() == ACLMessage.REFUSE) {
@@ -500,7 +505,7 @@ public class AgRover4 extends Agent {
 						e.printStackTrace();
 					}
 
-					
+
 				}
 			}
 
@@ -509,7 +514,77 @@ public class AgRover4 extends Agent {
 				// TODO Auto-generated method stub
 				return movementRequested;
 			}
+
+		});
+	}
+	//Cell Claim Protocol from Rover to Platform Simulator
+	private void cellClaimFromRover(){
+		addBehaviour (new SimpleBehaviour (this){
 			
+			//Receiver Agent ID
+			AID agCommunication;
+			private boolean claimCell = false;
+
+			public void action(){
+
+				if(!claimCell){
+					//Searching for an agent with RADIOCLAIMSERVICE Description
+					DFAgentDescription dfd = new DFAgentDescription();     
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType(XplorationOntology.RADIOCLAIMSERVICE);
+					dfd.addServices(sd);
+
+					try {
+						// It finds agents of the required type
+						DFAgentDescription[] result = new DFAgentDescription[20];
+						result = DFService.search(myAgent, dfd);
+
+						// Gets the first occurrence, if there was success
+						if (result.length > 0)
+						{
+							//System.out.println(result[0].getName());
+							agCommunication = (AID) result[0].getName();											
+							System.out.println(getLocalName()+ ": Radio Claim Service is found");
+
+							ClaimCellInfo cci = new ClaimCellInfo();
+							
+							//CREATING EXAMPLE INPUT, ONLY FOR TESTING 
+							Team myTeam = new Team();
+							myTeam.setTeamId(Constants.TEAM_ID);
+							cci.setTeam(myTeam);
+							org.xploration.ontology.Map cciMap = new org.xploration.ontology.Map();
+							Cell myCell = new Cell();
+							myCell.setMineral("A");
+							myCell.setX(1);
+							myCell.setY(3);
+							cciMap.addCellList(myCell);
+							cci.setMap(cciMap);
+													
+							try{
+								ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, cci, XplorationOntology.CLAIMCELLINFO);
+								send(msg);	
+								System.out.println(getLocalName() + ": INFORM is sent");
+								claimCell = true;
+							}
+							catch(Exception e){
+								e.printStackTrace();
+								System.out.println(getLocalName() + ": INFORM couldn't sent");
+							}
+						}
+						else{
+							System.out.println(getLocalName()+ ": No agent found yet");
+							doWait(5000);
+						}
+					}
+					catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+			}
+	
+			public boolean done() {
+				return claimCell;
+			}			
 		});
 	}
 }
