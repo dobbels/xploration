@@ -4,6 +4,7 @@ import java.util.*;
 import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.MessageHandler;
 import org.xploration.ontology.Cell;
+import org.xploration.ontology.ClaimCellInfo;
 import org.xploration.ontology.RegistrationRequest;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
@@ -101,21 +102,33 @@ public class Spacecraft extends Agent {
 		registerTime = new Date();
 
 		try {
-			// Creating registrationDesk description
-			DFAgentDescription dfd = new DFAgentDescription();
+			// Creating its description
+			DFAgentDescription dfd = new DFAgentDescription();			
 			ServiceDescription sd = new ServiceDescription();
+			
 			sd.setName(this.getName());
 			sd.setType(XplorationOntology.REGISTRATIONDESK);
 			dfd.addServices(sd);
+			
+			sd = new ServiceDescription();
+			sd.setName(this.getName());
+			sd.setType(XplorationOntology.SPACECRAFTCLAIMSERVICE);
+			dfd.addServices(sd);
+			
 			// Registers its description in the DF
 			DFService.register(this, dfd);
-			System.out.println(getLocalName() + ": registered in the DF");
+														
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
-		// Behaviour is addded to the setup() method
+		
+		//Behaviour is addded to the setup() method
 		Behaviour b = registrationListener();
 		addBehaviour(tbf.wrap(b));
+		
+		//Behaviour for claimcell
+		Behaviour r = listenRoverClaimCellFromCapsule();
+		addBehaviour(tbf.wrap(r));
 		/***END RD SETUP***/
 		
 		addBehaviour(createCapsulesAfterRegistration());
@@ -291,6 +304,60 @@ public class Spacecraft extends Agent {
 			}
 
 		};
+	}
+		
+	private Behaviour listenRoverClaimCellFromCapsule(){
+		return new CyclicBehaviour(this){
+
+			public void action(){
+				
+				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
+				
+				if(msg != null){
+					
+					ContentElement ce;					
+					try{
+						ce = getContentManager().extractContent(msg);
+						
+						if(ce instanceof Action){
+							Concept conc = ((Action) ce).getAction();
+							if(conc instanceof ClaimCellInfo){			
+								
+								AID fromAgent = msg.getSender();
+								try{
+										System.out.println(getLocalName()+ ": INFORM is received");
+										
+										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
+										Team claimedTeam = cellInfo.getTeam();
+										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
+																				
+										System.out.println(getLocalName()+ ": claimed team is team" + claimedTeam.getTeamId() + " and " + 
+										//TODO add the map value
+										"claimed map is: ");										
+								}
+								catch(Exception e){
+									e.printStackTrace();
+									System.out.println(getLocalName()+ ": ERROR about extracting the message");
+								}
+							}
+							else{
+								System.out.println(getLocalName()+ ": ERROR about unpacking ClaimCellInfo");
+							}
+						}
+						else{
+							System.out.println(getLocalName()+ ": ERROR about unpacking ClaimCellInfo");
+						}
+					}
+					catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+				else{
+					//Empty message is ignored
+					block();
+				}			
+			}							
+	   };
 	}
 
 }
