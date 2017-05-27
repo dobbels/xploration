@@ -142,7 +142,6 @@ public class Spacecraft extends Agent {
 				System.out.println(getLocalName() + ": Registration desk shutdown");
 		        removeBehaviour(registrationListener());
 		        // TODO remove registrationDesk from the yellow pages?
-		        // TODO does this also work with a threaded behaviour?
 		      } 
 		    });
 	}
@@ -310,7 +309,7 @@ public class Spacecraft extends Agent {
 		return new CyclicBehaviour(this){
 
 			public void action(){
-				
+
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
 				
 				if(msg != null){
@@ -331,9 +330,10 @@ public class Spacecraft extends Agent {
 										Team claimedTeam = cellInfo.getTeam();
 										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
 																				
-										System.out.println(getLocalName()+ ": claimed team is team" + claimedTeam.getTeamId() + " and " + 
-										//TODO add the map value
-										"claimed map is: ");										
+										System.out.println(getLocalName()+ ": claimed team is team" + claimedTeam.getTeamId());
+										
+										//Forward message
+										sendClaimToScorer(cellInfo);
 								}
 								catch(Exception e){
 									e.printStackTrace();
@@ -359,5 +359,56 @@ public class Spacecraft extends Agent {
 			}							
 	   };
 	}
+	
+	//Passes information to the spacecraft
+	private void sendClaimToScorer(ClaimCellInfo cellInfo){
+		addBehaviour (new CyclicBehaviour (this){
+
+			AID agScorer;
+			private boolean forwarded = false;
+
+			public void action(){
+
+				if(!forwarded){
+					//Searching for an agent with SPACECRAFTCLAIMSERVICE
+					DFAgentDescription dfd = new DFAgentDescription();     
+					ServiceDescription sd = new ServiceDescription();
+					sd.setType("scorer");
+					dfd.addServices(sd);
+
+					try {
+						// It finds agents of the required type
+						DFAgentDescription[] result = new DFAgentDescription[20];
+						result = DFService.search(myAgent, dfd);
+
+						// Gets the first occurrence, if there was success
+						if (result.length > 0)
+						{
+							//System.out.println(result[0].getName());
+							agScorer = (AID) result[0].getName();										
+
+							try{
+								ACLMessage msg = MessageHandler.constructMessage(agScorer, ACLMessage.INFORM, cellInfo, XplorationOntology.CLAIMCELLINFO);
+								send(msg);	
+								System.out.println(getLocalName() + ": INFORM is sent");
+								forwarded = true;
+							}
+							catch(Exception e){
+								e.printStackTrace();
+							}
+						}
+						else{
+							System.out.println(getLocalName()+ ": No scorer found yet!");
+							doWait(5000);
+						}
+					}
+					catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+			}		
+		});
+	}
+
 
 }

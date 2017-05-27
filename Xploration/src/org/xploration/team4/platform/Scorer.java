@@ -103,7 +103,6 @@ public class Scorer extends Agent {
 
 			@Override
 			protected void onTick() { // print all teams with the numbers of attempted claims 
-				System.out.println("HELLOOOOOOO");
 				try {
 					ArrayList<Integer> teams = new ArrayList<>();
 					teams.addAll(nbCorrectClaims.keySet());
@@ -111,7 +110,7 @@ public class Scorer extends Agent {
 					ArrayList<Object[]> table = new ArrayList<>();
 					
 					table.add(new Object[] {" ", "# correct claims", "# incorrect claims", "# late claims"});
-					table.add(new Object[] {"Team4", "10", "1", "0"});
+//					table.add(new Object[] {"Team4", "10", "1", "0"});
 					for (int teamid : teams) {	
 						Integer arg2 = 0, arg3 = 0;
 						if (nbIncorrectClaims.containsKey(teamid)) 

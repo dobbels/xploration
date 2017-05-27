@@ -36,7 +36,6 @@ import jade.lang.acl.ACLMessage;
 
 public class AgRover4 extends Agent {
 
-	//TODO It should not send the second or third request
 	private int worldDimY;
 	private int worldDimX;
 	private int missionLength;
@@ -49,9 +48,6 @@ public class AgRover4 extends Agent {
 	private ArrayList<Cell> analyzedCells = new ArrayList<>();
 
 	private Map localWorldMap; 
-
-	private Cell cell1 = new Cell();
-	private Cell cell2 = new Cell();
 
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 
@@ -288,7 +284,7 @@ public class AgRover4 extends Agent {
 							listenForMaps();
 
 							//UNDER COMMENTS Because it causes some problems
-							//movementRequest(); // TODO analyze cell happens in this behaviour for testing
+//							requestMovement(); // TODO analyze cell happens in this behaviour for testing
 							//analyzeCell(location);
 						}
 						else{
@@ -541,7 +537,7 @@ public class AgRover4 extends Agent {
 
 							ClaimCellInfo cci = new ClaimCellInfo();
 							
-							//CREATING EXAMPLE INPUT, ONLY FOR TESTING 
+							//CREATING EXAMPLE INPUT, ONLY FOR TESTING TODO delete
 							Team myTeam = new Team();
 							myTeam.setTeamId(Constants.TEAM_ID);
 							cci.setTeam(myTeam);
