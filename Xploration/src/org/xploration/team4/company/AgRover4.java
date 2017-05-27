@@ -40,7 +40,8 @@ public class AgRover4 extends Agent {
 	private int worldDimY;
 	private int worldDimX;
 	private int missionLength;
-
+	private int communicationRange;
+	
 	private static final long serialVersionUID = 1L;
 	public final static int TEAM_ID = 4;
 
@@ -71,13 +72,15 @@ public class AgRover4 extends Agent {
 		int arg3;
 		int arg4;
 		int arg5;
-
+		int arg6;
+		
 		if (args[0] instanceof String) { // To be able to pass arguments in command line
 			arg1 = Integer.parseInt((String) args[0]); // Landing of Capsule X-coordinate
 			arg2 = Integer.parseInt((String) args[1]); // Landing of Capsule Y-coordinate 
 			arg3 = Integer.parseInt((String) args[2]); // World map X dimension
 			arg4 = Integer.parseInt((String) args[3]); // World map Y dimension
 			arg5 = Integer.parseInt((String) args[4]); // the mission length
+			arg6 = Integer.parseInt((String) args[5]); // communication range
 		}
 		else {
 			arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
@@ -85,19 +88,22 @@ public class AgRover4 extends Agent {
 			arg3 = (int) args[2]; // World map X dimension
 			arg4 = (int) args[3]; // World map Y dimension
 			arg5 = (int) args[4]; // the mission length
+			arg6 = (int) args[5]; // communication range
 		}
-
+				
 		//Type conversions
 		location.setX(arg1);
 		location.setY(arg2);
 		worldDimX = arg3;
 		worldDimY = arg4;
 		missionLength = arg5;
-
+		communicationRange = arg6;
+		
 		localWorldMap = new Map(worldDimX, worldDimY);
 
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
+		System.out.println(getLocalName()+": communicationRange: "+ arg6);
 		
 		//roverRegistration for Map Simulator
 		//CAUSED some ERRORS thats why under comment
@@ -399,7 +405,7 @@ public class AgRover4 extends Agent {
 									localWorldMap.setCell(c);
 								}
 								System.out.println(getLocalName() + ": new local world map");
-								localWorldMap.printWorldMap();
+//								localWorldMap.printWorldMap();
 							}
 						}
 					} catch (Exception e) {

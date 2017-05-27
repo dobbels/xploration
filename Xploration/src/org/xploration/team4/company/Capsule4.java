@@ -31,6 +31,7 @@ public class Capsule4 extends Agent {
 	private int mapDimX;
 	private int mapDimY;
 	private int missionLength;	
+	private int communicationRange;
 	
 	private Map localWorldMap;
 	
@@ -51,6 +52,7 @@ public class Capsule4 extends Agent {
 		int arg3;
 		int arg4;
 		int arg5;
+		int arg6;
 		
 		if (args[0] instanceof String) { // To be able to pass arguments in command line
 			arg1 = Integer.parseInt((String) args[0]); // Landing of Capsule X-coordinate
@@ -58,6 +60,7 @@ public class Capsule4 extends Agent {
 			arg3 = Integer.parseInt((String) args[2]); // World map X dimension
 			arg4 = Integer.parseInt((String) args[3]); // World map Y dimension
 			arg5 = Integer.parseInt((String) args[4]); // the mission length
+			arg6 = Integer.parseInt((String) args[5]); // communication range
 		}
 		else {
 			arg1 = (int) args[0]; // Landing of Capsule X-coordinate 
@@ -65,6 +68,7 @@ public class Capsule4 extends Agent {
 			arg3 = (int) args[2]; // World map X dimension
 			arg4 = (int) args[3]; // World map Y dimension
 			arg5 = (int) args[4]; // the mission length
+			arg6 = (int) args[5]; // communication range
 		}
 				
 		//Type conversions
@@ -73,6 +77,7 @@ public class Capsule4 extends Agent {
 		mapDimX = arg3;
 		mapDimY = arg4;
 		missionLength = arg5;
+		communicationRange = arg6;
 		
 		localWorldMap = new Map(mapDimX, mapDimY);
 		
@@ -106,7 +111,7 @@ public class Capsule4 extends Agent {
                 try {
                 	String teamName = "Rover4";
 					String className = this.getClass().getPackage().getName()+".AgRover4";
-					Object[] args = new Object[]{x, y, mapDimX, mapDimY, missionLength};
+					Object[] args = new Object[]{x, y, mapDimX, mapDimY, missionLength, communicationRange};
                     a = cnt.createNewAgent(teamName, className, args);
                     a.start();
                 } catch (StaleProxyException e) {
@@ -219,7 +224,7 @@ public class Capsule4 extends Agent {
 									localWorldMap.setCell(c);
 								}
 								System.out.println(getLocalName() + ": new local world map");
-								localWorldMap.printWorldMap();
+//								localWorldMap.printWorldMap();
 							}
 						}
 					} catch (Exception e) {
