@@ -98,24 +98,11 @@ public class AgRover4 extends Agent {
 
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
-
-		//TODO delete these two cells, they are meant for testing
-		//		cell1.setX(4);
-		//		cell1.setY(6);
-		//		cell1.setMineral("A");
-		//	
-		//		cell2.setX(1);
-		//		cell2.setY(3);
-		//		cell2.setMineral("C");
-		//		
-		//		analyzedCells.add(cell1);
-		//		analyzedCells.add(cell2);
 		
-
 		//roverRegistration for Map Simulator
 		//CAUSED some ERRORS thats why under comment
 	    roverRegistration(location);	    
-		cellClaimFromRover();
+		claimCell();
 	} 
 
 	private void analyzeCell(Cell myCell){
@@ -428,7 +415,7 @@ public class AgRover4 extends Agent {
 
 	}
 
-	private void movementRequest() {
+	private void requestMovement() { //TODO here we probably add an argument 'cell' and take the decision of where to go outside?!
 		addBehaviour(new SimpleBehaviour(this) {
 			private static final long serialVersionUID = 1L;
 			AID agMovementSim;
@@ -518,7 +505,7 @@ public class AgRover4 extends Agent {
 		});
 	}
 	//Cell Claim Protocol from Rover to Platform Simulator
-	private void cellClaimFromRover(){
+	private void claimCell(){
 		addBehaviour (new SimpleBehaviour (this){
 			
 			//Receiver Agent ID

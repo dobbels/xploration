@@ -82,11 +82,7 @@ public class Capsule4 extends Agent {
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
         		
-        capsuleRegistration(location);
-        
-		Behaviour rcl = listenRoverClaimCell();
-		addBehaviour(tbf.wrap(rcl));
-     
+        capsuleRegistration(location);     
 	}
 	
 	//TODO This function causes a name problem an agent name problem
@@ -163,10 +159,11 @@ public class Capsule4 extends Agent {
 							capsuleRegistration = true;
 							
 							// Now the rover can be deployed
-							//COMMENTED to prevent errors
-							//addBehaviour(deployRover());
+							addBehaviour(deployRover());
 							
 							listenForMaps();
+
+							listenRoverClaimCell();
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
@@ -237,8 +234,8 @@ public class Capsule4 extends Agent {
 		}));
 	}
 	//Listens for a claim cell information
-	private Behaviour listenRoverClaimCell(){
-		return new CyclicBehaviour(this){
+	private void listenRoverClaimCell(){
+		addBehaviour(tbf.wrap(new CyclicBehaviour(this){
 
 			public void action(){
 				
@@ -295,7 +292,7 @@ public class Capsule4 extends Agent {
 					block();
 				}			
 			}							
-	   };
+	   }));
 	}
 	   	   
 	//Passes information to the spacecraft
