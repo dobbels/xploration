@@ -401,7 +401,7 @@ public class AgRover4 extends Agent {
 									localWorldMap.setCell(c);
 								}
 								System.out.println(getLocalName() + ": new local world map");
-								localWorldMap.printWorldMap();
+//								localWorldMap.printWorldMap();
 							}
 						}
 					} catch (Exception e) {

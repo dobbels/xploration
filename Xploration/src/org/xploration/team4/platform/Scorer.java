@@ -1,8 +1,10 @@
 package org.xploration.team4.platform;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.junit.runners.model.Annotatable;
 import org.xploration.ontology.CapsuleRegistrationInfo;
@@ -31,6 +33,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -59,6 +62,8 @@ public class Scorer extends Agent {
 	private HashMap<Integer, Integer> nbLateClaims = new HashMap<>();
 	//TODO get AIDs from simulator at registration to check if it's really them (not possible because senderAID is from Spacecraft?)
 	
+	private long printingRate = 10000;
+	
 	protected void setup(){
 
 		System.out.println(getLocalName() + ": HAS ENTERED");
@@ -80,12 +85,60 @@ public class Scorer extends Agent {
 			e.printStackTrace();
 		}
 		
-		receiveClaim();
+		listenForClaims();
 		
-		//TODO add behaviour(s) here
+		printScore();
 	}
 	
-	void receiveClaim() {
+	void printScore() {
+		// print Team X: score, # of correct cells claimed, # incorrect cells claimed, # late claims regularly
+		addBehaviour(new TickerBehaviour(this, printingRate) {
+			
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void onStart() {
+				System.out.println(getLocalName() + ": Start Printing Scores");
+			}
+
+			@Override
+			protected void onTick() { // print all teams with the numbers of attempted claims 
+				System.out.println("HELLOOOOOOO");
+				try {
+					ArrayList<Integer> teams = new ArrayList<>();
+					teams.addAll(nbCorrectClaims.keySet());
+					Collections.sort(teams);
+					ArrayList<Object[]> table = new ArrayList<>();
+					
+					table.add(new Object[] {" ", "# correct claims", "# incorrect claims", "# late claims"});
+					table.add(new Object[] {"Team4", "10", "1", "0"});
+					for (int teamid : teams) {	
+						Integer arg2 = 0, arg3 = 0;
+						if (nbIncorrectClaims.containsKey(teamid)) 
+							arg2 = nbIncorrectClaims.get(teamid);
+						
+						if (nbLateClaims.containsKey(teamid))
+							arg3 = nbLateClaims.get(teamid);
+						table.add(new Object[] {"Team" + teamid, 
+								nbCorrectClaims.get(teamid).toString(), 
+								arg2.toString(),
+								arg3.toString()});
+					}
+					
+					for (Object[] row : table) {
+						System.out.format("%-10s%-20s%-20s%20s\n", row);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			//TODO sort from highest to lowest? 
+			//TODO Check in the end if there's a team in the others that is not in correctClaims? 
+		});
+		
+	}
+
+	void listenForClaims() {
 		addBehaviour(new CyclicBehaviour(this) {
 			
 			private static final long serialVersionUID = 1L;
