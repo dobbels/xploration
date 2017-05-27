@@ -41,10 +41,7 @@ import jade.lang.acl.ACLMessage;
 
 public class Scorer extends Agent {
 	
-	// TODO get all claim cell requests from platform (or spacecraft?), either
-	//    	with a boolean or scorer checks again if it is a correct claim 
-	//		and then calculate score
-	// TODO send score to spacecraft in the end
+	// TODO send score to spacecraft in the end ?
 	
 	private static final long serialVersionUID = 1L;
 	

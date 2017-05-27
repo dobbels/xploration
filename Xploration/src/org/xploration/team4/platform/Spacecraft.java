@@ -187,7 +187,7 @@ public class Spacecraft extends Agent {
 						String teamName = "Capsule" + teamNb;
 						String className = "org.xploration.team" + teamNb + ".company."+ teamName;
 //							String className = "org.xploration.team" + 4 + ".company."+ teamName;
-						Object[] args = new Object[]{ currentCell.getX(), currentCell.getY(), mapDimensionX, mapDimensionY, missionLength};
+						Object[] args = new Object[]{ currentCell.getX(), currentCell.getY(), mapDimensionX, mapDimensionY, missionLength, Constants.COMMUNICATION_RANGE};
 				        agents.add(container.createNewAgent(teamName,className, args));
 					} catch (StaleProxyException e) {
 					    e.printStackTrace();
