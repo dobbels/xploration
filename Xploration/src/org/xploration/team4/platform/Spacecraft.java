@@ -362,7 +362,8 @@ public class Spacecraft extends Agent {
 	
 	//Passes information to the spacecraft
 	private void sendClaimToScorer(ClaimCellInfo cellInfo){
-		addBehaviour (new CyclicBehaviour (this){
+		addBehaviour (new CyclicBehaviour (this){ 
+			//TODO should be simple behaviour. now it keeps doing nothing forever. The searching in yellow pages should then happen in a while loop 
 
 			AID agScorer;
 			private boolean forwarded = false;

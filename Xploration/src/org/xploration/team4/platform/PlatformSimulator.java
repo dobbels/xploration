@@ -1,6 +1,7 @@
 package org.xploration.team4.platform;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
 import org.xploration.team4.common.MessageHandler;
 
+import jade.content.AgentAction;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -33,6 +35,7 @@ import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -245,35 +248,6 @@ public class PlatformSimulator extends Agent {
 				return inRange;
 			}
 			
-			//I moved these two functions to outside of listener. I needed them 
-			/*
-			private boolean inRangeFrom(Cell rover, Cell other) {
-		    	// In these calculations it is assumed that the map is spherical, so
-				// from the left side, you can go directly to the rigth side and so on. 
-		    	int x = rover.getX();
-		    	int y = rover.getY();
-		    	
-		    	int x_other = other.getX();
-		    	int y_other = other.getY();
-		    	
-		    	int distance = distance(x,y,x_other,y_other);
-		    	
-		    	return (0 <= distance && distance <= Constants.COMMUNICATION_RANGE);
-			}
-			
-			public int distance(int x, int y, int x_other, int y_other) {
-		        int rightDiff = (worldDimensionY + y_other - y) % worldDimensionY;
-		        int leftDiff = (worldDimensionY + y - y_other) % worldDimensionY;
-		        int upDiff = (worldDimensionX + x - x_other) % worldDimensionX;
-		        int downDiff = (worldDimensionX + x_other - x) % worldDimensionX;
-
-		        int distY = Math.min(rightDiff, leftDiff);
-		        int distX = Math.min(upDiff, downDiff);
-
-		        return distY + Math.max(0, (distX - distY) / 2);
-		    }
-			*/
-			
 			private void printContent(ContentElement ce) {
 				Action agAction = (Action) ce;
 				Concept conc = agAction.getAction();
@@ -430,18 +404,10 @@ public class PlatformSimulator extends Agent {
 									myAgent.send(reply);
 									System.out.println(myAgent.getLocalName()+": Initial AGREEMENT is sent");
 									
-									//wait for n seconds
+									//wait for n seconds and send message
 									roverState.replace(team, State.MOVING);
-									doWait(movingTime);
+									confirmNewLocation(msg, destination, team, movingTime);
 									
-									//TODO collision detection
-									
-									//send inform message and update rover position
-									roverState.replace(team, State.OTHER);
-									roversPosition.replace(team, destination);
-									ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM);
-									send(inform);
-
 									System.out.println(myAgent.getLocalName() + ": INFORM is sent with destination cell " + destination.getX() + " " + destination.getY());
 								}
 								else {
@@ -471,6 +437,21 @@ public class PlatformSimulator extends Agent {
 				}
 			}
 		};
+	}
+	
+	private void confirmNewLocation(ACLMessage msg, Cell destination, int team, long timePeriod){
+		addBehaviour (new WakerBehaviour (this, timePeriod){
+
+			private static final long serialVersionUID = 1L;
+
+			protected void handleElapsedTimeout() {
+				//send inform message and update rover position
+				roverState.replace(team, State.OTHER);
+				roversPosition.replace(team, destination);
+				ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM);
+				send(inform);
+			}
+		});
 	}
 
 	private Behaviour cellAnalysisRequestListener() {
@@ -536,23 +517,19 @@ public class PlatformSimulator extends Agent {
 										int teamID = AIDToTeamId.get(fromAgent);
 										if(!(isValidPosition(teamID, cellToAnalyze) && roverState.get(teamID) != State.MOVING)){
 											System.out.println(getLocalName()+ ": Either rover " + AIDToTeamId.get(fromAgent) + " is moving while analyzing or it is not in the location asked to analyze.");
-											doWait(2*analyzingTime); // because this rover is cheating
-											
-											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.FAILURE);
-											send(inform);
 
-											System.out.println(myAgent.getLocalName() + ": FAILURE is sent to team "+ AIDToTeamId.get(fromAgent));
+											sendFailure(msg, 2*analyzingTime);
+											
+											System.out.println(myAgent.getLocalName() + ": FAILURE will be sent to team "+ AIDToTeamId.get(fromAgent));
 										}
 										else {
 											CellAnalysis cellAnalysis = new CellAnalysis();
 											cellAnalysis.setCell(worldMap.getCell(m, n));
 											
-											doWait(analyzingTime); //TODO does this work?
+											informMineral(msg, cellAnalysis, (long) analyzingTime);
+//											System.out.println("issued: " + new Date());
 											
-											ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis);
-											send(inform);
-
-											System.out.println(myAgent.getLocalName() + ": INFORM is sent with mineral " + worldMap.getCell(m, n).getMineral());
+											System.out.println(myAgent.getLocalName() + ": INFORM with mineral "+ worldMap.getCell(m, n).getMineral() + " will be sent in " + analyzingTime/1000 + " seconds");
 										}	
 									}
 								} catch (Exception e) {
@@ -587,6 +564,32 @@ public class PlatformSimulator extends Agent {
 			}
 		};
 	}
+	
+	private void informMineral(ACLMessage msg, CellAnalysis cellAnalysis, long timePeriod){
+		addBehaviour (new WakerBehaviour (this, timePeriod){
+
+			private static final long serialVersionUID = 1L;
+
+			protected void handleElapsedTimeout() {
+				ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis); 
+                send(inform);
+//                System.out.println("sent: " +new Date());
+			}
+		});
+	}
+	
+	private void sendFailure(ACLMessage msg, long timePeriod){
+		addBehaviour (new WakerBehaviour (this, timePeriod){
+
+			private static final long serialVersionUID = 1L;
+
+			protected void handleElapsedTimeout() {
+				ACLMessage failure = MessageHandler.constructReplyMessage(msg, ACLMessage.FAILURE); 
+                send(failure);
+			}
+		});
+	}
+
 	
 	
 	private Behaviour cellClaimRoverListener(){
@@ -649,7 +652,7 @@ public class PlatformSimulator extends Agent {
 	}
 	
 	private void cellClaimToCapsule(ClaimCellInfo cellInfo){
-		addBehaviour (new CyclicBehaviour (this){
+		addBehaviour (new CyclicBehaviour (this){ //TODO not cyclic, should be simple
 
 			AID agCommunication;
 			Cell capsuleCell;

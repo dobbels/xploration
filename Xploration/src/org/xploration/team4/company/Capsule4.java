@@ -302,7 +302,7 @@ public class Capsule4 extends Agent {
 	   	   
 	//Passes information to the spacecraft
 	private void cellClaimToSpacecraft(ClaimCellInfo cellInfo){
-		addBehaviour (new CyclicBehaviour (this){
+		addBehaviour (new CyclicBehaviour (this){ //TODO should be simple behaviour !
 
 			AID agCommunication;
 			private boolean claimCellToSpacecraft = false;

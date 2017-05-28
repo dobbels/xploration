@@ -103,9 +103,14 @@ public class AgRover4 extends Agent {
 		
 		//roverRegistration for Map Simulator
 	    roverRegistration(location);	    
-		claimCell();
-		claimCell();
+//		claimCell();
+//		claimCell();
+		startMainBehaviour();
 	} 
+	
+	private void startMainBehaviour() {
+		
+	}
 
 	private void analyzeCell(Cell myCell){
 
