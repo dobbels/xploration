@@ -109,7 +109,21 @@ public class AgRover4 extends Agent {
 	} 
 	
 	private void startMainBehaviour() {
-		
+		addBehaviour (new CyclicBehaviour(this) {
+			
+			@Override
+			public void action() {
+				// TODO make simple but realistic behaviour of rover
+				// move around (in a spiral around the planet and not caring about what is already analyzed), analyze cells (maybe write wantToAnalyze() which now always returns true), claim them if you're in range
+				// make sure you don't do anything illegal while waiting for move or analyze responses
+				
+				// TODO add exploration-algorithm-logic
+				// maybe never go back in range of capsule, except when the end of the mission is approaching. 
+				// if the world is small, maybe it's even best to just go around the whole time, or mark your territory first and then 
+				// start filling in the inside. To calculate the size of this territory you could make some calculation based on missionlength, analyzingTime and movementTime (oh maybe these last ones you don't know).
+				
+			}
+		});
 	}
 
 	private void analyzeCell(Cell myCell){
