@@ -125,7 +125,7 @@ public class Scorer extends Agent {
 					}
 					
 					for (Object[] row : table) {
-						System.out.format("%-10s%-20s%-20s%20s\n", row);
+						System.out.format("%-10s%-20s%-20s%-20s\n", row);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -162,6 +162,13 @@ public class Scorer extends Agent {
 								Iterator cellListIterator = cci.getMap().getAllCellList();
 								int teamid = team.getTeamId();
 								
+								if (!nbCorrectClaims.containsKey(teamid))
+									nbCorrectClaims.put(teamid, 0);
+								if (!nbIncorrectClaims.containsKey(teamid))
+									nbIncorrectClaims.put(teamid, 0);
+								if (!nbLateClaims.containsKey(teamid))
+									nbLateClaims.put(teamid, 0);
+								
 								Cell c;
 								while (cellListIterator.hasNext()) {
 									c = (Cell) cellListIterator.next();
@@ -169,24 +176,15 @@ public class Scorer extends Agent {
 									// In any case check if the claim was correct
 									if (correctClaim(c)) {
 										if (!alreadyClaimed(c)) {
-											nbCorrectClaims.put(teamid, nbCorrectClaims.put(teamid, nbCorrectClaims.get(teamid)));
+											nbCorrectClaims.put(teamid, nbCorrectClaims.get(teamid)+1);
 											claimedCells.add(c);
 										}
 										else {
-											if (!nbLateClaims.containsKey(teamid))
-												nbLateClaims.put(teamid, 1);
-											else
-												nbLateClaims.put(teamid, nbLateClaims.get(teamid)+1);
+											nbLateClaims.put(teamid, nbLateClaims.get(teamid)+1);
 										}
 									}
 									else {
-										nbIncorrectClaims.put(teamid, nbIncorrectClaims.put(teamid, nbIncorrectClaims.get(teamid)));
-										if (alreadyClaimed(c)) { //TODO necessary?
-											if (!nbLateClaims.containsKey(teamid))
-												nbLateClaims.put(teamid, 1);
-											else
-												nbLateClaims.put(teamid, nbLateClaims.get(teamid)+1);
-										}
+										nbIncorrectClaims.put(teamid, nbIncorrectClaims.get(teamid)+1);
 									}
 								}
 								
@@ -214,7 +212,7 @@ public class Scorer extends Agent {
 	}
 
 	protected boolean correctClaim(Cell c) {
-		return (worldMap.getCell(c.getX(), c.getY()).getMineral() == c.getMineral());
+		return (worldMap.getCell(c.getX(), c.getY()).getMineral().equals(c.getMineral()));
 	}
 
 	protected boolean alreadyClaimed(Cell c) {

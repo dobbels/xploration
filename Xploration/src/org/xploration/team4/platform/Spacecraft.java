@@ -390,7 +390,7 @@ public class Spacecraft extends Agent {
 							try{
 								ACLMessage msg = MessageHandler.constructMessage(agScorer, ACLMessage.INFORM, cellInfo, XplorationOntology.CLAIMCELLINFO);
 								send(msg);	
-								System.out.println(getLocalName() + ": INFORM is sent");
+								System.out.println(getLocalName() + ": claim-INFORM is sent");
 								forwarded = true;
 							}
 							catch(Exception e){

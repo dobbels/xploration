@@ -102,8 +102,8 @@ public class AgRover4 extends Agent {
 		System.out.println(getLocalName()+": communicationRange: "+ arg6);
 		
 		//roverRegistration for Map Simulator
-		//CAUSED some ERRORS thats why under comment
 	    roverRegistration(location);	    
+		claimCell();
 		claimCell();
 	} 
 
