@@ -16,7 +16,6 @@ import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.RoverRegistrationInfo;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
-import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
 import org.xploration.team4.common.MessageHandler;
 
@@ -613,7 +612,7 @@ public class PlatformSimulator extends Agent {
 										
 										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
 										Team claimedTeam = cellInfo.getTeam();
-										//TODO COULDN'T EXTRACT A MEANINGFUL MAP INFO
+										
 										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
 										jade.util.leap.List myCellList = claimedMap.getCellList();
 										

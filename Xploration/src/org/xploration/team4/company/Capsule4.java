@@ -3,7 +3,6 @@ package org.xploration.team4.company;
 import java.util.Iterator;
 
 import org.xploration.ontology.*;
-import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
 import org.xploration.team4.common.MessageHandler;
 
@@ -34,6 +33,8 @@ public class Capsule4 extends Agent {
 	private int communicationRange;
 	
 	private Map localWorldMap;
+	
+	public final static int TEAM_ID = 4;
 	
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 	
@@ -155,7 +156,7 @@ public class Capsule4 extends Agent {
 							CapsuleRegistrationInfo capsuleReg = new CapsuleRegistrationInfo();
 							capsuleReg.setCell(myCell);
 							Team team = new Team();
-							team.setTeamId(Constants.TEAM_ID);
+							team.setTeamId(TEAM_ID);
 							capsuleReg.setTeam(team);
 							
 							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.INFORM, capsuleReg, XplorationOntology.CAPSULEREGISTRATIONINFO);

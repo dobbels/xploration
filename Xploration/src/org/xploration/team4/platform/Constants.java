@@ -1,8 +1,7 @@
-package org.xploration.team4.common;
+package org.xploration.team4.platform;
 
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.Team;
-import org.xploration.team4.platform.PropertyReader;
 
 import jade.util.leap.Properties;
 

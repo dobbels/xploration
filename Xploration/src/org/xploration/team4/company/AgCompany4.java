@@ -1,7 +1,6 @@
 package org.xploration.team4.company;
 
 import org.xploration.ontology.*;
-import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.MessageHandler;
 
 import jade.content.AgentAction;
@@ -20,6 +19,7 @@ public class AgCompany4 extends Agent {
 	 
 	private static final long serialVersionUID = 1L;
 	
+	public final static int TEAM_ID = 4;
 
 	//sources: 
 	//  http://paginas.fe.up.pt/~eol/SOCRATES/Palzer/ontologysupportJADE.htm
@@ -76,7 +76,7 @@ public class AgCompany4 extends Agent {
 		
 								// Try to register to the desk
 								Team team = new Team();
-								team.setTeamId(Constants.TEAM_ID);
+								team.setTeamId(TEAM_ID);
 								RegistrationRequest regReq = new RegistrationRequest();
 								regReq.setTeam(team);
 								
