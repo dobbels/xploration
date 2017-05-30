@@ -44,7 +44,10 @@ public class AgRover4 extends Agent {
 	public final static int TEAM_ID = 4;
 
 	private Cell location = new Cell();
-	private ArrayList<Cell> analyzedCells = new ArrayList<>();
+	private ArrayList<Cell> claimedCells = new ArrayList<>();
+	
+	private ArrayList<Cell> nextMovements = new ArrayList<Cell>();
+	private ArrayList<String> directions = new ArrayList<String>();
 
 	private Map localWorldMap; 
 
@@ -100,13 +103,15 @@ public class AgRover4 extends Agent {
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
 		System.out.println(getLocalName()+": communicationRange: "+ arg6);
 		
+		directions.add("up");
+		directions.add("down");
+		directions.add("leftUp");
+		directions.add("leftDown");
+		directions.add("rightDown");
+		directions.add("rightUp");
+		
 		//roverRegistration for Map Simulator
 	    roverRegistration(location);	    
-		claimCell();
-		claimCell();
-		doWait(5000);
-//		analyzeCell(location);
-//		startMainBehaviour();
 	} 
 	
 	private void startMainBehaviour() {
@@ -121,6 +126,10 @@ public class AgRover4 extends Agent {
 				// we could move in spiral + radio range level if no other rovers are around
 				// if rovers are around move in spiral starting close to where they are so that they don't move to our position
 				
+				if (missionLength <= 0) {
+					System.out.println(getLocalName() + ": committing suicide");
+	                myAgent.doDelete();
+				}
 				
 				// TODO add exploration-algorithm-logic
 				// maybe never go back in range of capsule, except when the end of the mission is approaching. 
@@ -131,6 +140,20 @@ public class AgRover4 extends Agent {
 			}
 		});
 	}
+	
+	private ArrayList<Cell> calculateBorderCells(Cell position) {
+		ArrayList<Cell> border = new ArrayList<Cell>();
+		for (int i = 0; i < directions.size(); i++) {
+			Cell next = localWorldMap.calculateNextPosition(position.getX(), position.getY(), directions.get(i));
+			border.add(next);
+		}
+		return border;
+	}
+	
+	
+	
+	
+	// ------------------------------------------------------------------------------------------------------------------
 
 	private void analyzeCell(Cell myCell){
 
@@ -209,8 +232,7 @@ public class AgRover4 extends Agent {
 
 												if (conc instanceof CellAnalysis) {
 													Cell cell = ((CellAnalysis) conc).getCell();
-													//TODO set mineral in our representation of map. Is this the way to go?
-													analyzedCells.add(cell);
+													claimedCells.add(cell);
 													localWorldMap.setCell(cell);
 													System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
 															+cell.getX() + ","+ cell.getY()+  ", " + cell.getMineral() + ")");
@@ -220,15 +242,6 @@ public class AgRover4 extends Agent {
 											e.printStackTrace();
 										}
 										claimingCell = true;	
-
-										// map broadcast
-										broadcastCurrentMap(analyzedCells);
-
-										//Test if we get failure to this message. TODO delete
-										Cell notLocation = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
-										notLocation.setX(notLocation.getX());
-										notLocation.setY(notLocation.getY());
-										analyzeCell(notLocation);
 
 										break;
 									case ACLMessage.FAILURE:
@@ -306,11 +319,8 @@ public class AgRover4 extends Agent {
 							System.out.println(getLocalName() + ": INFORM is sent");
 							roverRegistration = true;
 
+							startMainBehaviour();
 							listenForMaps();
-
-							//UNDER COMMENTS Because it causes some problems
-//							requestMovement(); // TODO analyze cell happens in this behaviour for testing
-							//analyzeCell(location);
 						}
 						else{
 							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
@@ -363,11 +373,11 @@ public class AgRover4 extends Agent {
 
 						System.out.println(getLocalName()+ ": map broadcast service is found");
 
-						if (!analyzedCells.isEmpty()) {
+						if (!claimedCells.isEmpty()) {
 							MapBroadcastInfo mbi = new MapBroadcastInfo();
 							org.xploration.ontology.Map map = new org.xploration.ontology.Map();
 
-							for (Cell c : analyzedCells) {
+							for (Cell c : claimedCells) {
 								map.addCellList(c);
 							}
 							mbi.setMap(map);
@@ -442,7 +452,7 @@ public class AgRover4 extends Agent {
 
 	}
 
-	private void requestMovement() { //TODO here we probably add an argument 'cell' and take the decision of where to go outside?!
+	private void requestMovement(Cell destination) { //TODO here we probably add an argument 'cell' and take the decision of where to go outside?!
 		addBehaviour(new SimpleBehaviour(this) {
 			private static final long serialVersionUID = 1L;
 			AID agMovementSim;
@@ -469,11 +479,6 @@ public class AgRover4 extends Agent {
 							System.out.println(getLocalName()+ ": movement simulator agent is found");
 
 							MovementRequestInfo mri = new MovementRequestInfo();
-							Cell destination = localWorldMap.calculateNextPosition(location.getX(), location.getY(), "up");
-							//TODO uncomment when you want to test sprint 3.6
-							//							destination = localWorldMap.calculateNextPosition(destination.getX(), destination.getY(), "up");
-							destination.setX(destination.getX());
-							destination.setY(destination.getY());
 							Team team = new Team();
 							team.setTeamId(TEAM_ID);
 							mri.setCell(destination);
@@ -505,6 +510,8 @@ public class AgRover4 extends Agent {
 										movementRequested = true;
 										// Analyze this cell 
 										analyzeCell(location);
+										// map broadcast
+										broadcastCurrentMap(claimedCells);
 									}
 									else if (finalMsg.getPerformative() == ACLMessage.FAILURE) {
 										System.out.println(getLocalName() + ": FAILURE was received, collision");
@@ -578,6 +585,7 @@ public class AgRover4 extends Agent {
 								ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, cci, XplorationOntology.CLAIMCELLINFO);
 								send(msg);	
 								System.out.println(getLocalName() + ": INFORM is sent");
+								
 								claimCell = true;
 							}
 							catch(Exception e){

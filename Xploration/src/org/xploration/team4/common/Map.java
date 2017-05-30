@@ -154,6 +154,32 @@ public class Map {
     	
     	return false;
     }
+    
+    public boolean inRangeFrom(Cell rover, Cell other, int comRange) {
+    	// In these calculations it is assumed that the map is spherical, so
+		// from the left side, you can go directly to the rigth side and so on. 
+    	int x = rover.getX();
+    	int y = rover.getY();
+    	
+    	int x_other = other.getX();
+    	int y_other = other.getY();
+    	
+    	int distance = distance(x,y,x_other,y_other);
+    	
+    	return (0 <= distance && distance <= comRange);
+	}
+	
+	public int distance(int x, int y, int x_other, int y_other) {
+        int rightDiff = (getWidth() + y_other - y) % getWidth();
+        int leftDiff = (getWidth() + y - y_other) % getWidth();
+        int upDiff = (getHeight() + x - x_other) % getHeight();
+        int downDiff = (getHeight() + x_other - x) % getHeight();
+
+        int distY = Math.min(rightDiff, leftDiff);
+        int distX = Math.min(upDiff, downDiff);
+
+        return distY + Math.max(0, (distX - distY) / 2);
+    }
 }
 
 
