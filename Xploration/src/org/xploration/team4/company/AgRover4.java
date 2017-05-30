@@ -104,6 +104,8 @@ public class AgRover4 extends Agent {
 	    roverRegistration(location);	    
 		claimCell();
 		claimCell();
+		doWait(5000);
+//		analyzeCell(location);
 //		startMainBehaviour();
 	} 
 	
@@ -190,7 +192,7 @@ public class AgRover4 extends Agent {
 
 									switch (finalMsg.getPerformative()) {
 									case ACLMessage.INFORM:
-										System.out.println(getLocalName()+": INFORM is received!");
+										System.out.println(getLocalName()+": analyze INFORM is received!");
 
 										ContentElement ce;
 										try {
