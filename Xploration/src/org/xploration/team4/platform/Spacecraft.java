@@ -1,7 +1,7 @@
 package org.xploration.team4.platform;
 
 import java.util.*;
-import org.xploration.team4.common.Constants;
+
 import org.xploration.team4.common.MessageHandler;
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.ClaimCellInfo;

@@ -10,7 +10,6 @@ import org.xploration.ontology.MapBroadcastInfo;
 import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.RoverRegistrationInfo;
 import org.xploration.ontology.XplorationOntology;
-import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
 import org.xploration.team4.common.MessageHandler;
 import org.xploration.ontology.Team;
@@ -103,9 +102,11 @@ public class AgRover4 extends Agent {
 		
 		//roverRegistration for Map Simulator
 	    roverRegistration(location);	    
-//		claimCell();
-//		claimCell();
-		startMainBehaviour();
+		claimCell();
+		claimCell();
+		doWait(5000);
+//		analyzeCell(location);
+//		startMainBehaviour();
 	} 
 	
 	private void startMainBehaviour() {
@@ -125,6 +126,7 @@ public class AgRover4 extends Agent {
 				// maybe never go back in range of capsule, except when the end of the mission is approaching. 
 				// if the world is small, maybe it's even best to just go around the whole time, or mark your territory first and then 
 				// start filling in the inside. To calculate the size of this territory you could make some calculation based on missionlength, analyzingTime and movementTime (oh maybe these last ones you don't know).
+				// + claim cells you get in map broadcast. Just in case they broadcast it right after analyzing, not after claiming
 				
 			}
 		});
@@ -194,7 +196,7 @@ public class AgRover4 extends Agent {
 
 									switch (finalMsg.getPerformative()) {
 									case ACLMessage.INFORM:
-										System.out.println(getLocalName()+": INFORM is received!");
+										System.out.println(getLocalName()+": analyze INFORM is received!");
 
 										ContentElement ce;
 										try {
@@ -296,7 +298,7 @@ public class AgRover4 extends Agent {
 							RoverRegistrationInfo roverReg = new RoverRegistrationInfo();
 							roverReg.setCell(myCell);
 							Team team = new Team();
-							team.setTeamId(Constants.TEAM_ID);
+							team.setTeamId(TEAM_ID);
 							roverReg.setTeam(team);
 
 							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.INFORM, roverReg, XplorationOntology.ROVERREGISTRATIONINFO);
@@ -562,7 +564,7 @@ public class AgRover4 extends Agent {
 							
 							//CREATING EXAMPLE INPUT, ONLY FOR TESTING TODO delete
 							Team myTeam = new Team();
-							myTeam.setTeamId(Constants.TEAM_ID);
+							myTeam.setTeamId(TEAM_ID);
 							cci.setTeam(myTeam);
 							org.xploration.ontology.Map cciMap = new org.xploration.ontology.Map();
 							Cell myCell = new Cell();

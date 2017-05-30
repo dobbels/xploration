@@ -16,7 +16,6 @@ import org.xploration.ontology.MovementRequestInfo;
 import org.xploration.ontology.RoverRegistrationInfo;
 import org.xploration.ontology.Team;
 import org.xploration.ontology.XplorationOntology;
-import org.xploration.team4.common.Constants;
 import org.xploration.team4.common.Map;
 import org.xploration.team4.common.MessageHandler;
 
@@ -526,7 +525,8 @@ public class PlatformSimulator extends Agent {
 											CellAnalysis cellAnalysis = new CellAnalysis();
 											cellAnalysis.setCell(worldMap.getCell(m, n));
 											
-											informMineral(msg, cellAnalysis, (long) analyzingTime);
+//											informMineral(msg, cellAnalysis, (long) analyzingTime);
+											informMineralTeam1(fromAgent, cellAnalysis, analyzingTime);
 //											System.out.println("issued: " + new Date());
 											
 											System.out.println(myAgent.getLocalName() + ": INFORM with mineral "+ worldMap.getCell(m, n).getMineral() + " will be sent in " + analyzingTime/1000 + " seconds");
@@ -565,12 +565,28 @@ public class PlatformSimulator extends Agent {
 		};
 	}
 	
+	private void informMineralTeam1(AID from, CellAnalysis cellAnalysis, long timePeriod){
+		addBehaviour (new WakerBehaviour (this, timePeriod){
+
+			private static final long serialVersionUID = 1L;
+
+			protected void handleElapsedTimeout() {
+				System.out.println(getLocalName()+ ": send analyze inform");
+				ACLMessage inform = MessageHandler.constructMessage(from, ACLMessage.INFORM, cellAnalysis, XplorationOntology.CELLANALYSIS); 
+                send(inform);
+//                System.out.println("sent: " +new Date());
+			}
+		});
+	}
+
+	
 	private void informMineral(ACLMessage msg, CellAnalysis cellAnalysis, long timePeriod){
 		addBehaviour (new WakerBehaviour (this, timePeriod){
 
 			private static final long serialVersionUID = 1L;
 
 			protected void handleElapsedTimeout() {
+				System.out.println(getLocalName()+ ": send analyze inform");
 				ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis); 
                 send(inform);
 //                System.out.println("sent: " +new Date());
@@ -613,7 +629,7 @@ public class PlatformSimulator extends Agent {
 										
 										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
 										Team claimedTeam = cellInfo.getTeam();
-										//TODO COULDN'T EXTRACT A MEANINGFUL MAP INFO
+										
 										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
 										jade.util.leap.List myCellList = claimedMap.getCellList();
 										
