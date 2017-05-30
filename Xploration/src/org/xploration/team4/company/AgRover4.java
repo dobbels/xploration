@@ -539,7 +539,7 @@ public class AgRover4 extends Agent {
 		});
 	}
 	//Cell Claim Protocol from Rover to Platform Simulator
-	private void claimCell(){
+	private void claimCell(Cell myCell){
 		addBehaviour (new SimpleBehaviour (this){
 			
 			//Receiver Agent ID
@@ -574,10 +574,6 @@ public class AgRover4 extends Agent {
 							myTeam.setTeamId(TEAM_ID);
 							cci.setTeam(myTeam);
 							org.xploration.ontology.Map cciMap = new org.xploration.ontology.Map();
-							Cell myCell = new Cell();
-							myCell.setMineral("A");
-							myCell.setX(1);
-							myCell.setY(3);
 							cciMap.addCellList(myCell);
 							cci.setMap(cciMap);
 													
@@ -585,7 +581,6 @@ public class AgRover4 extends Agent {
 								ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, cci, XplorationOntology.CLAIMCELLINFO);
 								send(msg);	
 								System.out.println(getLocalName() + ": INFORM is sent");
-								
 								claimCell = true;
 							}
 							catch(Exception e){
