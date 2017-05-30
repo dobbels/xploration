@@ -116,6 +116,10 @@ public class AgRover4 extends Agent {
 				// TODO make simple but realistic behaviour of rover
 				// move around (in a spiral around the planet and not caring about what is already analyzed), analyze cells (maybe write wantToAnalyze() which now always returns true), claim them if you're in range
 				// make sure you don't do anything illegal while waiting for move or analyze responses
+				// to be able to move in spiral we have to have an array of next moves and a function calculating the cells around
+				// we could move in spiral + radio range level if no other rovers are around
+				// if rovers are around move in spiral starting close to where they are so that they don't move to our position
+				
 				
 				// TODO add exploration-algorithm-logic
 				// maybe never go back in range of capsule, except when the end of the mission is approaching. 
