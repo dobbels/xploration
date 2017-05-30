@@ -48,6 +48,7 @@ public class Scorer extends Agent {
 	private HashMap<Integer, Integer> nbCorrectClaims = new HashMap<>();
 	private HashMap<Integer, Integer> nbIncorrectClaims = new HashMap<>();
 	private HashMap<Integer, Integer> nbLateClaims = new HashMap<>();
+	private HashMap<Integer, Integer> teamScores = new HashMap<>();
 	//TODO get AIDs from simulator at registration to check if it's really them (not possible because senderAID is from Spacecraft?)
 	
 	private long printingRate = 10000;
@@ -97,30 +98,30 @@ public class Scorer extends Agent {
 					Collections.sort(teams);
 					ArrayList<Object[]> table = new ArrayList<>();
 					
-					table.add(new Object[] {" ", "# correct claims", "# incorrect claims", "# late claims"});
-//					table.add(new Object[] {"Team4", "10", "1", "0"});
+					table.add(new Object[] {" ", "# correct claims", "# incorrect claims", "# late claims", "## score ##"});
 					for (int teamid : teams) {	
-						Integer arg2 = 0, arg3 = 0;
-						if (nbIncorrectClaims.containsKey(teamid)) 
+						Integer arg2 = 0, arg3 = 0, arg4 = 0;
+//						if (nbIncorrectClaims.containsKey(teamid)) 
 							arg2 = nbIncorrectClaims.get(teamid);
 						
-						if (nbLateClaims.containsKey(teamid))
+//						if (nbLateClaims.containsKey(teamid))
 							arg3 = nbLateClaims.get(teamid);
+						arg4 = teamScores.get(teamid);
 						table.add(new Object[] {"Team" + teamid, 
 								nbCorrectClaims.get(teamid).toString(), 
 								arg2.toString(),
-								arg3.toString()});
+								arg3.toString(),
+								arg4.toString()});
 					}
 					
 					for (Object[] row : table) {
-						System.out.format("%-10s%-20s%-20s%-20s\n", row);
+						System.out.format("%-10s%-20s%-20s%-20s%-20s\n", row);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 			//TODO sort from highest to lowest? 
-			//TODO Check in the end if there's a team in the others that is not in correctClaims? 
 		});
 		
 	}
@@ -156,6 +157,8 @@ public class Scorer extends Agent {
 									nbIncorrectClaims.put(teamid, 0);
 								if (!nbLateClaims.containsKey(teamid))
 									nbLateClaims.put(teamid, 0);
+								if (!teamScores.containsKey(teamid))
+									teamScores.put(teamid, 0);
 								
 								Cell c;
 								while (cellListIterator.hasNext()) {
@@ -166,6 +169,7 @@ public class Scorer extends Agent {
 										if (!alreadyClaimed(c)) {
 											nbCorrectClaims.put(teamid, nbCorrectClaims.get(teamid)+1);
 											claimedCells.add(c);
+											teamScores.put(teamid, teamScores.get(teamid)+1);
 										}
 										else {
 											nbLateClaims.put(teamid, nbLateClaims.get(teamid)+1);
@@ -173,6 +177,7 @@ public class Scorer extends Agent {
 									}
 									else {
 										nbIncorrectClaims.put(teamid, nbIncorrectClaims.get(teamid)+1);
+										teamScores.put(teamid, teamScores.get(teamid)-5);
 									}
 								}
 								
@@ -188,7 +193,6 @@ public class Scorer extends Agent {
 						myAgent.send(reply);
 						System.out.println(myAgent.getLocalName() + ": NOT_UNDERSTOOD is sent");
 					}
-
 				}
 				else {
 					// Behaviour is blocked. Will be woken up again whenever the agent receives an ACLMessage.

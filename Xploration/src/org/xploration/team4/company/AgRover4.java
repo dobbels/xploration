@@ -101,11 +101,20 @@ public class AgRover4 extends Agent {
 		System.out.println(getLocalName()+": communicationRange: "+ arg6);
 		
 		//roverRegistration for Map Simulator
-	    roverRegistration(location);	    
-		claimCell();
-		claimCell();
-		doWait(5000);
-//		analyzeCell(location);
+	    roverRegistration(location);	
+	    
+	    Cell myCell = new Cell();
+		myCell.setMineral("A");
+		myCell.setX(1);
+		myCell.setY(3);
+		claimCell(myCell);
+		claimCell(myCell);
+		Cell otherCell = new Cell();
+		otherCell.setX(1);
+		otherCell.setY(3);
+		otherCell.setMineral("D");
+		claimCell(otherCell);
+
 //		startMainBehaviour();
 	} 
 	
@@ -528,7 +537,7 @@ public class AgRover4 extends Agent {
 		});
 	}
 	//Cell Claim Protocol from Rover to Platform Simulator
-	private void claimCell(){
+	private void claimCell(Cell myCell){
 		addBehaviour (new SimpleBehaviour (this){
 			
 			//Receiver Agent ID
@@ -563,10 +572,6 @@ public class AgRover4 extends Agent {
 							myTeam.setTeamId(TEAM_ID);
 							cci.setTeam(myTeam);
 							org.xploration.ontology.Map cciMap = new org.xploration.ontology.Map();
-							Cell myCell = new Cell();
-							myCell.setMineral("A");
-							myCell.setX(1);
-							myCell.setY(3);
 							cciMap.addCellList(myCell);
 							cci.setMap(cciMap);
 													

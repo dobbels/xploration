@@ -49,7 +49,6 @@ public class PlatformSimulator extends Agent {
 	// TODO every listening behaviour you put in a thread (http://jade.tilab.com/doc/api/jade/core/behaviours/ThreadedBehaviourFactory.html),
 	//			you can just do blockingReceive() ! If there are any problems with messages that don't arrive, then this might be the solution.
 	
-	private static final long serialVersionUID = 1L;
 	//TODO eventually maybe the difference between variables of 'different' simulators is not important anymore.
 	/***COMMON***/
 	private static final Ontology ontology = XplorationOntology.getInstance();
@@ -441,8 +440,6 @@ public class PlatformSimulator extends Agent {
 	private void confirmNewLocation(ACLMessage msg, Cell destination, int team, long timePeriod){
 		addBehaviour (new WakerBehaviour (this, timePeriod){
 
-			private static final long serialVersionUID = 1L;
-
 			protected void handleElapsedTimeout() {
 				//send inform message and update rover position
 				roverState.replace(team, State.OTHER);
@@ -525,8 +522,8 @@ public class PlatformSimulator extends Agent {
 											CellAnalysis cellAnalysis = new CellAnalysis();
 											cellAnalysis.setCell(worldMap.getCell(m, n));
 											
-//											informMineral(msg, cellAnalysis, (long) analyzingTime);
-											informMineralTeam1(fromAgent, cellAnalysis, analyzingTime);
+											informMineral(msg, cellAnalysis, (long) analyzingTime);
+//											informMineralTeam1(fromAgent, cellAnalysis, analyzingTime);
 //											System.out.println("issued: " + new Date());
 											
 											System.out.println(myAgent.getLocalName() + ": INFORM with mineral "+ worldMap.getCell(m, n).getMineral() + " will be sent in " + analyzingTime/1000 + " seconds");
@@ -568,7 +565,7 @@ public class PlatformSimulator extends Agent {
 	private void informMineralTeam1(AID from, CellAnalysis cellAnalysis, long timePeriod){
 		addBehaviour (new WakerBehaviour (this, timePeriod){
 
-			private static final long serialVersionUID = 1L;
+			
 
 			protected void handleElapsedTimeout() {
 				System.out.println(getLocalName()+ ": send analyze inform");
@@ -583,9 +580,7 @@ public class PlatformSimulator extends Agent {
 	private void informMineral(ACLMessage msg, CellAnalysis cellAnalysis, long timePeriod){
 		addBehaviour (new WakerBehaviour (this, timePeriod){
 
-			private static final long serialVersionUID = 1L;
-
-			protected void handleElapsedTimeout() {
+			protected void onWake() {
 				System.out.println(getLocalName()+ ": send analyze inform");
 				ACLMessage inform = MessageHandler.constructReplyMessage(msg, ACLMessage.INFORM, cellAnalysis); 
                 send(inform);
@@ -596,8 +591,6 @@ public class PlatformSimulator extends Agent {
 	
 	private void sendFailure(ACLMessage msg, long timePeriod){
 		addBehaviour (new WakerBehaviour (this, timePeriod){
-
-			private static final long serialVersionUID = 1L;
 
 			protected void handleElapsedTimeout() {
 				ACLMessage failure = MessageHandler.constructReplyMessage(msg, ACLMessage.FAILURE); 
