@@ -27,11 +27,11 @@ public class MessageHandler {
         
 //        System.out.println(ag.toString());
 //        System.out.println(ag);
-        if (agentAction instanceof ClaimCellInfo) {
+//        if (agentAction instanceof ClaimCellInfo) {
 //        	System.out.println(((ClaimCellInfo) agentAction).getTeam());
 //        	System.out.println(((ClaimCellInfo) agentAction).getMap());
-        	System.out.println(((ClaimCellInfo) agentAction).getMap().getCellList());
-    	}
+//        	System.out.println(((ClaimCellInfo) agentAction).getMap().getCellList());
+//    	}
         Action action = new Action(ag, agentAction);
         
 		ACLMessage msg = new ACLMessage(performative);

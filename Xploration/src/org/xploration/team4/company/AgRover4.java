@@ -141,28 +141,28 @@ public class AgRover4 extends Agent {
 				if (nextMovements.isEmpty()) {
 					System.out.println(getLocalName() + ": calculating next cells");
 					nextMovements = calculateBorderCells(location); //TODO put sagars function here ..(location, prev_distance + 1)
-					
 				}
 				
-				if (!analyzing() && currentCellAnalyzed()) {
+				if (!analyzing() && !moving() && currentCellAnalyzed()) {
 					System.out.println(getLocalName() + ": requesting movement");
+					if (state == State.ANALYZING) {
+						System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
+					}
+					state = State.MOVING;
 					requestMovement(nextMovements.get(0));
 				} //TODO in future maybe turn around and start turning anti clockwise if there are too many claimed cells before you 
 				
-				if (!moving() && !alreadyHandled()) {
+				if (!moving() && !analyzing() && !currentCellAlreadyHandled()) {
 					System.out.println(getLocalName() + ": analyzing");
+					if (state == State.MOVING) {
+						System.out.println(getLocalName() + ": ERROR! Analyzing while moving");
+					}
+					state = State.ANALYZING;
 					analyzeCurrentCell();
-				}
+				} //TODO print at start and end of claimCells(), there is a currentModification error
 				
 				// nextMovements.remove(0); is done in requestMovement after an inform. If a failure is received, the same cell will be tried on the next iteration.
 				//TODO if refused or failed, calculate new nextMovements from current location? Or relative to capsule loc? 
-				if (!analyzedCells.isEmpty() && alreadyClaiming && localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-					alreadyClaiming = true;
-					System.out.println("should not be empty: " + analyzedCells);
-					System.out.println(getLocalName() + ": claimin'");
-					claimCells();
-				}
-				
 				
 				// TODO add exploration-algorithm-logic
 				// we could move in spiral + radio range level if no other rovers are around
@@ -180,7 +180,7 @@ public class AgRover4 extends Agent {
 	 * Our current location is already analyzed by this rover or claimed by other rovers
 	 * (In this function we assume that others only broadcast claimed cells, not when they are just analyzed)
 	 */ 
-	protected boolean alreadyHandled() {
+	protected boolean currentCellAlreadyHandled() {
 		for (Cell c : localWorldMap.getCellList()) {
 			if (c.getX() == location.getX() && c.getY() == location.getY() && c.getMineral() != null)
 				return true;
@@ -266,10 +266,6 @@ public class AgRover4 extends Agent {
 							CellAnalysis cellAnalysis = new CellAnalysis();
 							cellAnalysis.setCell(location);
 
-							if (state == State.MOVING) {
-								System.out.println(getLocalName() + ": ERROR! Analyzing while moving");
-							}
-							state = State.ANALYZING;
 							ACLMessage msg = MessageHandler.constructMessage(agTerrain, ACLMessage.REQUEST, cellAnalysis, XplorationOntology.CELLANALYSIS);
 							send(msg);			                	
 
@@ -562,12 +558,15 @@ public class AgRover4 extends Agent {
 							mri.setCell(destination);
 							mri.setTeam(team);
 
-							if (state == State.ANALYZING) {
-								System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
-							}
-							state = State.MOVING;
 							ACLMessage msg = MessageHandler.constructMessage(agMovementSim, ACLMessage.REQUEST, mri, XplorationOntology.MOVEMENTREQUESTINFO);
-							send(msg);			                	
+							send(msg);
+							
+							// Try to claim here, because there is no use in trying more often than the times you move 
+							if (!analyzedCells.isEmpty() && localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+								System.out.println("should not be empty: " + analyzedCells);
+								System.out.println(getLocalName() + ": claimin'");
+								claimCells();
+							}
 
 							System.out.println(getLocalName() + ": REQUEST is sent");
 
@@ -594,8 +593,11 @@ public class AgRover4 extends Agent {
 										nextMovements.remove(0);
 										movementRequested = true;
 										
-										// map broadcast
+										
 										broadcastCurrentMap();
+										
+//										if (!currentCellAlreadyHandled())
+//											analyzeCurrentCell();
 									}
 									else if (finalMsg.getPerformative() == ACLMessage.FAILURE) {
 										System.out.println(getLocalName() + ": FAILURE was received, collision");
@@ -629,7 +631,7 @@ public class AgRover4 extends Agent {
 			private boolean claimCell = false;
 
 			public void action(){
-
+				System.out.println("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 				if(!claimCell){
 					//Searching for an agent with RADIOCLAIMSERVICE Description
 					DFAgentDescription dfd = new DFAgentDescription();     
