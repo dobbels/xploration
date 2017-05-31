@@ -115,12 +115,12 @@ public class AgRover4 extends Agent {
 		System.out.println(getLocalName()+": missionLength: "+ arg5);
 		System.out.println(getLocalName()+": communicationRange: "+ arg6);
 		
-		directions.add("up");
 		directions.add("rightUp");
 		directions.add("rightDown");
 		directions.add("down");
 		directions.add("leftDown");
 		directions.add("leftUp");
+		directions.add("up");
 		
 		//roverRegistration for Map Simulator
 	    roverRegistration(location);	    
@@ -137,11 +137,11 @@ public class AgRover4 extends Agent {
 			
 			@Override
 			public void action() {
-				//TODO je moet een manier vinden om zeker te weten of een behaviour is gestopt? Of kan alles linken van buitenuit?
 				if (nextMovements.isEmpty()) {
 					System.out.println(getLocalName() + ": calculating next cells");
-					nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); //TODO put sagars function here ..(location, prev_distance + 1)
-				}
+					nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
+					System.out.println(nextMovements);
+				} //TODO with 6 if's we can probably make a bulletproof spiralalgorithm.
 				
 				if (!analyzing() && !moving() && currentCellAnalyzed()) {
 					System.out.println(getLocalName() + ": requesting movement");
@@ -219,8 +219,11 @@ public class AgRover4 extends Agent {
 	
 	private ArrayList<Cell> calculateBorderCells(Cell position, int distance) {
 		ArrayList<Cell> borderCells = new ArrayList<Cell>();
-		Cell nextPos = position;
-		while(borderCells.size() < 2 || (borderCells.get(0) != borderCells.get(borderCells.size()-1))) {
+		Cell nextPos = localWorldMap.calculateNextPosition(position.getX(), position.getY(), "up");
+		borderCells.add(nextPos);
+		
+		//TODO should work with (borderCells.get(0) equals borderCells.get(borderCells.size()-1)
+		while(borderCells.size() <= (distance * 6)) {
 			ArrayList<Cell> border = new ArrayList<Cell>();
 			for (int i = 0; i < directions.size(); i++) {
 				Cell next = localWorldMap.calculateNextPosition(nextPos.getX(), nextPos.getY(), directions.get(i));
@@ -233,13 +236,35 @@ public class AgRover4 extends Agent {
 				if (localWorldMap.distance(capsuleLocation, c) == distance)
 					atRightDistance.add(c);
 			}
-			nextPos = atRightDistance.get(0);
+			if (atRightDistance.size() != 2) {
+				System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+				System.out.println(nextPos.getX() + ", " + nextPos.getY());
+				for (Cell whut : atRightDistance) {
+					System.out.println(whut.getX() + ", " + whut.getY());
+				}
+			}
+
+			for (Cell last : atRightDistance) {
+				if (notContains(borderCells, last)) {
+					nextPos = last;
+					break;
+				}
+			}
+//			nextPos = atRightDistance.get(0);
 			borderCells.add(nextPos);
 		}
 		borderCells.remove(borderCells.size()-1);
 		return borderCells;
 	}
 	
+	private boolean notContains(ArrayList<Cell> borderCells, Cell last) {
+		for (Cell c : borderCells) {
+			if (c.getX() == last.getX() && c.getY() == last.getY())
+				return false;
+		}
+		return true;
+	}
+
 	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator
 		return new WakerBehaviour(this, missionLength*1000) {
 			
@@ -584,13 +609,6 @@ public class AgRover4 extends Agent {
 							ACLMessage msg = MessageHandler.constructMessage(agMovementSim, ACLMessage.REQUEST, mri, XplorationOntology.MOVEMENTREQUESTINFO);
 							send(msg);
 							
-							// Try to claim here, because there is no use in trying more often than the times you move 
-							if (!analyzedCells.isEmpty() && !alreadyClaiming && localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-								alreadyClaiming = true;
-//								System.out.println("should not be empty: " + analyzedCells);
-								System.out.println(getLocalName() + ": claimin'");
-								claimCells();
-							}
 							System.out.println(getLocalName() + ": REQUEST is sent");
 
 							ACLMessage ans = MessageHandler.blockingReceive(myAgent, XplorationOntology.MOVEMENTREQUESTINFO);
@@ -616,6 +634,13 @@ public class AgRover4 extends Agent {
 										nextMovements.remove(0);
 										movementRequested = true;
 										
+										// Try to claim here, because there is no use in trying more often than the times you move 
+										if (!analyzedCells.isEmpty() && !alreadyClaiming && localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+											alreadyClaiming = true;
+//											System.out.println("should not be empty: " + analyzedCells);
+											System.out.println(getLocalName() + ": claimin'");
+											claimCells();
+										}
 										
 										broadcastCurrentMap();
 										
