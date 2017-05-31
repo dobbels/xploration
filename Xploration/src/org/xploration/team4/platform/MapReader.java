@@ -89,6 +89,20 @@ public class MapReader {
 		
 		m.printWorldMap();
 		
+		ArrayList<Integer> test = new ArrayList<>();
+		int i;
+		for (i = 0 ; i <=10 ; i++) {
+			test.add(i);
+		}
+		System.out.println();
+		System.out.println(test.toString());
+		test.remove(0);
+		System.out.println(test.toString());
+		
+		System.out.println(test.isEmpty());
+		test.clear();
+		System.out.println(test);
+		System.out.println(test.isEmpty());
 	}
 
 }

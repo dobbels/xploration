@@ -46,6 +46,17 @@ public class Map {
 			System.out.println();
 		}		
 	}
+	
+	public ArrayList<Cell> getCellList() {
+		ArrayList<Cell> result = new ArrayList<>();
+		for (ArrayList<Cell> row : worldMap) {
+			for (Cell c : row) {
+				if (c != null)
+					result.add(c);
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * 

@@ -91,7 +91,6 @@ public class Capsule4 extends Agent {
         capsuleRegistration(location);     
 	}
 	
-	//TODO This function causes a name problem an agent name problem
 	private Behaviour deployRover() {
 		return new OneShotBehaviour() {
             
@@ -102,10 +101,6 @@ public class Capsule4 extends Agent {
                 int x = location.getX();
                 int y = location.getY();
                 
-        		// to test sprint 3.7: capsule should not get broadcast
-//        		x = 5;
-//        		y = 7;
-
                 AgentContainer cnt = getContainerController();
                 AgentController a;
 
@@ -259,16 +254,12 @@ public class Capsule4 extends Agent {
 								
 								AID fromAgent = msg.getSender();
 								try{
-										System.out.println(getLocalName()+ ": INFORM is received");
-										
 										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
 										Team claimedTeam = cellInfo.getTeam();
 										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
 										jade.util.leap.List myCellList = claimedMap.getCellList();
-																				
-										System.out.println(getLocalName()+ ": claimed team Id is: team" + claimedTeam.getTeamId() + " and " + 
-										//TODO add the map value
-										"claimed map is: ");
+										
+										System.out.println(getLocalName()+ ": claim INFORM is received from team " + claimedTeam.getTeamId());
 										try{
 											//Passes the information to the spacecraft
 											cellClaimToSpacecraft(cellInfo);
@@ -303,7 +294,7 @@ public class Capsule4 extends Agent {
 	   	   
 	//Passes information to the spacecraft
 	private void cellClaimToSpacecraft(ClaimCellInfo cellInfo){
-		addBehaviour (new CyclicBehaviour (this){ //TODO should be simple behaviour !
+		addBehaviour (new SimpleBehaviour (this){ 
 
 			AID agCommunication;
 			private boolean claimCellToSpacecraft = false;
@@ -349,6 +340,11 @@ public class Capsule4 extends Agent {
 						e.printStackTrace();
 					}
 				}
+			}
+
+			@Override
+			public boolean done() {
+				return claimCellToSpacecraft;
 			}		
 		});
 	}

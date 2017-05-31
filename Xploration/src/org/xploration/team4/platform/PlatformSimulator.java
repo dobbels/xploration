@@ -46,10 +46,6 @@ public class PlatformSimulator extends Agent {
 	
 	// TODO think of the case (in the beginning or in registration failure) when not everyone/no one is registered. Don't count on those things.  
 	
-	// TODO every listening behaviour you put in a thread (http://jade.tilab.com/doc/api/jade/core/behaviours/ThreadedBehaviourFactory.html),
-	//			you can just do blockingReceive() ! If there are any problems with messages that don't arrive, then this might be the solution.
-	
-	//TODO eventually maybe the difference between variables of 'different' simulators is not important anymore.
 	/***COMMON***/
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
