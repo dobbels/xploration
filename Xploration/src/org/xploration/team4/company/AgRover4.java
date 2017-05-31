@@ -140,7 +140,7 @@ public class AgRover4 extends Agent {
 				//TODO je moet een manier vinden om zeker te weten of een behaviour is gestopt? Of kan alles linken van buitenuit?
 				if (nextMovements.isEmpty()) {
 					System.out.println(getLocalName() + ": calculating next cells");
-					nextMovements = calculateBorderCells(location); //TODO put sagars function here ..(location, prev_distance + 1)
+					nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); //TODO put sagars function here ..(location, prev_distance + 1)
 				}
 				
 				if (!analyzing() && !moving() && currentCellAnalyzed()) {
@@ -215,6 +215,29 @@ public class AgRover4 extends Agent {
 			border.add(next);
 		}
 		return border;
+	}
+	
+	private ArrayList<Cell> calculateBorderCells(Cell position, int distance) {
+		ArrayList<Cell> borderCells = new ArrayList<Cell>();
+		Cell nextPos = position;
+		while(borderCells.size() < 2 || (borderCells.get(0) != borderCells.get(borderCells.size()-1))) {
+			ArrayList<Cell> border = new ArrayList<Cell>();
+			for (int i = 0; i < directions.size(); i++) {
+				Cell next = localWorldMap.calculateNextPosition(nextPos.getX(), nextPos.getY(), directions.get(i));
+				border.add(next);
+			}
+			Cell c;
+			ArrayList<Cell> atRightDistance = new ArrayList<Cell>();
+			for (int j = 0; j < border.size(); j++) {
+				c = border.get(j);
+				if (localWorldMap.distance(capsuleLocation, c) == distance)
+					atRightDistance.add(c);
+			}
+			nextPos = atRightDistance.get(0);
+			borderCells.add(nextPos);
+		}
+		borderCells.remove(borderCells.size()-1);
+		return borderCells;
 	}
 	
 	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator

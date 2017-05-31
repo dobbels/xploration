@@ -191,6 +191,22 @@ public class Map {
 
         return distY + Math.max(0, (distX - distY) / 2);
     }
+	
+	public int distance(Cell a, Cell b) {
+		int x = a.getX();
+		int y = a.getY();
+		int x_other = b.getX();
+		int y_other = b.getY();
+        int rightDiff = (getWidth() + y_other - y) % getWidth();
+        int leftDiff = (getWidth() + y - y_other) % getWidth();
+        int upDiff = (getHeight() + x - x_other) % getHeight();
+        int downDiff = (getHeight() + x_other - x) % getHeight();
+
+        int distY = Math.min(rightDiff, leftDiff);
+        int distX = Math.min(upDiff, downDiff);
+
+        return distY + Math.max(0, (distX - distY) / 2);
+    }
 }
 
 
