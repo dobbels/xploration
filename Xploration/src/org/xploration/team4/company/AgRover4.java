@@ -145,7 +145,7 @@ public class AgRover4 extends Agent {
 				
 				if (!analyzing() && !moving() && currentCellAnalyzed()) {
 					System.out.println(getLocalName() + ": requesting movement");
-					if (state == State.ANALYZING) {
+					if (state == State.ANALYZING && state == State.MOVING) {
 						System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
 					}
 					state = State.MOVING;
@@ -154,7 +154,7 @@ public class AgRover4 extends Agent {
 				
 				if (!moving() && !analyzing() && !currentCellAlreadyHandled()) {
 					System.out.println(getLocalName() + ": analyzing");
-					if (state == State.MOVING) {
+					if (state == State.MOVING && state == State.ANALYZING) {
 						System.out.println(getLocalName() + ": ERROR! Analyzing while moving");
 					}
 					state = State.ANALYZING;
@@ -562,12 +562,12 @@ public class AgRover4 extends Agent {
 							send(msg);
 							
 							// Try to claim here, because there is no use in trying more often than the times you move 
-							if (!analyzedCells.isEmpty() && localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-								System.out.println("should not be empty: " + analyzedCells);
+							if (!analyzedCells.isEmpty() && !alreadyClaiming && localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+								alreadyClaiming = true;
+//								System.out.println("should not be empty: " + analyzedCells);
 								System.out.println(getLocalName() + ": claimin'");
 								claimCells();
 							}
-
 							System.out.println(getLocalName() + ": REQUEST is sent");
 
 							ACLMessage ans = MessageHandler.blockingReceive(myAgent, XplorationOntology.MOVEMENTREQUESTINFO);
@@ -631,7 +631,6 @@ public class AgRover4 extends Agent {
 			private boolean claimCell = false;
 
 			public void action(){
-				System.out.println("WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 				if(!claimCell){
 					//Searching for an agent with RADIOCLAIMSERVICE Description
 					DFAgentDescription dfd = new DFAgentDescription();     
@@ -658,15 +657,14 @@ public class AgRover4 extends Agent {
 							cci.setTeam(myTeam);
 							org.xploration.ontology.Map cciMap = new org.xploration.ontology.Map();
 							System.out.println(analyzedCells);
-							for (Cell c : analyzedCells)
-								cciMap.addCellList(c);
-							cci.setMap(cciMap);
-							
 							for (Cell c : analyzedCells) {
+								cciMap.addCellList(c);
 								claimedCells.add(c);
-								analyzedCells.remove(c);
 							}
-													
+							analyzedCells.clear();
+							
+							cci.setMap(cciMap);
+																				
 							try{
 								ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, cci, XplorationOntology.CLAIMCELLINFO);
 								send(msg);	

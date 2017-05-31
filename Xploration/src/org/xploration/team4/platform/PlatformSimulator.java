@@ -191,6 +191,7 @@ public class PlatformSimulator extends Agent {
 								
 								AID fromAgent = msg.getSender();
 								Cell location = roversPosition.get(AIDToTeamId.get(fromAgent));
+								//TODO if it is a capsule sending a broadcast, get from capsulePositions
 								
 		//						System.out.println(location.getX() + " " + location.getY());
 								ArrayList<AID> inRange = getAllInRange(location);
