@@ -166,6 +166,27 @@ public class Map {
     	return false;
     }
     
+    public String whichDirection(Cell initial, Cell destination) {
+    	int ix = initial.getX();
+    	int iy = initial.getY();
+    	int dx = destination.getX();
+    	int dy = destination.getY();
+    	Cell c = calculateNextPosition(ix, iy, "up");
+    	if (compareCelltoDestination(c, dx, dy)) return "up";
+    	c = calculateNextPosition(ix, iy, "down");
+    	if (compareCelltoDestination(c, dx, dy)) return "down";
+    	c = calculateNextPosition(ix, iy, "leftUp");
+    	if (compareCelltoDestination(c, dx, dy)) return "leftUp";
+    	c = calculateNextPosition(ix, iy, "leftDown");
+    	if (compareCelltoDestination(c, dx, dy)) return "leftDown";
+    	c = calculateNextPosition(ix, iy, "rightUp");
+    	if (compareCelltoDestination(c, dx, dy)) return "rightUp";
+    	c = calculateNextPosition(ix, iy, "rightDown");
+    	if (compareCelltoDestination(c, dx, dy)) return "rightDown";
+    	
+    	return null;
+    }
+    
     public boolean inRangeFrom(Cell rover, Cell other, int comRange) {
     	// In these calculations it is assumed that the map is spherical, so
 		// from the left side, you can go directly to the rigth side and so on. 
