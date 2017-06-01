@@ -2,6 +2,7 @@ package org.xploration.team4.platform;
 
 import java.util.*;
 
+import org.xploration.team4.common.Map;
 import org.xploration.team4.common.MessageHandler;
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.ClaimCellInfo;
@@ -67,8 +68,9 @@ public class Spacecraft extends Agent {
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
 	
-	private int mapDimensionX = 10;
-	private int mapDimensionY = 10;
+	Map map = MapReader.readMap();
+	private int mapDimensionX = map.getHeight();
+	private int mapDimensionY = map.getWidth();
 	private int missionLength = Constants.MISSION_LENGTH; // mission length in seconds
 	
 	/******Registration Desk Fields*******/
@@ -199,6 +201,9 @@ public class Spacecraft extends Agent {
 						String teamName = "Capsule" + teamNb;
 						String className = "org.xploration.team" + teamNb + ".company."+ teamName;
 //							String className = "org.xploration.team" + 4 + ".company."+ teamName;
+						//TODO delete next two lines!
+						currentCell.setX(10);
+						currentCell.setY(10);
 						Object[] args = new Object[]{ currentCell.getX(), currentCell.getY(), mapDimensionX, mapDimensionY, missionLength, Constants.COMMUNICATION_RANGE};
 				        agents.add(container.createNewAgent(teamName,className, args));
 					} catch (StaleProxyException e) {

@@ -60,6 +60,7 @@ public class AgRover4 extends Agent {
 	
 	private ArrayList<Cell> nextMovements = new ArrayList<Cell>();
 	private ArrayList<String> directions = new ArrayList<String>();
+	private boolean firstBehaviourUseless = false;
 
 	private Map localWorldMap; 
 
@@ -138,19 +139,26 @@ public class AgRover4 extends Agent {
 			@Override
 			public void action() {
 				if (nextMovements.isEmpty()) {
-					System.out.println(getLocalName() + ": calculating next cells");
-					nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
-					System.out.println(nextMovements);
-				} //TODO with 6 if's we can probably make a bulletproof spiralalgorithm.
-				
-				if (!analyzing() && !moving() && currentCellAnalyzed()) {
-					System.out.println(getLocalName() + ": requesting movement");
-					if (state == State.ANALYZING && state == State.MOVING) {
-						System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
+					if (!firstBehaviourUseless) {
+						System.out.println(getLocalName() + ": calculating next cells");
+						nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
+//						System.out.println(nextMovements);
 					}
-					state = State.MOVING;
-					requestMovement(nextMovements.get(0));
-				} //TODO in future maybe turn around and start turning anti clockwise if there are too many claimed cells before you 
+					else {
+						nextMovements = calculateCanonBallCells(location); 
+					}
+				}
+				else {
+					if (!analyzing() && !moving() && currentCellAnalyzed()) {
+						System.out.println(getLocalName() + ": requesting movement");
+						if (state == State.ANALYZING && state == State.MOVING) {
+							System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
+						}
+						state = State.MOVING;
+						requestMovement(nextMovements.get(0));
+					} //TODO in future maybe turn around and start turning anti clockwise if there are too many claimed cells before you 
+				}
+				
 				
 				if (!moving() && !analyzing() && !currentCellAlreadyHandled()) {
 					System.out.println(getLocalName() + ": analyzing");
@@ -220,10 +228,11 @@ public class AgRover4 extends Agent {
 	private ArrayList<Cell> calculateBorderCells(Cell position, int distance) {
 		ArrayList<Cell> borderCells = new ArrayList<Cell>();
 		Cell nextPos = localWorldMap.calculateNextPosition(position.getX(), position.getY(), "up");
+		borderCells.add(position); // for followsSpiral-call to work. This entry is deleted at the end of the function
 		borderCells.add(nextPos);
 		int nbCells;
 		
-		while(borderCells.size() <= (distance * 6)) {
+		while(borderCells.size() < (distance * 6 + 1)) {
 			ArrayList<Cell> border = new ArrayList<Cell>();
 			for (int i = 0; i < directions.size(); i++) {
 				Cell next = localWorldMap.calculateNextPosition(nextPos.getX(), nextPos.getY(), directions.get(i));
@@ -236,29 +245,106 @@ public class AgRover4 extends Agent {
 				if (localWorldMap.distance(capsuleLocation, c) == distance)
 					atRightDistance.add(c);
 			}
-			if (atRightDistance.size() != 2) {
+//			if (atRightDistance.size() != 2) { // TODO remove this whole check
 				System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-				System.out.println(nextPos.getX() + ", " + nextPos.getY());
+				System.out.println("current pos: " + nextPos.getX() + ", " + nextPos.getY());
+				System.out.println("a right distance:");
 				for (Cell whut : atRightDistance) {
 					System.out.println(whut.getX() + ", " + whut.getY());
 				}
+//			}
+ 
+			System.out.println("bordercells");
+			for (Cell b : borderCells) {
+				System.out.println(b.getX() + ", " + b.getY());
 			}
-
+			System.out.println();
 			nbCells = borderCells.size();
 			for (Cell last : atRightDistance) {
-				if (notContains(borderCells, last) && followsSpiral(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
+				if (distance <= 1) {
+					if (notContains(borderCells, last)) {
+						nextPos = last;
+						break;
+				}
+					
+				}
+				else if (notContains(borderCells, last) && followsSpiral(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
+					System.out.println("chosen");
 					nextPos = last;
 					break;
 				}
 			}
 //			nextPos = atRightDistance.get(0);
+			System.out.println("adding: " + nextPos.getX() + ", " + nextPos.getY());
 			borderCells.add(nextPos);
+			
+			if (borderCells.get(borderCells.size()-2).getX() == borderCells.get(borderCells.size()-1).getX() 
+					&& borderCells.get(borderCells.size()-2).getY() == borderCells.get(borderCells.size()-1).getY()) {
+				firstBehaviourUseless = true;
+				System.out.println("First behaviour finished");
+				borderCells.remove(borderCells.size()-1);
+				break;
+			}
+			
 		}
-		borderCells.remove(borderCells.size()-1);
+		System.out.println("Final border cells: ");
+		for (Cell b : borderCells) {
+			System.out.println(b.getX() + " " + b.getY());
+		}
+		borderCells.remove(0);
 		return borderCells;
 	}
 	
 	private boolean followsSpiral(Cell cell, Cell cell2, Cell last) {
+		String dir = localWorldMap.whichDirection(cell, cell2);
+		
+		int ix = cell.getX();
+    	int iy = cell.getY();
+    	int dx = cell2.getX();
+    	int dy = cell2.getY();
+    	System.out.println(ix);
+    	System.out.println(iy);
+    	System.out.println(dx);
+    	System.out.println(dy);
+    	System.out.println(" ");
+		System.out.println(dir);
+		System.out.println();
+		System.out.println(last.getX());
+		System.out.println(last.getY());
+		System.out.println();
+		if (localWorldMap.whichDirection(cell2, last) == null) {
+			System.out.println("ERROR calculating bordercells");
+			return false;
+		}
+		
+		if (dir.equals("up")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("rightUp") ||
+					localWorldMap.whichDirection(cell2, last).equals("up"));
+		}
+		else if (dir.equals("rightUp")) {
+			boolean a1 = localWorldMap.whichDirection(cell2, last).equals("rightDown");
+			boolean a2 = localWorldMap.whichDirection(cell2, last).equals("rightUp");
+			return (a1 ||
+					a2);
+		}
+		else if (dir.equals("rightDown")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("down") ||
+					localWorldMap.whichDirection(cell2, last).equals("rightDown"));
+		}
+		else if (dir.equals("down")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("leftDown") ||
+					localWorldMap.whichDirection(cell2, last).equals("down"));
+		}
+		else if (dir.equals("leftDown")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("leftUp") ||
+					localWorldMap.whichDirection(cell2, last).equals("leftDown"));
+		}
+		else if (dir.equals("leftUp")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("up") ||
+					localWorldMap.whichDirection(cell2, last).equals("leftUp"));
+		}
+		
+		System.out.println("ERROR, non of the constructs are followed");
 		return false;
 	}
 
@@ -268,6 +354,11 @@ public class AgRover4 extends Agent {
 				return false;
 		}
 		return true;
+	}
+	
+	private void resetBehaviour() {
+		nextMovements.clear();
+		//TODO add cannonball behaviour
 	}
 
 	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator
@@ -621,6 +712,7 @@ public class AgRover4 extends Agent {
 								if (ans.getPerformative() == ACLMessage.REFUSE) {
 									System.out.println(getLocalName() + ": REFUSED due to Invalid Cell");
 									movementRequested = true;
+									resetBehaviour();
 								}
 
 								else if(ans.getPerformative()== ACLMessage.NOT_UNDERSTOOD) {
