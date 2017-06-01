@@ -208,7 +208,7 @@ public class AgRover4 extends Agent {
 		return false;
 	}
 
-	private ArrayList<Cell> calculateBorderCells(Cell position) {
+	private ArrayList<Cell> calculateCanonBallCells(Cell position) { //TODO optimize for use in moment we don't know what to do? + path algo to move back to capsule to claim/before mission ends
 		ArrayList<Cell> border = new ArrayList<Cell>();
 		for (int i = 0; i < directions.size(); i++) {
 			Cell next = localWorldMap.calculateNextPosition(position.getX(), position.getY(), directions.get(i));
@@ -221,8 +221,8 @@ public class AgRover4 extends Agent {
 		ArrayList<Cell> borderCells = new ArrayList<Cell>();
 		Cell nextPos = localWorldMap.calculateNextPosition(position.getX(), position.getY(), "up");
 		borderCells.add(nextPos);
+		int nbCells;
 		
-		//TODO should work with (borderCells.get(0) equals borderCells.get(borderCells.size()-1)
 		while(borderCells.size() <= (distance * 6)) {
 			ArrayList<Cell> border = new ArrayList<Cell>();
 			for (int i = 0; i < directions.size(); i++) {
@@ -244,8 +244,9 @@ public class AgRover4 extends Agent {
 				}
 			}
 
+			nbCells = borderCells.size();
 			for (Cell last : atRightDistance) {
-				if (notContains(borderCells, last)) {
+				if (notContains(borderCells, last) && followsSpiral(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
 					nextPos = last;
 					break;
 				}
@@ -257,6 +258,10 @@ public class AgRover4 extends Agent {
 		return borderCells;
 	}
 	
+	private boolean followsSpiral(Cell cell, Cell cell2, Cell last) {
+		return false;
+	}
+
 	private boolean notContains(ArrayList<Cell> borderCells, Cell last) {
 		for (Cell c : borderCells) {
 			if (c.getX() == last.getX() && c.getY() == last.getY())
