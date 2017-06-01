@@ -131,12 +131,12 @@ public class Map {
 			newy = iy + 1;
     	}
 		
-		if (newx <= 0 || newx > getWidth()) {
-			newx = Math.abs(Math.abs(newx) - getWidth());
+		if (newx <= 0 || newx > getHeight()) {
+			newx = Math.abs(Math.abs(newx) - getHeight());
 		}
 		
-		if (newy <= 0 || newy > getHeight()) {
-			newy = Math.abs(Math.abs(newy) - getHeight());
+		if (newy <= 0 || newy > getWidth()) {
+			newy = Math.abs(Math.abs(newy) - getWidth());
 		}
 		
 		c.setX(newx);

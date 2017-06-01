@@ -1,11 +1,13 @@
-(10,10)
-A A D A B
-A B D E B
-A A B E B
-A B B E D
-A B B E A
-A B B E A
-A C D A D
-C C A C C
-B E C A C
-C C E C B
+(12,20)
+A A D A B B A A D A
+A B D E B B A A D A
+A A B E B B A A D A
+A B B E D B A A D A
+A B B E A B A A D A
+A B B E A B A A D A
+A C D A D B A A D A
+C C A C C B A A D A
+B E C A C B A A D A
+C C E C B B A A D A
+A A D A B B A A D A
+A A D A B B A A D A

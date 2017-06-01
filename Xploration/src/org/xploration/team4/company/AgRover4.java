@@ -139,14 +139,20 @@ public class AgRover4 extends Agent {
 			@Override
 			public void action() {
 				if (nextMovements.isEmpty()) {
-					if (!firstBehaviourUseless) {
-						System.out.println(getLocalName() + ": calculating next cells");
+					if (!firstBehaviourUseless && 
+							(localWorldMap.distance(location, capsuleLocation)+1) <= Math.min(localWorldMap.getHeight()/4, localWorldMap.getWidth()/2)) {
+						System.out.println(getLocalName() + ": calculating next cells (for distance " + (localWorldMap.distance(location, capsuleLocation)+1) + ")");
 						nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
 //						System.out.println(nextMovements);
 					}
-					else {
-						nextMovements = calculateCanonBallCells(location); 
-					}
+//					else {
+//						for (int i = 0 ; i < 10 ; i++)
+//							System.out.println();
+//						System.out.println("Activating canonball");
+//						for (int i = 0 ; i < 10 ; i++)
+//							System.out.println();
+//						nextMovements = calculateCanonBallCells(location); 
+//					}
 				}
 				else {
 					if (!analyzing() && !moving() && currentCellAnalyzed()) {
@@ -159,6 +165,9 @@ public class AgRover4 extends Agent {
 					} //TODO in future maybe turn around and start turning anti clockwise if there are too many claimed cells before you 
 				}
 				
+				if (analyzedCells.size() > (localWorldMap.distance(location, capsuleLocation) - communicationRange)) {
+					//TODO merge in cells to go claim cells and come back
+				}
 				
 				if (!moving() && !analyzing() && !currentCellAlreadyHandled()) {
 					System.out.println(getLocalName() + ": analyzing");
@@ -231,6 +240,7 @@ public class AgRover4 extends Agent {
 		borderCells.add(position); // for followsSpiral-call to work. This entry is deleted at the end of the function
 		borderCells.add(nextPos);
 		int nbCells;
+		boolean nextCellFound = false;
 		
 		while(borderCells.size() < (distance * 6 + 1)) {
 			ArrayList<Cell> border = new ArrayList<Cell>();
@@ -245,14 +255,12 @@ public class AgRover4 extends Agent {
 				if (localWorldMap.distance(capsuleLocation, c) == distance)
 					atRightDistance.add(c);
 			}
-//			if (atRightDistance.size() != 2) { // TODO remove this whole check
-				System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-				System.out.println("current pos: " + nextPos.getX() + ", " + nextPos.getY());
-				System.out.println("a right distance:");
-				for (Cell whut : atRightDistance) {
-					System.out.println(whut.getX() + ", " + whut.getY());
-				}
-//			}
+
+			System.out.println("current pos: " + nextPos.getX() + ", " + nextPos.getY());
+			System.out.println("a right distance:");
+			for (Cell whut : atRightDistance) {
+				System.out.println(whut.getX() + ", " + whut.getY());
+			}
  
 			System.out.println("bordercells");
 			for (Cell b : borderCells) {
@@ -260,19 +268,34 @@ public class AgRover4 extends Agent {
 			}
 			System.out.println();
 			nbCells = borderCells.size();
-			for (Cell last : atRightDistance) {
-				if (distance <= 1) {
+			if (distance <= 1) {
+				for (Cell last : atRightDistance) {
 					if (notContains(borderCells, last)) {
 						nextPos = last;
 						break;
+					}
 				}
-					
+			}
+			else {
+				for (Cell last : atRightDistance) {
+					if (notContains(borderCells, last) && preferredDirection(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
+						System.out.println("chosen");
+						nextPos = last;
+						nextCellFound = true;
+						break;
+					}
 				}
-				else if (notContains(borderCells, last) && followsSpiral(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
-					System.out.println("chosen");
-					nextPos = last;
-					break;
+				
+				if (!nextCellFound) {
+					for (Cell last : atRightDistance) {
+						if (notContains(borderCells, last) && otherDirection(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
+							System.out.println("chosen");
+							nextPos = last;
+							break;
+						}
+					}
 				}
+				nextCellFound = false;
 			}
 //			nextPos = atRightDistance.get(0);
 			System.out.println("adding: " + nextPos.getX() + ", " + nextPos.getY());
@@ -295,7 +318,8 @@ public class AgRover4 extends Agent {
 		return borderCells;
 	}
 	
-	private boolean followsSpiral(Cell cell, Cell cell2, Cell last) {
+	// Rover turns, to keep doing the spiral
+	private boolean preferredDirection(Cell cell, Cell cell2, Cell last) {
 		String dir = localWorldMap.whichDirection(cell, cell2);
 		
 		int ix = cell.getX();
@@ -318,30 +342,68 @@ public class AgRover4 extends Agent {
 		}
 		
 		if (dir.equals("up")) {
-			return (localWorldMap.whichDirection(cell2, last).equals("rightUp") ||
-					localWorldMap.whichDirection(cell2, last).equals("up"));
+			return (localWorldMap.whichDirection(cell2, last).equals("rightUp"));
 		}
 		else if (dir.equals("rightUp")) {
-			boolean a1 = localWorldMap.whichDirection(cell2, last).equals("rightDown");
-			boolean a2 = localWorldMap.whichDirection(cell2, last).equals("rightUp");
-			return (a1 ||
-					a2);
+			return (localWorldMap.whichDirection(cell2, last).equals("rightDown"));
 		}
 		else if (dir.equals("rightDown")) {
-			return (localWorldMap.whichDirection(cell2, last).equals("down") ||
-					localWorldMap.whichDirection(cell2, last).equals("rightDown"));
+			return (localWorldMap.whichDirection(cell2, last).equals("down"));
 		}
 		else if (dir.equals("down")) {
-			return (localWorldMap.whichDirection(cell2, last).equals("leftDown") ||
-					localWorldMap.whichDirection(cell2, last).equals("down"));
+			return (localWorldMap.whichDirection(cell2, last).equals("leftDown"));
 		}
 		else if (dir.equals("leftDown")) {
-			return (localWorldMap.whichDirection(cell2, last).equals("leftUp") ||
-					localWorldMap.whichDirection(cell2, last).equals("leftDown"));
+			return (localWorldMap.whichDirection(cell2, last).equals("leftUp"));
 		}
 		else if (dir.equals("leftUp")) {
-			return (localWorldMap.whichDirection(cell2, last).equals("up") ||
-					localWorldMap.whichDirection(cell2, last).equals("leftUp"));
+			return (localWorldMap.whichDirection(cell2, last).equals("up"));
+		}
+		
+		System.out.println("ERROR, non of the constructs are followed");
+		return false;
+	}
+	
+	// Rover keeps heading in the same direction
+	private boolean otherDirection(Cell cell, Cell cell2, Cell last) {
+		String dir = localWorldMap.whichDirection(cell, cell2);
+		
+//		int ix = cell.getX();
+//    	int iy = cell.getY();
+//    	int dx = cell2.getX();
+//    	int dy = cell2.getY();
+//    	System.out.println(ix);
+//    	System.out.println(iy);
+//    	System.out.println(dx);
+//    	System.out.println(dy);
+//    	System.out.println(" ");
+//		System.out.println(dir);
+//		System.out.println();
+//		System.out.println(last.getX());
+//		System.out.println(last.getY());
+//		System.out.println();
+		if (localWorldMap.whichDirection(cell2, last) == null) {
+			System.out.println("ERROR calculating bordercells");
+			return false;
+		}
+		
+		if (dir.equals("up")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("up"));
+		}
+		else if (dir.equals("rightUp")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("rightUp"));
+		}
+		else if (dir.equals("rightDown")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("rightDown"));
+		}
+		else if (dir.equals("down")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("down"));
+		}
+		else if (dir.equals("leftDown")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("leftDown"));
+		}
+		else if (dir.equals("leftUp")) {
+			return (localWorldMap.whichDirection(cell2, last).equals("leftUp"));
 		}
 		
 		System.out.println("ERROR, non of the constructs are followed");
@@ -421,7 +483,7 @@ public class AgRover4 extends Agent {
 							if(ans!= null){	  
 								if(ans.getPerformative()==ACLMessage.REFUSE)
 								{
-									System.out.println(getLocalName() + ": REFUSED due to Invalid Cell");
+									System.out.println(getLocalName() + ": REFUSED due to Invalid Cell: " + location.getX() + ", " + location.getY());
 									cellAnalyzed = true;
 								}
 

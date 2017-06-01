@@ -393,7 +393,7 @@ public class PlatformSimulator extends Agent {
 								Cell destination = ((MovementRequestInfo) conc).getCell();
 								int team = AIDToTeamId.get(fromAgent);
 								//TODO communicate internally the dimensions of map
-								if (Constants.isExistingCoordinate(worldMap.getWidth(), worldMap.getHeight(), destination.getX(), destination.getY()) 
+								if (Constants.isExistingCoordinate(worldMap.getHeight(), worldMap.getWidth(), destination.getX(), destination.getY()) 
 										&& worldMap.isNextPosition(roversPosition.get(team).getX(), roversPosition.get(team).getY(), destination.getX(), destination.getY())) {
 									ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.AGREE);
 									myAgent.send(reply);
@@ -410,6 +410,7 @@ public class PlatformSimulator extends Agent {
 									ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
 									myAgent.send(reply);
 									System.out.println(myAgent.getLocalName()+": REFUSE due to invalid cell");
+									System.out.println(myAgent.getLocalName()+": team " + team + " tries to move from " + roversPosition.get(team).getX() + ", " + roversPosition.get(team).getY() + " to " + destination.getX() + ", " + destination.getY());
 								}
 							}
 							else {
@@ -491,7 +492,7 @@ public class PlatformSimulator extends Agent {
 									//Invalid Cell Condition
 									//Checking world boundaries
 									//Check if existing cell within world
-									if(cellToAnalyze.getX()>worldDimensionY || cellToAnalyze.getY()>worldDimensionX || !(cellToAnalyze.getX()%2 == cellToAnalyze.getY()%2))
+									if(cellToAnalyze.getX()>worldDimensionX || cellToAnalyze.getY()>worldDimensionY || !(cellToAnalyze.getX()%2 == cellToAnalyze.getY()%2))
 									{
 										ACLMessage reply = MessageHandler.constructReplyMessage(msg, ACLMessage.REFUSE);
 										myAgent.send(reply);
