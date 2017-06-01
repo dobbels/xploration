@@ -94,15 +94,27 @@ public class MapReader {
 		for (i = 0 ; i <=10 ; i++) {
 			test.add(i);
 		}
-		System.out.println();
-		System.out.println(test.toString());
-		test.remove(0);
-		System.out.println(test.toString());
 		
-		System.out.println(test.isEmpty());
-		test.clear();
-		System.out.println(test);
-		System.out.println(test.isEmpty());
+		Cell c1 = new Cell();
+		Cell c2 = new Cell();
+		c1.setX(1);
+		c1.setY(3);
+		c2.setX(1);
+		c2.setY(3);
+		
+		System.out.println(c1);
+		System.out.println(c2);
+		System.out.println(c1.equals(c2));
+		
+//		System.out.println();
+//		System.out.println(test.toString());
+//		test.remove(0);
+//		System.out.println(test.toString());
+//		
+//		System.out.println(test.isEmpty());
+//		test.clear();
+//		System.out.println(test);
+//		System.out.println(test.isEmpty());
 	}
 
 }
