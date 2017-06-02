@@ -461,20 +461,22 @@ public class AgRover4 extends Agent {
 				else {
 					//getting closer
 					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
-					movements.add(actual);
-					distance = newDistance;
 					possible.clear();
 					possible = calculateSurroundingCells(actual);
+					movements.add(actual);
+					distance = newDistance;
 					i = 0;
 				}
 			}
 			else {
 				System.out.println("too far away");
-				if (i >= 5) {
+				++i;
+				/*if (i >= 5) {
 					System.out.println("this shouldn't happen so recalculate surrounding cells");
 					if (movements.size() > 0) {
 						possible.clear();
 						possible = calculateSurroundingCells(movements.get(movements.size()-1));
+						System.out.println(possible.size());
 						i = 0;
 					}
 					else {
@@ -482,17 +484,9 @@ public class AgRover4 extends Agent {
 						possible = calculateSurroundingCells(position);
 						i = 0;
 					}
-				}
+				}*/
 			}
-			++i;
 		}
-		
-		return movements;
-	}
-	
-	private ArrayList<Cell> pathToCell(Cell destination) {
-		ArrayList<Cell> movements = new ArrayList<Cell>();
-		
 		
 		return movements;
 	}
