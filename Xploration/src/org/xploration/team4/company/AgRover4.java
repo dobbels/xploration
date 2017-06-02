@@ -178,19 +178,25 @@ public class AgRover4 extends Agent {
 						//TODO better smaller analyze size?! Just a disadvantage then if communication range is 1? because of first tour
 						&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
 					// + conditions: not in range and not yet going in range
-					ArrayList<Cell> toGoBack = goBackInRange(location);
-					ArrayList<Cell> thereAndBack = new ArrayList<>(toGoBack);
-					Collections.reverse(toGoBack);
-					toGoBack.remove(0);
-					thereAndBack.addAll(toGoBack);
-					thereAndBack.add(location);
+					ArrayList<Cell> toGoBackInRange = goBackInRange(location);
+//					if (nextMovements.get(0) != location) { //TODO make check for if it is last in nextMovements by accident 
+					ArrayList<Cell> backToPath = shortestPathBetween(toGoBackInRange.get(toGoBackInRange.size()-1), nextMovements.get(0));
+					backToPath.remove(backToPath.size()-1); // otherwise the destination is added twice
+					ArrayList<Cell> thereAndBack = new ArrayList<>(toGoBackInRange);
+					thereAndBack.addAll(backToPath);
+					
+//					Collections.reverse(toGoBackInRange);
+//					toGoBackInRange.remove(0);
+//					thereAndBack.addAll(toGoBackInRange);
+//					thereAndBack.add(location);
 					//TODO better: from the last cell of (toGoBack): calculate shortest path to next cell that were going to do
 
-					System.out.println("movements to go back in range:");
-					for (int i = 0; i < thereAndBack.size(); i++) {
-						System.out.println(thereAndBack.get(i).getX() + ", " + thereAndBack.get(i).getY());
-					}
 					nextMovements.addAll(0, thereAndBack);
+
+					System.out.println("New next movements");
+					for (int i = 0; i < nextMovements.size(); i++) {
+						System.out.println(nextMovements.get(i).getX() + ", " + nextMovements.get(i).getY());
+					}					
 					movingInRangeToClaim = true;
 					// TODO merge cells in path
 					
@@ -294,16 +300,16 @@ public class AgRover4 extends Agent {
 					atRightDistance.add(c);
 			}
 
-			System.out.println("current pos: " + nextPos.getX() + ", " + nextPos.getY());
-			System.out.println("a right distance:");
-			for (Cell whut : atRightDistance) {
-				System.out.println(whut.getX() + ", " + whut.getY());
-			}
+//			System.out.println("current pos: " + nextPos.getX() + ", " + nextPos.getY());
+//			System.out.println("a right distance:");
+//			for (Cell whut : atRightDistance) {
+//				System.out.println(whut.getX() + ", " + whut.getY());
+//			}
  
-			System.out.println("bordercells");
-			for (Cell b : borderCells) {
-				System.out.println(b.getX() + ", " + b.getY());
-			}
+//			System.out.println("bordercells");
+//			for (Cell b : borderCells) {
+//				System.out.println(b.getX() + ", " + b.getY());
+//			}
 			System.out.println();
 			nbCells = borderCells.size();
 			if (distance <= 1) {
@@ -335,7 +341,6 @@ public class AgRover4 extends Agent {
 				}
 				nextCellFound = false;
 			}
-//			nextPos = atRightDistance.get(0);
 			System.out.println("adding: " + nextPos.getX() + ", " + nextPos.getY());
 			borderCells.add(nextPos);
 			
@@ -346,12 +351,11 @@ public class AgRover4 extends Agent {
 				borderCells.remove(borderCells.size()-1);
 				break;
 			}
-			
 		}
-		System.out.println("Final border cells: ");
-		for (Cell b : borderCells) {
-			System.out.println(b.getX() + " " + b.getY());
-		}
+//		System.out.println("Final border cells: ");
+//		for (Cell b : borderCells) {
+//			System.out.println(b.getX() + " " + b.getY());
+//		}
 		borderCells.remove(0);
 		return borderCells;
 	}
@@ -470,17 +474,17 @@ public class AgRover4 extends Agent {
 		while (!found) {
 			Cell actual = possible.get(i);
 			int newDistance = localWorldMap.distance(capsuleLocation, actual);
-			System.out.println("new distance to capsule is: " + newDistance);
-			System.out.println("trying: " + actual.getX() + ", " + actual.getY());
+//			System.out.println("new distance to capsule is: " + newDistance);
+//			System.out.println("trying: " + actual.getX() + ", " + actual.getY());
 			if (newDistance < distance) {
 				if (newDistance <= communicationRange) {
-					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
+//					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
 					movements.add(actual);
 					found = true;
 				}
 				else {
 					//getting closer
-					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
+//					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
 					possible.clear();
 					possible = calculateSurroundingCells(actual);
 					movements.add(actual);
@@ -489,7 +493,7 @@ public class AgRover4 extends Agent {
 				}
 			}
 			else {
-				System.out.println("too far away");
+//				System.out.println("too far away");
 				++i;
 				/*if (i >= 5) {
 					System.out.println("this shouldn't happen so recalculate surrounding cells");
@@ -505,6 +509,44 @@ public class AgRover4 extends Agent {
 						i = 0;
 					}
 				}*/
+			}
+		}
+		
+		return movements;
+	}
+	
+	private ArrayList<Cell> shortestPathBetween(Cell position, Cell destination) {
+		ArrayList<Cell> movements = new ArrayList<Cell>();
+		ArrayList<Cell> possible = calculateSurroundingCells(position);
+		boolean found = false;
+		int distance = localWorldMap.distance(position, destination);
+		
+		int i = 0;
+		while (!found) {
+			Cell actual = possible.get(i);
+			int newDistance = localWorldMap.distance(destination, actual);
+//			System.out.println("new distance to destination is: " + newDistance);
+//			System.out.println("trying: " + actual.getX() + ", " + actual.getY());
+			if (newDistance < distance) {
+				if (destination.getX() == actual.getX() 
+						&& destination.getY() == actual.getY()) {
+//					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
+					movements.add(actual);
+					found = true;
+				}
+				else {
+					//getting closer
+//					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
+					possible.clear();
+					possible = calculateSurroundingCells(actual);
+					movements.add(actual);
+					distance = newDistance;
+					i = 0;
+				}
+			}
+			else {
+//				System.out.println("too far away");
+				++i;
 			}
 		}
 		

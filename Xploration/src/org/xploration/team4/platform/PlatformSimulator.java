@@ -552,8 +552,8 @@ public class PlatformSimulator extends Agent {
 			
 			private boolean isValidPosition(int team, Cell location) {
 				Cell actualLocation = roversPosition.get(team);
-				System.out.println("Valid position? " + (actualLocation.getX() == location.getX() && 
-						actualLocation.getY() == location.getY()));
+//				System.out.println("Valid position? " + (actualLocation.getX() == location.getX() && 
+//						actualLocation.getY() == location.getY()));
 				return (actualLocation.getX() == location.getX() && 
 						actualLocation.getY() == location.getY());
 			}
