@@ -1,9 +1,11 @@
 package org.xploration.team4.company;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
@@ -61,6 +63,8 @@ public class AgRover4 extends Agent {
 	private ArrayList<Cell> nextMovements = new ArrayList<Cell>();
 	private ArrayList<String> directions = new ArrayList<String>();
 	private boolean firstBehaviourUseless = false;
+	
+	private boolean movingInRangeToClaim = false;
 
 	private Map localWorldMap; 
 
@@ -145,6 +149,10 @@ public class AgRover4 extends Agent {
 						nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
 //						System.out.println(nextMovements);
 					}
+					else if (localWorldMap.distance(location, capsuleLocation)+1 <= Math.min(localWorldMap.getHeight()/4, localWorldMap.getWidth()/2)) {
+						// To make sure first behaviour is not restarted, just because we are in range again at some point
+						firstBehaviourUseless = true;
+					}
 //					else {
 //						for (int i = 0 ; i < 10 ; i++)
 //							System.out.println();
@@ -161,20 +169,32 @@ public class AgRover4 extends Agent {
 							System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
 						}
 						state = State.MOVING;
-						//TODO removeeee just for testing
-						if (!localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-							ArrayList<Cell> toGoBack = goBackInRange(location);
-							System.out.println("movements to go back in range:");
-							for (int i = 0; i < toGoBack.size(); i++) {
-								System.out.println(toGoBack.get(i).getX() + ", " + toGoBack.get(i).getY());
-							}
-						}
 						requestMovement(nextMovements.get(0));
-					} //TODO in future maybe turn around and start turning anti clockwise if there are too many claimed cells before you 
+					} 
 				}
 				
-				if (analyzedCells.size() > (localWorldMap.distance(location, capsuleLocation) - communicationRange)) {
-					//TODO merge in cells to go claim cells and come back
+				if (!movingInRangeToClaim && ! moving()
+						&& analyzedCells.size() > 3*(localWorldMap.distance(location, capsuleLocation) - communicationRange) 
+						//TODO better smaller analyze size?! Just a disadvantage then if communication range is 1? because of first tour
+						&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+					// + conditions: not in range and not yet going in range
+					ArrayList<Cell> toGoBack = goBackInRange(location);
+					ArrayList<Cell> thereAndBack = new ArrayList<>(toGoBack);
+					Collections.reverse(toGoBack);
+					toGoBack.remove(0);
+					thereAndBack.addAll(toGoBack);
+					thereAndBack.add(location);
+					//TODO better: from the last cell of (toGoBack): calculate shortest path to next cell that were going to do
+
+					System.out.println("movements to go back in range:");
+					for (int i = 0; i < thereAndBack.size(); i++) {
+						System.out.println(thereAndBack.get(i).getX() + ", " + thereAndBack.get(i).getY());
+					}
+					nextMovements.addAll(0, thereAndBack);
+					movingInRangeToClaim = true;
+					// TODO merge cells in path
+					
+					// TODO check in printstatement of alle cellen aaneensluitend zijn
 				}
 				
 				if (!moving() && !analyzing() && !currentCellAlreadyHandled()) {
@@ -184,7 +204,7 @@ public class AgRover4 extends Agent {
 					}
 					state = State.ANALYZING;
 					analyzeCurrentCell();
-				} //TODO print at start and end of claimCells(), there is a currentModification error
+				}
 				
 				// nextMovements.remove(0); is done in requestMovement after an inform. If a failure is received, the same cell will be tried on the next iteration.
 				//TODO if refused or failed, calculate new nextMovements from current location? Or relative to capsule loc? 
@@ -942,6 +962,7 @@ public class AgRover4 extends Agent {
 								claimedCells.add(c);
 							}
 							analyzedCells.clear();
+							movingInRangeToClaim = false;
 							
 							cci.setMap(cciMap);
 																				
