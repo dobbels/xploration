@@ -149,18 +149,14 @@ public class AgRover4 extends Agent {
 						nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
 //						System.out.println(nextMovements);
 					}
-					else if (localWorldMap.distance(location, capsuleLocation)+1 <= Math.min(localWorldMap.getHeight()/4, localWorldMap.getWidth()/2)) {
+//					else if (firstBehaviourUseless) {
+//						System.out.println(getLocalName() + ": calculating next cannon ball");
+//						nextMovements = calculateCanonBallCells(location);
+//					}
+					else if (localWorldMap.distance(location, capsuleLocation)+1 >= Math.min(localWorldMap.getHeight()/4, localWorldMap.getWidth()/2)) {
 						// To make sure first behaviour is not restarted, just because we are in range again at some point
 						firstBehaviourUseless = true;
 					}
-//					else {
-//						for (int i = 0 ; i < 10 ; i++)
-//							System.out.println();
-//						System.out.println("Activating canonball");
-//						for (int i = 0 ; i < 10 ; i++)
-//							System.out.println();
-//						nextMovements = calculateCanonBallCells(location); 
-//					}
 				}
 				else {
 					if (!analyzing() && !moving() && currentCellAnalyzed()) {
@@ -173,7 +169,7 @@ public class AgRover4 extends Agent {
 					} 
 				}
 				
-				if (!movingInRangeToClaim && ! moving()
+				if (!movingInRangeToClaim && ! moving() //TODO do this differently once the second behaviour has started? Also broadcast analyzed cells when that behaviour started?
 						&& analyzedCells.size() > 3*(localWorldMap.distance(location, capsuleLocation) - communicationRange) 
 						//TODO better smaller analyze size?! Just a disadvantage then if communication range is 1? because of first tour
 						&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
@@ -193,10 +189,10 @@ public class AgRover4 extends Agent {
 
 					nextMovements.addAll(0, thereAndBack);
 
-					System.out.println("New next movements");
-					for (int i = 0; i < nextMovements.size(); i++) {
-						System.out.println(nextMovements.get(i).getX() + ", " + nextMovements.get(i).getY());
-					}					
+//					System.out.println("New next movements");
+//					for (int i = 0; i < nextMovements.size(); i++) {
+//						System.out.println(nextMovements.get(i).getX() + ", " + nextMovements.get(i).getY());
+//					}					
 					movingInRangeToClaim = true;
 					// TODO merge cells in path
 					
@@ -341,7 +337,7 @@ public class AgRover4 extends Agent {
 				}
 				nextCellFound = false;
 			}
-			System.out.println("adding: " + nextPos.getX() + ", " + nextPos.getY());
+//			System.out.println("adding: " + nextPos.getX() + ", " + nextPos.getY());
 			borderCells.add(nextPos);
 			
 			if (borderCells.get(borderCells.size()-2).getX() == borderCells.get(borderCells.size()-1).getX() 

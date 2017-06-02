@@ -204,8 +204,8 @@ public class Spacecraft extends Agent {
 						//TODO delete next four lines!
 //						currentCell.setX(map.getHeight()/2);
 //						currentCell.setY(map.getWidth()/2);
-						currentCell.setX(10);
-						currentCell.setY(10);
+						currentCell.setX(5);
+						currentCell.setY(5);
 						Object[] args = new Object[]{ currentCell.getX(), currentCell.getY(), mapDimensionX, mapDimensionY, missionLength, Constants.COMMUNICATION_RANGE};
 				        agents.add(container.createNewAgent(teamName,className, args));
 					} catch (StaleProxyException e) {

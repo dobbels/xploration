@@ -13,7 +13,7 @@ import org.xploration.team4.common.Map;
 
 public class MapReader {
 	
-	private final static String MAP_FILE = "./src/org/xploration/team4/platform/map2.txt";
+	private final static String MAP_FILE = "./src/org/xploration/team4/platform/map.txt";
 	
 	//worldMap construction from a read txt file
 	public static Map readMap() {
