@@ -161,6 +161,14 @@ public class AgRover4 extends Agent {
 							System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
 						}
 						state = State.MOVING;
+						//TODO removeeee just for testing
+						if (!localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+							ArrayList<Cell> toGoBack = goBackInRange(location);
+							System.out.println("movements to go back in range:");
+							for (int i = 0; i < toGoBack.size(); i++) {
+								System.out.println(toGoBack.get(i).getX() + ", " + toGoBack.get(i).getY());
+							}
+						}
 						requestMovement(nextMovements.get(0));
 					} //TODO in future maybe turn around and start turning anti clockwise if there are too many claimed cells before you 
 				}
@@ -223,6 +231,16 @@ public class AgRover4 extends Agent {
 				return true;
 		}
 		return false;
+	}
+	
+	//calculate only border cells with distance 1
+	private ArrayList<Cell> calculateSurroundingCells(Cell position) { 
+		ArrayList<Cell> border = new ArrayList<Cell>();
+		for (int i = 0; i < directions.size(); i++) {
+			Cell next = localWorldMap.calculateNextPosition(position.getX(), position.getY(), directions.get(i));
+			border.add(next);
+		}
+		return border;
 	}
 
 	private ArrayList<Cell> calculateCanonBallCells(Cell position) { //TODO optimize for use in moment we don't know what to do? + path algo to move back to capsule to claim/before mission ends
@@ -416,6 +434,67 @@ public class AgRover4 extends Agent {
 				return false;
 		}
 		return true;
+	}
+	
+	private ArrayList<Cell> goBackInRange(Cell position) {
+		System.out.println("go back in range function called");
+		ArrayList<Cell> movements = new ArrayList<Cell>();
+		ArrayList<Cell> possible = calculateSurroundingCells(position);
+		boolean found = false;
+		int distance = localWorldMap.distance(position, capsuleLocation);
+		System.out.println("distance to capsule is: " + distance);
+		if (distance <= communicationRange) {
+			System.out.println("Already in range"); //function should not be called in this case
+		}
+		int i = 0;
+		while (!found) {
+			Cell actual = possible.get(i);
+			int newDistance = localWorldMap.distance(capsuleLocation, actual);
+			System.out.println("new distance to capsule is: " + newDistance);
+			System.out.println("trying: " + actual.getX() + ", " + actual.getY());
+			if (newDistance < distance) {
+				if (newDistance <= communicationRange) {
+					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
+					movements.add(actual);
+					found = true;
+				}
+				else {
+					//getting closer
+					System.out.println("adding: " + actual.getX() + ", " + actual.getY());
+					movements.add(actual);
+					distance = newDistance;
+					possible.clear();
+					possible = calculateSurroundingCells(actual);
+					i = 0;
+				}
+			}
+			else {
+				System.out.println("too far away");
+				if (i >= 5) {
+					System.out.println("this shouldn't happen so recalculate surrounding cells");
+					if (movements.size() > 0) {
+						possible.clear();
+						possible = calculateSurroundingCells(movements.get(movements.size()-1));
+						i = 0;
+					}
+					else {
+						possible.clear();
+						possible = calculateSurroundingCells(position);
+						i = 0;
+					}
+				}
+			}
+			++i;
+		}
+		
+		return movements;
+	}
+	
+	private ArrayList<Cell> pathToCell(Cell destination) {
+		ArrayList<Cell> movements = new ArrayList<Cell>();
+		
+		
+		return movements;
 	}
 	
 	private void resetBehaviour() {
