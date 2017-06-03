@@ -63,11 +63,16 @@ public class AgRover4 extends Agent {
 	private ArrayList<Cell> nextMovements = new ArrayList<Cell>();
 	private ArrayList<String> directions = new ArrayList<String>();
 	private boolean firstBehaviourUseless = false;
+	private boolean secondBehaviourUseless = false;
+	private boolean lastCellsClaimed = false;
 	
 	private boolean movingInRangeToClaim = false;
+	private int movementTime = 10;
 
 	private Map localWorldMap; 
 
+	private Date creationTime = new Date();
+	
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 
 	private Codec codec = new SLCodec();
@@ -149,10 +154,9 @@ public class AgRover4 extends Agent {
 						nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
 //						System.out.println(nextMovements);
 					}
-//					else if (firstBehaviourUseless) {
-//						System.out.println(getLocalName() + ": calculating next cannon ball");
-//						nextMovements = calculateCanonBallCells(location);
-//					}
+					else if (firstBehaviourUseless) {
+						secondBehaviour();
+					}
 					else if (localWorldMap.distance(location, capsuleLocation)+1 >= Math.min(localWorldMap.getHeight()/4, localWorldMap.getWidth()/2)) {
 						// To make sure first behaviour is not restarted, just because we are in range again at some point
 						firstBehaviourUseless = true;
@@ -165,40 +169,26 @@ public class AgRover4 extends Agent {
 							System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
 						}
 						state = State.MOVING;
-						Cell c = findClosestCellToAnalyse(location);
-						System.out.println("Closest cell to analyse is: " + c.getX() + ", " + c.getY());
 						requestMovement(nextMovements.get(0));
 					} 
 				}
-				
-				if (!movingInRangeToClaim && ! moving() //TODO do this differently once the second behaviour has started? Also broadcast analyzed cells when that behaviour started?
-						&& analyzedCells.size() > 3*(localWorldMap.distance(location, capsuleLocation) - communicationRange) 
-						//TODO better smaller analyze size?! Just a disadvantage then if communication range is 1? because of first tour
-						&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-					// + conditions: not in range and not yet going in range
-					ArrayList<Cell> toGoBackInRange = goBackInRange(location);
-//					if (nextMovements.get(0) != location) { //TODO make check for if it is last in nextMovements by accident 
-					ArrayList<Cell> backToPath = shortestPathBetween(toGoBackInRange.get(toGoBackInRange.size()-1), nextMovements.get(0));
-					backToPath.remove(backToPath.size()-1); // otherwise the destination is added twice
-					ArrayList<Cell> thereAndBack = new ArrayList<>(toGoBackInRange);
-					thereAndBack.addAll(backToPath);
-					
-//					Collections.reverse(toGoBackInRange);
-//					toGoBackInRange.remove(0);
-//					thereAndBack.addAll(toGoBackInRange);
-//					thereAndBack.add(location);
-					//TODO better: from the last cell of (toGoBack): calculate shortest path to next cell that were going to do
-
-					nextMovements.addAll(0, thereAndBack);
-
-//					System.out.println("New next movements");
-//					for (int i = 0; i < nextMovements.size(); i++) {
-//						System.out.println(nextMovements.get(i).getX() + ", " + nextMovements.get(i).getY());
-//					}					
-					movingInRangeToClaim = true;
-					// TODO merge cells in path
-					
-					// TODO check in printstatement of alle cellen aaneensluitend zijn
+				if (!firstBehaviourUseless) {
+					if (!movingInRangeToClaim && ! moving() //TODO do this differently once the second behaviour has started? Also broadcast analyzed cells when that behaviour started?
+							&& analyzedCells.size() > 3*(localWorldMap.distance(location, capsuleLocation) - communicationRange) 
+							//TODO better smaller analyze size?! Just a disadvantage then if communication range is 1? because of first tour
+							&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+						ArrayList<Cell> toGoBackInRange = goBackInRange(location);
+	//					if (nextMovements.get(0) != location) { //TODO make check for if it is last in nextMovements by accident 
+						ArrayList<Cell> backToPath = shortestPathBetween(toGoBackInRange.get(toGoBackInRange.size()-1), nextMovements.get(0));
+						backToPath.remove(backToPath.size()-1); // otherwise the destination is added twice
+						ArrayList<Cell> thereAndBack = new ArrayList<>(toGoBackInRange);
+						thereAndBack.addAll(backToPath);
+	
+						nextMovements.addAll(0, thereAndBack);
+						movingInRangeToClaim = true;
+						
+						// TODO check in printstatement of alle cellen aaneensluitend zijn
+					}
 				}
 				
 				if (!moving() && !analyzing() && !currentCellAlreadyHandled()) {
@@ -211,8 +201,7 @@ public class AgRover4 extends Agent {
 				}
 				
 				// nextMovements.remove(0); is done in requestMovement after an inform. If a failure is received, the same cell will be tried on the next iteration.
-				//TODO if refused or failed, calculate new nextMovements from current location? Or relative to capsule loc? 
-				
+				//TODO if movement refuse or failure: clear next movements and end firstBehaviour?
 				// TODO add exploration-algorithm-logic
 				// we could move in spiral + radio range level if no other rovers are around
 				// if rovers are around move in spiral starting close to where they are so that they don't move to our position
@@ -223,6 +212,40 @@ public class AgRover4 extends Agent {
 				// + claim cells you get in map broadcast. Just in case they broadcast it right after analyzing, not after claiming
 			}
 		});
+	}
+	
+	private void secondBehaviour() {
+		if (!lastCellsClaimed && !movingInRangeToClaim) {
+			if (!movingInRangeToClaim && ! moving()
+				&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+			ArrayList<Cell> toGoBackInRange = goBackInRange(location);
+			nextMovements = toGoBackInRange;
+			movingInRangeToClaim = true;
+			lastCellsClaimed = true;
+			}
+		}
+		else if (!secondBehaviourUseless) {
+			try {
+				System.out.println(getLocalName() + ": calculating next cannon ball");
+				Cell c = findClosestCellToAnalyse(location);
+				nextMovements = shortestPathBetween(location, c);
+				System.out.println("Closest cell to analyse is: " + c.getX() + ", " + c.getY());
+			} catch (Exception e) {
+				System.out.println(getLocalName() + ": calculating cannonball not possible");
+				secondBehaviourUseless = true;
+			}
+		}
+		if (!movingInRangeToClaim && ! moving()
+				&& (new Date()).getTime() > (creationTime.getTime() + missionLength*1000 - movementTime*1000*(localWorldMap.distance(location, capsuleLocation) - communicationRange)) // to be back before mission end 
+				&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
+			System.out.println("Claim last cells");
+			nextMovements.clear();
+			ArrayList<Cell> toGoBackInRange = goBackInRange(location);
+			nextMovements.addAll(toGoBackInRange);
+			//TODO Now also broadcast analyzed cells when first behaviour is over? 		
+			movingInRangeToClaim = true;
+		}
+		//TODO if all cells in world analyzed, go claim
 	}
 	
 	/*
@@ -316,7 +339,7 @@ public class AgRover4 extends Agent {
 //			for (Cell b : borderCells) {
 //				System.out.println(b.getX() + ", " + b.getY());
 //			}
-			System.out.println();
+//			System.out.println();
 			nbCells = borderCells.size();
 			if (distance <= 1) {
 				for (Cell last : atRightDistance) {
@@ -329,7 +352,7 @@ public class AgRover4 extends Agent {
 			else {
 				for (Cell last : atRightDistance) {
 					if (notContains(borderCells, last) && preferredDirection(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
-						System.out.println("chosen");
+//						System.out.println("chosen");
 						nextPos = last;
 						nextCellFound = true;
 						break;
@@ -339,7 +362,7 @@ public class AgRover4 extends Agent {
 				if (!nextCellFound) {
 					for (Cell last : atRightDistance) {
 						if (notContains(borderCells, last) && otherDirection(borderCells.get(nbCells-2), borderCells.get(nbCells-1), last)) {
-							System.out.println("chosen");
+//							System.out.println("chosen");
 							nextPos = last;
 							break;
 						}
@@ -370,20 +393,20 @@ public class AgRover4 extends Agent {
 	private boolean preferredDirection(Cell cell, Cell cell2, Cell last) {
 		String dir = localWorldMap.whichDirection(cell, cell2);
 		
-		int ix = cell.getX();
-    	int iy = cell.getY();
-    	int dx = cell2.getX();
-    	int dy = cell2.getY();
-    	System.out.println(ix);
-    	System.out.println(iy);
-    	System.out.println(dx);
-    	System.out.println(dy);
-    	System.out.println(" ");
-		System.out.println(dir);
-		System.out.println();
-		System.out.println(last.getX());
-		System.out.println(last.getY());
-		System.out.println();
+//		int ix = cell.getX();
+//    	int iy = cell.getY();
+//    	int dx = cell2.getX();
+//    	int dy = cell2.getY();
+//    	System.out.println(ix);
+//    	System.out.println(iy);
+//    	System.out.println(dx);
+//    	System.out.println(dy);
+//    	System.out.println(" ");
+//		System.out.println(dir);
+//		System.out.println();
+//		System.out.println(last.getX());
+//		System.out.println(last.getY());
+//		System.out.println();
 		if (localWorldMap.whichDirection(cell2, last) == null) {
 			System.out.println("ERROR calculating bordercells");
 			return false;
@@ -551,30 +574,29 @@ public class AgRover4 extends Agent {
 		ArrayList<Cell> possible = calculateSurroundingCells(position);
 		ArrayList<Cell> alreadyTested = new ArrayList<Cell>();
 		boolean found = false;
-		int distance = 0;
+//		int distance = 0;
 		int i = 0;
 		
 		while (!found) {
 			Cell actual = possible.get(i);
-			int newDistance = localWorldMap.distance(location, actual);
-			System.out.println("getting farer?: " + newDistance);
-			System.out.println("trying: " + actual.getX() + ", " + actual.getY());
+//			int newDistance = localWorldMap.distance(location, actual);
+//			System.out.println("getting farer?: " + newDistance);
+//			System.out.println("trying: " + actual.getX() + ", " + actual.getY());
 			if (notContains(alreadyTested, actual)) {
-				System.out.println("not tested yet");
+//				System.out.println("not tested yet");
 				if (!currentCellAlreadyHandled(actual)) {
-					System.out.println("Not handled cell found");
+//					System.out.println("Not handled cell found");
 					toAnalyse = actual;
 					found = true;
 				}
 				else {
-					System.out.println("Already handled");
+//					System.out.println("Already handled");
 					possible.addAll(calculateSurroundingCells(actual));
 					alreadyTested.add(actual);
 				}
 			}
 			++i;
 		}
-		
 		return toAnalyse;
 	}
 	

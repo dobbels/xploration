@@ -124,6 +124,8 @@ public class Spacecraft extends Agent {
 			e.printStackTrace();
 		}
 		
+		addBehaviour(tbf.wrap(killAgentAtMissionEnd()));
+		
 		//Behaviour is addded to the setup() method
 		Behaviour b = registrationListener();
 		addBehaviour(tbf.wrap(b));
@@ -146,6 +148,16 @@ public class Spacecraft extends Agent {
 		        // TODO remove registrationDesk from the yellow pages?
 		      } 
 		    });
+	}
+	
+	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator
+		return new WakerBehaviour(this, missionLength*1000) {
+			
+			protected void onWake() {
+				System.out.println(getLocalName() + ": committing suicide");
+                myAgent.doDelete();
+	        } 
+		};
 	}
 	
 	private WakerBehaviour createCapsulesAfterRegistration() {

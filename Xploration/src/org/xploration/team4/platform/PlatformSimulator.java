@@ -139,6 +139,8 @@ public class PlatformSimulator extends Agent {
 			e.printStackTrace();
 		}
 		
+		addBehaviour(tbf.wrap(killAgentAtMissionEnd()));
+		
 		/***COMM_SIM***/
 		Behaviour bb = mapBroadcastListener();
 		addBehaviour(tbf.wrap(bb));	
@@ -160,6 +162,16 @@ public class PlatformSimulator extends Agent {
 		/***NETWORK_SIM***/
 		Behaviour ccr = cellClaimRoverListener();
 		addBehaviour(tbf.wrap(ccr));
+	}
+
+	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator
+		return new WakerBehaviour(this, Constants.MISSION_LENGTH*1000) {
+			
+			protected void onWake() {
+				System.out.println(getLocalName() + ": committing suicide");
+                myAgent.doDelete();
+	        } 
+		};
 	}
 		
 	/*
