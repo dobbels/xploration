@@ -165,6 +165,8 @@ public class AgRover4 extends Agent {
 							System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
 						}
 						state = State.MOVING;
+						Cell c = findClosestCellToAnalyse(location);
+						System.out.println("Closest cell to analyse is: " + c.getX() + ", " + c.getY());
 						requestMovement(nextMovements.get(0));
 					} 
 				}
@@ -230,6 +232,14 @@ public class AgRover4 extends Agent {
 	protected boolean currentCellAlreadyHandled() {
 		for (Cell c : localWorldMap.getCellList()) {
 			if (c.getX() == location.getX() && c.getY() == location.getY() && c.getMineral() != null)
+				return true;
+		}
+		return false;
+	}
+	
+	protected boolean currentCellAlreadyHandled(Cell toAnalyse) {
+		for (Cell c : localWorldMap.getCellList()) {
+			if (c.getX() == toAnalyse.getX() && c.getY() == toAnalyse.getY() && c.getMineral() != null)
 				return true;
 		}
 		return false;
@@ -491,20 +501,6 @@ public class AgRover4 extends Agent {
 			else {
 //				System.out.println("too far away");
 				++i;
-				/*if (i >= 5) {
-					System.out.println("this shouldn't happen so recalculate surrounding cells");
-					if (movements.size() > 0) {
-						possible.clear();
-						possible = calculateSurroundingCells(movements.get(movements.size()-1));
-						System.out.println(possible.size());
-						i = 0;
-					}
-					else {
-						possible.clear();
-						possible = calculateSurroundingCells(position);
-						i = 0;
-					}
-				}*/
 			}
 		}
 		
@@ -547,6 +543,39 @@ public class AgRover4 extends Agent {
 		}
 		
 		return movements;
+	}
+	
+
+	private Cell findClosestCellToAnalyse(Cell position) {
+		Cell toAnalyse = null;
+		ArrayList<Cell> possible = calculateSurroundingCells(position);
+		ArrayList<Cell> alreadyTested = new ArrayList<Cell>();
+		boolean found = false;
+		int distance = 0;
+		int i = 0;
+		
+		while (!found) {
+			Cell actual = possible.get(i);
+			int newDistance = localWorldMap.distance(location, actual);
+			System.out.println("getting farer?: " + newDistance);
+			System.out.println("trying: " + actual.getX() + ", " + actual.getY());
+			if (notContains(alreadyTested, actual)) {
+				System.out.println("not tested yet");
+				if (!currentCellAlreadyHandled(actual)) {
+					System.out.println("Not handled cell found");
+					toAnalyse = actual;
+					found = true;
+				}
+				else {
+					System.out.println("Already handled");
+					possible.addAll(calculateSurroundingCells(actual));
+					alreadyTested.add(actual);
+				}
+			}
+			++i;
+		}
+		
+		return toAnalyse;
 	}
 	
 	private void resetBehaviour() {
