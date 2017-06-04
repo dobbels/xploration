@@ -147,6 +147,10 @@ public class AgRover4 extends Agent {
 			
 			@Override
 			public void action() {
+//				System.out.println(nextMovements);
+//				System.out.println(state.toString());
+//				System.out.println(currentCellAnalyzed());
+//				System.out.println(firstBehaviourUseless);
 				if (nextMovements.isEmpty()) {
 					if (!firstBehaviourUseless && 
 							(localWorldMap.distance(location, capsuleLocation)+1) <= Math.min(localWorldMap.getHeight()/4, localWorldMap.getWidth()/2)) {
@@ -163,14 +167,14 @@ public class AgRover4 extends Agent {
 					}
 				}
 				else {
-					if (!analyzing() && !moving() && currentCellAnalyzed()) {
+					if (!analyzing() && !moving() && currentCellAlreadyHandled()) {
 						System.out.println(getLocalName() + ": requesting movement");
 						if (state == State.ANALYZING && state == State.MOVING) {
 							System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
 						}
 						state = State.MOVING;
 						requestMovement(nextMovements.get(0));
-					} 
+					}
 				}
 				if (!firstBehaviourUseless) {
 					if (!movingInRangeToClaim && ! moving() //TODO do this differently once the second behaviour has started? Also broadcast analyzed cells when that behaviour started?
@@ -178,7 +182,9 @@ public class AgRover4 extends Agent {
 							//TODO better smaller analyze size?! Just a disadvantage then if communication range is 1? because of first tour
 							&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
 						ArrayList<Cell> toGoBackInRange = goBackInRange(location);
-	//					if (nextMovements.get(0) != location) { //TODO make check for if it is last in nextMovements by accident 
+//						if (nextMovements.get(0) != null) { 
+//							// if current cell  was the last in next movements -> maybe not necessary, very very edge case
+//						}
 						ArrayList<Cell> backToPath = shortestPathBetween(toGoBackInRange.get(toGoBackInRange.size()-1), nextMovements.get(0));
 						backToPath.remove(backToPath.size()-1); // otherwise the destination is added twice
 						ArrayList<Cell> thereAndBack = new ArrayList<>(toGoBackInRange);
@@ -215,13 +221,23 @@ public class AgRover4 extends Agent {
 	}
 	
 	private void secondBehaviour() {
+		System.out.println("second behaviour useless: " + secondBehaviourUseless);
+		System.out.println(lastCellsClaimed);
+		System.out.println(movingInRangeToClaim);
+		System.out.println(secondBehaviourUseless);
+		System.out.println(state.toString());
+		if (analyzedCells.size() == 0) {
+			System.out.println(getLocalName() + ": last cells already claimed");
+			lastCellsClaimed = true;
+		}
 		if (!lastCellsClaimed && !movingInRangeToClaim) {
 			if (!movingInRangeToClaim && ! moving()
 				&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-			ArrayList<Cell> toGoBackInRange = goBackInRange(location);
-			nextMovements = toGoBackInRange;
-			movingInRangeToClaim = true;
-			lastCellsClaimed = true;
+				System.out.println(getLocalName() + ": claiming last cells");
+				ArrayList<Cell> toGoBackInRange = goBackInRange(location);
+				nextMovements = toGoBackInRange;
+				movingInRangeToClaim = true;
+				lastCellsClaimed = true;
 			}
 		}
 		else if (!secondBehaviourUseless) {
@@ -235,10 +251,11 @@ public class AgRover4 extends Agent {
 				secondBehaviourUseless = true;
 			}
 		}
-		if (!movingInRangeToClaim && ! moving()
-				&& (new Date()).getTime() > (creationTime.getTime() + missionLength*1000 - movementTime*1000*(localWorldMap.distance(location, capsuleLocation) - communicationRange)) // to be back before mission end 
+		if (!movingInRangeToClaim && ! moving() 
+				//TODO move this to outside secondBehaviour! Otherwise only when nextMovements is empty and when first behaviour has finished
+				&& (new Date()).getTime() > (creationTime.getTime() + missionLength*1000 - (movementTime*1.1)*1000*(localWorldMap.distance(location, capsuleLocation) - communicationRange)) // to be back before mission end 
 				&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-			System.out.println("Claim last cells");
+			System.out.println("Claim very last cells");
 			nextMovements.clear();
 			ArrayList<Cell> toGoBackInRange = goBackInRange(location);
 			nextMovements.addAll(toGoBackInRange);
