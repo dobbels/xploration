@@ -32,24 +32,18 @@ import jade.lang.acl.ACLMessage;
 
 public class Scorer extends Agent {
 	
-	// TODO send score to spacecraft in the end ?
-	
 	private static final long serialVersionUID = 1L;
 	
 	private static final Ontology ontology = XplorationOntology.getInstance();
 	private Codec codec = new SLCodec();
 	
-	Map worldMap = MapReader.readMap(); //TODO send this from platform simulator through a proper ACLMessage ?
-	
-	private int worldDimensionY = worldMap.getWidth(); 
-	private int worldDimensionX = worldMap.getHeight();
+	Map worldMap = MapReader.readMap();
 	
 	private ArrayList<Cell> claimedCells = new ArrayList<>();
 	private HashMap<Integer, Integer> nbCorrectClaims = new HashMap<>();
 	private HashMap<Integer, Integer> nbIncorrectClaims = new HashMap<>();
 	private HashMap<Integer, Integer> nbLateClaims = new HashMap<>();
 	private HashMap<Integer, Integer> teamScores = new HashMap<>();
-	//TODO get AIDs from simulator at registration to check if it's really them (not possible because senderAID is from Spacecraft?)
 	
 	private long printingRate = 10000;
 	
@@ -133,7 +127,6 @@ public class Scorer extends Agent {
 
 			@Override
 			public void action() {
-				// TODO Auto-generated method stub
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
 				
 				if (msg!= null) {
@@ -148,6 +141,7 @@ public class Scorer extends Agent {
 								ClaimCellInfo cci = (ClaimCellInfo) conc;
 								
 								Team team = cci.getTeam();
+								@SuppressWarnings("rawtypes")
 								Iterator cellListIterator = cci.getMap().getAllCellList();
 								int teamid = team.getTeamId();
 								

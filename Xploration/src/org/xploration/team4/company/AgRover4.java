@@ -1,11 +1,8 @@
 package org.xploration.team4.company;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import org.xploration.ontology.Cell;
 import org.xploration.ontology.CellAnalysis;
@@ -25,20 +22,16 @@ import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.core.behaviours.WakerBehaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
-//TODO search for all the services at the startup of this agent (in a behaviour) !! Not every time you do an action of course! 
-//TODO solve OntologyException
 public class AgRover4 extends Agent {
 
 	private int worldDimY;
@@ -67,11 +60,17 @@ public class AgRover4 extends Agent {
 	private boolean lastCellsClaimed = false;
 	
 	private boolean movingInRangeToClaim = false;
-	private int movementTime = 10;
+	private long movementTime = 10000;
+	private Date movementTimeMeasurement;
+	
+	DFAgentDescription[] terrainSimulator = new DFAgentDescription[20];
+	DFAgentDescription[] movementRequestService = new DFAgentDescription[20];
+	DFAgentDescription[] mapBroadcastService = new DFAgentDescription[20];
+	DFAgentDescription[] radioClaimService = new DFAgentDescription[20];
 
 	private Map localWorldMap; 
 
-	private Date creationTime = new Date();
+	private Date creationTime;
 	
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 
@@ -119,6 +118,8 @@ public class AgRover4 extends Agent {
 		missionLength = arg5;
 		communicationRange = arg6;
 		
+		creationTime = new Date();
+		
 		localWorldMap = new Map(worldDimX, worldDimY);
 
 		System.out.println(getLocalName()+": starting location: "+ arg1 +  "," + arg2);
@@ -132,13 +133,145 @@ public class AgRover4 extends Agent {
 		directions.add("leftUp");
 		directions.add("up");
 		
+		searchForServicesInYellowPages();
+		
 		//roverRegistration for Map Simulator
-	    roverRegistration(location);	    
+	    roverRegistration(location);
 	} 
+	
+	private void searchForServicesInYellowPages() {
+	    addBehaviour (new SimpleBehaviour(this) {			  			
+
+			private static final long serialVersionUID = 1355306191219660531L;
+			private boolean terrainSimFound = false;
+	    	
+			public void action(){
+				//Creates description for the AGENT TERRAIN SIMULATOR to be searched
+				DFAgentDescription dfd = new DFAgentDescription();     
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType(XplorationOntology.TERRAINSIMULATOR);
+				dfd.addServices(sd);
+				
+				try {
+					// It finds agents of the required type
+					terrainSimulator = DFService.search(myAgent, dfd);
+					if (terrainSimulator.length > 0)
+						terrainSimFound = true;
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public boolean done() {
+				return terrainSimFound; 
+			}
+	    });
+	    
+	    addBehaviour (new SimpleBehaviour(this) {			  			
+
+	    	 
+			private static final long serialVersionUID = -7176777209553028459L;
+			private boolean movementSimFound = false;
+	    	
+			public void action(){
+				DFAgentDescription dfd = new DFAgentDescription();     
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType(XplorationOntology.MOVEMENTREQUESTSERVICE);
+				dfd.addServices(sd);
+				
+				try {
+					// It finds agents of the required type
+					movementRequestService = DFService.search(myAgent, dfd);
+
+					// Gets the first occurrence, if there was success
+					if (movementRequestService.length > 0) {
+						movementSimFound = true;
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public boolean done() {
+				return movementSimFound; 
+			}
+	    });
+	    
+	    addBehaviour (new SimpleBehaviour(this) {			  			
+
+			private static final long serialVersionUID = 2519312725633578222L;
+			private boolean mapSimFound = false;
+	    	
+			public void action(){
+				DFAgentDescription dfd = new DFAgentDescription();     
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType(XplorationOntology.MAPBROADCASTSERVICE);
+				dfd.addServices(sd);
+				
+				try {
+					// It finds agents of the required type					
+					mapBroadcastService = DFService.search(myAgent, dfd);
+
+					// Gets the first occurrence, if there was success
+					if (mapBroadcastService.length > 0)
+						mapSimFound = true;
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public boolean done() {
+				return mapSimFound; 
+			}
+	    });
+	    
+	    addBehaviour (new SimpleBehaviour(this) {			  			
+
+	    	 
+			private static final long serialVersionUID = 4683011341099832665L;
+			private boolean radioSimFound = false;
+	    	
+			public void action(){
+				//Searching for an agent with RADIOCLAIMSERVICE Description
+				DFAgentDescription dfd = new DFAgentDescription();     
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType(XplorationOntology.RADIOCLAIMSERVICE);
+				dfd.addServices(sd);
+
+				try {
+					// It finds agents of the required type
+					
+					radioClaimService = DFService.search(myAgent, dfd);
+
+					// Gets the first occurrence, if there was success
+					if (radioClaimService.length > 0)
+						radioSimFound = true;
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public boolean done() {
+				return radioSimFound; 
+			}
+	    });
+	}
 	
 	private void startMainBehaviour() {
 		addBehaviour (new CyclicBehaviour(this) {
 
+			 
+			private static final long serialVersionUID = -618318044108331361L;
+			boolean shouldBeBackAsSoonAsPossible = false;
+			
 			@Override
 			public void onStart() {
 				addBehaviour(tbf.wrap(killAgentAtMissionEnd()));
@@ -147,16 +280,11 @@ public class AgRover4 extends Agent {
 			
 			@Override
 			public void action() {
-//				System.out.println(nextMovements);
-//				System.out.println(state.toString());
-//				System.out.println(currentCellAnalyzed());
-//				System.out.println(firstBehaviourUseless);
 				if (nextMovements.isEmpty()) {
 					if (!firstBehaviourUseless && 
 							(localWorldMap.distance(location, capsuleLocation)+1) <= Math.min(localWorldMap.getHeight()/4, localWorldMap.getWidth()/2)) {
-						System.out.println(getLocalName() + ": calculating next cells (for distance " + (localWorldMap.distance(location, capsuleLocation)+1) + ")");
+//						System.out.println(getLocalName() + ": calculating next cells (for distance " + (localWorldMap.distance(location, capsuleLocation)+1) + ")");
 						nextMovements = calculateBorderCells(location, localWorldMap.distance(location, capsuleLocation)+1); 
-//						System.out.println(nextMovements);
 					}
 					else if (firstBehaviourUseless) {
 						secondBehaviour();
@@ -167,19 +295,19 @@ public class AgRover4 extends Agent {
 					}
 				}
 				else {
-					if (!analyzing() && !moving() && currentCellAlreadyHandled()) {
-						System.out.println(getLocalName() + ": requesting movement");
+					if (!analyzing() && !moving() && (currentCellAlreadyHandled() || shouldBeBackAsSoonAsPossible)) {
+//						System.out.println(getLocalName() + ": requesting movement");
 						if (state == State.ANALYZING && state == State.MOVING) {
 							System.out.println(getLocalName() + ": ERROR! Moving while analyzing");
 						}
 						state = State.MOVING;
 						requestMovement(nextMovements.get(0));
+						// nextMovements.remove(0); is done in requestMovement after an inform.
 					}
 				}
 				if (!firstBehaviourUseless) {
-					if (!movingInRangeToClaim && ! moving() //TODO do this differently once the second behaviour has started? Also broadcast analyzed cells when that behaviour started?
+					if (!movingInRangeToClaim && ! moving()
 							&& analyzedCells.size() > 3*(localWorldMap.distance(location, capsuleLocation) - communicationRange) 
-							//TODO better smaller analyze size?! Just a disadvantage then if communication range is 1? because of first tour
 							&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
 						ArrayList<Cell> toGoBackInRange = goBackInRange(location);
 //						if (nextMovements.get(0) != null) { 
@@ -192,48 +320,48 @@ public class AgRover4 extends Agent {
 	
 						nextMovements.addAll(0, thereAndBack);
 						movingInRangeToClaim = true;
-						
-						// TODO check in printstatement of alle cellen aaneensluitend zijn
 					}
 				}
 				
-				if (!moving() && !analyzing() && !currentCellAlreadyHandled()) {
-					System.out.println(getLocalName() + ": analyzing");
+//				System.out.println("tijdtest");
+//				System.out.println((new Date()).getTime());
+//				System.out.println((creationTime.getTime() + missionLength*1000) - ((movementTime*1.1)*(localWorldMap.distance(location, capsuleLocation) - communicationRange)));
+//				System.out.println((new Date()).getTime() > (creationTime.getTime() + missionLength*1000 - (movementTime*1.1)*(localWorldMap.distance(location, capsuleLocation)- communicationRange)));
+				
+				if (!movingInRangeToClaim && ! moving() && !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange) && 
+						(firstBehaviourUseless && secondBehaviourUseless 
+								|| 
+						(new Date()).getTime() > (creationTime.getTime() + missionLength*1000 - (movementTime*1.1)*(localWorldMap.distance(location, capsuleLocation) - communicationRange)))) { // to be back before mission end )
+					System.out.println(getLocalName() + ": Claim very last cells");
+					ArrayList<Cell> toGoBackInRange = goBackInRange(location);
+					nextMovements = toGoBackInRange; 		
+					movingInRangeToClaim = true;
+					firstBehaviourUseless = true;
+					secondBehaviourUseless = true;
+					shouldBeBackAsSoonAsPossible = true;
+				}
+				
+				if (!moving() && !analyzing() && !currentCellAlreadyHandled() && !shouldBeBackAsSoonAsPossible) {
+//					System.out.println(getLocalName() + ": analyzing");
 					if (state == State.MOVING && state == State.ANALYZING) {
 						System.out.println(getLocalName() + ": ERROR! Analyzing while moving");
 					}
 					state = State.ANALYZING;
 					analyzeCurrentCell();
 				}
-				
-				// nextMovements.remove(0); is done in requestMovement after an inform. If a failure is received, the same cell will be tried on the next iteration.
-				//TODO if movement refuse or failure: clear next movements and end firstBehaviour?
-				// TODO add exploration-algorithm-logic
-				// we could move in spiral + radio range level if no other rovers are around
-				// if rovers are around move in spiral starting close to where they are so that they don't move to our position
-				
-				// maybe never go back in range of capsule, except when the end of the mission is approaching. 
-				// if the world is small, maybe it's even best to just go around the whole time, or mark your territory first and then 
-				// start filling in the inside. To calculate the size of this territory you could make some calculation based on missionlength, analyzingTime and movementTime (oh maybe these last ones you don't know).
-				// + claim cells you get in map broadcast. Just in case they broadcast it right after analyzing, not after claiming
 			}
 		});
 	}
 	
 	private void secondBehaviour() {
-		System.out.println("second behaviour useless: " + secondBehaviourUseless);
-		System.out.println(lastCellsClaimed);
-		System.out.println(movingInRangeToClaim);
-		System.out.println(secondBehaviourUseless);
-		System.out.println(state.toString());
 		if (analyzedCells.size() == 0) {
-			System.out.println(getLocalName() + ": last cells already claimed");
+//			System.out.println(getLocalName() + ": last cells already claimed");
 			lastCellsClaimed = true;
 		}
 		if (!lastCellsClaimed && !movingInRangeToClaim) {
 			if (!movingInRangeToClaim && ! moving()
 				&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-				System.out.println(getLocalName() + ": claiming last cells");
+//				System.out.println(getLocalName() + ": claiming last cells");
 				ArrayList<Cell> toGoBackInRange = goBackInRange(location);
 				nextMovements = toGoBackInRange;
 				movingInRangeToClaim = true;
@@ -242,27 +370,16 @@ public class AgRover4 extends Agent {
 		}
 		else if (!secondBehaviourUseless) {
 			try {
-				System.out.println(getLocalName() + ": calculating next cannon ball");
+//				System.out.println(getLocalName() + ": calculating next cannon ball");
 				Cell c = findClosestCellToAnalyse(location);
 				nextMovements = shortestPathBetween(location, c);
-				System.out.println("Closest cell to analyse is: " + c.getX() + ", " + c.getY());
+//				System.out.println("Closest cell to analyse is: " + c.getX() + ", " + c.getY());
 			} catch (Exception e) {
-				System.out.println(getLocalName() + ": calculating cannonball not possible");
+				// normally IndexOutOfBoundsExcpetion is thrown when all cells in world analyzed, go claim
+//				System.out.println(getLocalName() + ": calculating cannonball not possible");
 				secondBehaviourUseless = true;
 			}
 		}
-		if (!movingInRangeToClaim && ! moving() 
-				//TODO move this to outside secondBehaviour! Otherwise only when nextMovements is empty and when first behaviour has finished
-				&& (new Date()).getTime() > (creationTime.getTime() + missionLength*1000 - (movementTime*1.1)*1000*(localWorldMap.distance(location, capsuleLocation) - communicationRange)) // to be back before mission end 
-				&& !localWorldMap.inRangeFrom(location, capsuleLocation, communicationRange)) {
-			System.out.println("Claim very last cells");
-			nextMovements.clear();
-			ArrayList<Cell> toGoBackInRange = goBackInRange(location);
-			nextMovements.addAll(toGoBackInRange);
-			//TODO Now also broadcast analyzed cells when first behaviour is over? 		
-			movingInRangeToClaim = true;
-		}
-		//TODO if all cells in world analyzed, go claim
 	}
 	
 	/*
@@ -315,7 +432,7 @@ public class AgRover4 extends Agent {
 		return border;
 	}
 
-	private ArrayList<Cell> calculateCanonBallCells(Cell position) { //TODO optimize for use in moment we don't know what to do? + path algo to move back to capsule to claim/before mission ends
+	private ArrayList<Cell> calculateCanonBallCells(Cell position) {
 		ArrayList<Cell> border = new ArrayList<Cell>();
 		for (int i = 0; i < directions.size(); i++) {
 			Cell next = localWorldMap.calculateNextPosition(position.getX(), position.getY(), directions.get(i));
@@ -346,17 +463,6 @@ public class AgRover4 extends Agent {
 					atRightDistance.add(c);
 			}
 
-//			System.out.println("current pos: " + nextPos.getX() + ", " + nextPos.getY());
-//			System.out.println("a right distance:");
-//			for (Cell whut : atRightDistance) {
-//				System.out.println(whut.getX() + ", " + whut.getY());
-//			}
- 
-//			System.out.println("bordercells");
-//			for (Cell b : borderCells) {
-//				System.out.println(b.getX() + ", " + b.getY());
-//			}
-//			System.out.println();
 			nbCells = borderCells.size();
 			if (distance <= 1) {
 				for (Cell last : atRightDistance) {
@@ -398,10 +504,7 @@ public class AgRover4 extends Agent {
 				break;
 			}
 		}
-//		System.out.println("Final border cells: ");
-//		for (Cell b : borderCells) {
-//			System.out.println(b.getX() + " " + b.getY());
-//		}
+		
 		borderCells.remove(0);
 		return borderCells;
 	}
@@ -410,20 +513,6 @@ public class AgRover4 extends Agent {
 	private boolean preferredDirection(Cell cell, Cell cell2, Cell last) {
 		String dir = localWorldMap.whichDirection(cell, cell2);
 		
-//		int ix = cell.getX();
-//    	int iy = cell.getY();
-//    	int dx = cell2.getX();
-//    	int dy = cell2.getY();
-//    	System.out.println(ix);
-//    	System.out.println(iy);
-//    	System.out.println(dx);
-//    	System.out.println(dy);
-//    	System.out.println(" ");
-//		System.out.println(dir);
-//		System.out.println();
-//		System.out.println(last.getX());
-//		System.out.println(last.getY());
-//		System.out.println();
 		if (localWorldMap.whichDirection(cell2, last) == null) {
 			System.out.println("ERROR calculating bordercells");
 			return false;
@@ -456,20 +545,6 @@ public class AgRover4 extends Agent {
 	private boolean otherDirection(Cell cell, Cell cell2, Cell last) {
 		String dir = localWorldMap.whichDirection(cell, cell2);
 		
-//		int ix = cell.getX();
-//    	int iy = cell.getY();
-//    	int dx = cell2.getX();
-//    	int dy = cell2.getY();
-//    	System.out.println(ix);
-//    	System.out.println(iy);
-//    	System.out.println(dx);
-//    	System.out.println(dy);
-//    	System.out.println(" ");
-//		System.out.println(dir);
-//		System.out.println();
-//		System.out.println(last.getX());
-//		System.out.println(last.getY());
-//		System.out.println();
 		if (localWorldMap.whichDirection(cell2, last) == null) {
 			System.out.println("ERROR calculating bordercells");
 			return false;
@@ -507,14 +582,14 @@ public class AgRover4 extends Agent {
 	}
 	
 	private ArrayList<Cell> goBackInRange(Cell position) {
-		System.out.println("go back in range function called");
+//		System.out.println("go back in range function called");
 		ArrayList<Cell> movements = new ArrayList<Cell>();
 		ArrayList<Cell> possible = calculateSurroundingCells(position);
 		boolean found = false;
 		int distance = localWorldMap.distance(position, capsuleLocation);
-		System.out.println("distance to capsule is: " + distance);
+//		System.out.println("distance to capsule is: " + distance);
 		if (distance <= communicationRange) {
-			System.out.println("Already in range"); //function should not be called in this case
+//			System.out.println("Already in range"); //function should not be called in this case
 		}
 		int i = 0;
 		while (!found) {
@@ -619,12 +694,15 @@ public class AgRover4 extends Agent {
 	
 	private void resetBehaviour() {
 		nextMovements.clear();
-		//TODO add cannonball behaviour
+		firstBehaviourUseless = true;
 	}
 
-	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator
+	private WakerBehaviour killAgentAtMissionEnd() {
 		return new WakerBehaviour(this, missionLength*1000) {
 			
+			 
+			private static final long serialVersionUID = 1442964318675336227L;
+
 			protected void onWake() {
 				System.out.println(getLocalName() + ": committing suicide");
                 myAgent.doDelete();
@@ -636,9 +714,9 @@ public class AgRover4 extends Agent {
 	
 	// ------------------------------------------------------------------------------------------------------------------
 
-	private void analyzeCurrentCell(){ //TODO all behaviours parallel? We have roverstates, so should normally stay consistent? But what do we win with it?
+	private void analyzeCurrentCell(){
 
-		addBehaviour (new SimpleBehaviour(this) { //TODO can also be OneShotBehaviour?					  			
+		addBehaviour (new SimpleBehaviour(this) {					  			
 			private static final long serialVersionUID = 1L;
 
 			AID agTerrain;
@@ -649,23 +727,11 @@ public class AgRover4 extends Agent {
 
 				//A defensive check
 				if(!cellAnalyzed){
-					//Creates description for the AGENT TERRAIN SIMULATOR to be searched
-					DFAgentDescription dfd = new DFAgentDescription();     
-					ServiceDescription sd = new ServiceDescription();
-					sd.setType(XplorationOntology.TERRAINSIMULATOR);
-					dfd.addServices(sd);
-
 					try {
-						// It finds agents of the required type
-						DFAgentDescription[] result = new DFAgentDescription[20];
-						result = DFService.search(myAgent, dfd);
-
 						// Gets the first occurrence, if there was success
-						if (result.length > 0)
+						if (terrainSimulator.length > 0)
 						{
-							//System.out.println(result[0].getName());
-							agTerrain = (AID) result[0].getName();	
-							System.out.println(getLocalName()+ ": terrain simulator agent is found");
+							agTerrain = (AID) terrainSimulator[0].getName();
 
 
 							CellAnalysis cellAnalysis = new CellAnalysis();
@@ -674,16 +740,16 @@ public class AgRover4 extends Agent {
 							ACLMessage msg = MessageHandler.constructMessage(agTerrain, ACLMessage.REQUEST, cellAnalysis, XplorationOntology.CELLANALYSIS);
 							send(msg);			                	
 
-							System.out.println(getLocalName() + ": REQUEST is sent");
-							//doWait(1000);
+							System.out.println(getLocalName() + ": analyze REQUEST is sent for (" + location.getX() + ", " + location.getY() + ")");
 
 							//Returned answer from Terrain Simulation
 							ACLMessage ans = MessageHandler.blockingReceive(myAgent, XplorationOntology.CELLANALYSIS);
 							if(ans!= null){	  
 								if(ans.getPerformative()==ACLMessage.REFUSE)
 								{
-									System.out.println(getLocalName() + ": REFUSED due to Invalid Cell: " + location.getX() + ", " + location.getY());
+									System.out.println(getLocalName() + ": REFUSED due to invalid Cell: " + location.getX() + ", " + location.getY());
 									cellAnalyzed = true;
+									resetBehaviour();
 								}
 
 								else if(ans.getPerformative()== ACLMessage.NOT_UNDERSTOOD)
@@ -699,7 +765,6 @@ public class AgRover4 extends Agent {
 
 									switch (finalMsg.getPerformative()) {
 									case ACLMessage.INFORM:
-										System.out.println(getLocalName()+": analyze INFORM is received!");
 
 										ContentElement ce;
 										try {
@@ -714,6 +779,7 @@ public class AgRover4 extends Agent {
 													Cell cell = ((CellAnalysis) conc).getCell();
 													analyzedCells.add(cell);
 													localWorldMap.setCell(cell);
+													System.out.println(getLocalName()+ ": analyze INFORM is received");
 													System.out.println(myAgent.getLocalName()+ ": investigated Cell ("
 															+cell.getX() + ","+ cell.getY()+  ", " + cell.getMineral() + ")");
 												}
@@ -727,6 +793,7 @@ public class AgRover4 extends Agent {
 									case ACLMessage.FAILURE:
 										System.out.println(getLocalName()+": FAILURE was received!");
 										cellAnalyzed = true;
+										resetBehaviour();
 									}							
 								}						  						  						  
 							}else{
@@ -759,7 +826,8 @@ public class AgRover4 extends Agent {
 	private void roverRegistration(Cell myCell){	
 		addBehaviour (new SimpleBehaviour(this)
 		{	
-			private static final long serialVersionUID1 = 2L;
+			 
+			private static final long serialVersionUID = 1367457889574272504L;
 
 			AID agMapSimulator;
 
@@ -784,9 +852,7 @@ public class AgRover4 extends Agent {
 						if (result.length > 0)
 						{
 							//System.out.println(result[0].getName());
-							agMapSimulator = (AID) result[0].getName();	
-							System.out.println(getLocalName()+ ": Map Simulator agent is found");
-
+							agMapSimulator = (AID) result[0].getName();
 
 							RoverRegistrationInfo roverReg = new RoverRegistrationInfo();
 							roverReg.setCell(myCell);
@@ -796,7 +862,7 @@ public class AgRover4 extends Agent {
 
 							ACLMessage msg = MessageHandler.constructMessage(agMapSimulator, ACLMessage.INFORM, roverReg, XplorationOntology.ROVERREGISTRATIONINFO);
 							send(msg);	
-							System.out.println(getLocalName() + ": INFORM is sent");
+							System.out.println(getLocalName() + ": rover registration INFORM is sent");
 							roverRegistration = true;
 
 							System.out.println(getLocalName() + ": Main behaviour started");
@@ -804,7 +870,7 @@ public class AgRover4 extends Agent {
 							listenForMaps();
 						}
 						else{
-							System.out.println(getLocalName() + ": No map simulator found in yellow pages yet.");
+							System.out.println(getLocalName() + ": No rover registration service found in yellow pages yet.");
 							doWait(5000);
 						}
 					}
@@ -832,27 +898,13 @@ public class AgRover4 extends Agent {
 			AID agCommunication;
 
 			public void action(){
-
-				//Creates description for the AGENT TERRAIN SIMULATOR to be searched
-				DFAgentDescription dfd = new DFAgentDescription();     
-				ServiceDescription sd = new ServiceDescription();
-				sd.setType(XplorationOntology.MAPBROADCASTSERVICE);
-				dfd.addServices(sd);
-
 				try {
-					// It finds agents of the required type
-					DFAgentDescription[] result = new DFAgentDescription[20];
-					result = DFService.search(myAgent, dfd);
 
 					// Gets the first occurrence, if there was success
-					if (result.length > 0)
+					if (mapBroadcastService.length > 0)
 					{
 						//System.out.println(result[0].getName());
-						agCommunication = (AID) result[0].getName();	
-
-						//TODO change from here on 
-
-						System.out.println(getLocalName()+ ": map broadcast service is found");
+						agCommunication = (AID) mapBroadcastService[0].getName();
 
 						if (!claimedCells.isEmpty()) {
 							MapBroadcastInfo mbi = new MapBroadcastInfo();
@@ -897,7 +949,7 @@ public class AgRover4 extends Agent {
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.MAPBROADCASTINFO);
 
 				if (msg != null) {
-					System.out.println(getLocalName() + ": received map broadcast");
+//					System.out.println(getLocalName() + ": received map broadcast");
 
 					// The ContentManager transforms the message content
 					ContentElement ce;
@@ -910,13 +962,14 @@ public class AgRover4 extends Agent {
 							if (conc instanceof MapBroadcastInfo) {
 								MapBroadcastInfo mbi = (MapBroadcastInfo) conc;
 								org.xploration.ontology.Map map = mbi.getMap();
+								@SuppressWarnings("rawtypes")
 								Iterator it = map.getAllCellList();
 								Cell c;
 								while (it.hasNext()) {
 									c = (Cell) it.next();
 									localWorldMap.setCell(c);
 								}
-								System.out.println(getLocalName() + ": new local world map");
+//								System.out.println(getLocalName() + ": new local world map");
 //								localWorldMap.printWorldMap();
 							}
 						}
@@ -932,8 +985,8 @@ public class AgRover4 extends Agent {
 		}));
 
 	}
-	//TODO you have to give something back here? because if movementrequest fails, it is still removed from list and on next move there is a problem? 
-	private void requestMovement(Cell destination) { //TODO here we probably add an argument 'cell' and take the decision of where to go outside?!
+	
+	private void requestMovement(Cell destination) {
 		addBehaviour(new SimpleBehaviour(this) {
 			private static final long serialVersionUID = 1L;
 			AID agMovementSim;
@@ -941,21 +994,10 @@ public class AgRover4 extends Agent {
 			@Override
 			public void action() {
 				if (!movementRequested) {
-					//Creates description for the AGENT TERRAIN SIMULATOR to be searched
-					DFAgentDescription dfd = new DFAgentDescription();     
-					ServiceDescription sd = new ServiceDescription();
-					sd.setType(XplorationOntology.MOVEMENTREQUESTSERVICE);
-					dfd.addServices(sd);
-
 					try {
-						// It finds agents of the required type
-						DFAgentDescription[] result = new DFAgentDescription[20];
-						result = DFService.search(myAgent, dfd);
-
 						// Gets the first occurrence, if there was success
-						if (result.length > 0) {
-							agMovementSim = (AID) result[0].getName();	
-							System.out.println(getLocalName()+ ": movement simulator agent is found");
+						if (movementRequestService.length > 0) {
+							agMovementSim = (AID) movementRequestService[0].getName();
 
 							MovementRequestInfo mri = new MovementRequestInfo();
 							Team team = new Team();
@@ -965,13 +1007,14 @@ public class AgRover4 extends Agent {
 
 							ACLMessage msg = MessageHandler.constructMessage(agMovementSim, ACLMessage.REQUEST, mri, XplorationOntology.MOVEMENTREQUESTINFO);
 							send(msg);
+							movementTimeMeasurement = new Date();
 							
-							System.out.println(getLocalName() + ": REQUEST is sent");
+							System.out.println(getLocalName() + ": movement REQUEST is sent for (" + destination.getX() + ", " + destination.getY() + ")");
 
 							ACLMessage ans = MessageHandler.blockingReceive(myAgent, XplorationOntology.MOVEMENTREQUESTINFO);
 							if (ans != null) {
 								if (ans.getPerformative() == ACLMessage.REFUSE) {
-									System.out.println(getLocalName() + ": REFUSED due to Invalid Cell");
+									System.out.println(getLocalName() + ": REFUSED due to invalid Cell");
 									movementRequested = true;
 									resetBehaviour();
 								}
@@ -1000,14 +1043,17 @@ public class AgRover4 extends Agent {
 											claimCells();
 										}
 										
+										// recalculate movement to fit the real value
+										movementTime = (movementTime + (new Date()).getTime() - movementTimeMeasurement.getTime()) / 2;
+//										System.out.println(movementTime);
+										
 										broadcastCurrentMap();
 										
-//										if (!currentCellAlreadyHandled())
-//											analyzeCurrentCell();
 									}
 									else if (finalMsg.getPerformative() == ACLMessage.FAILURE) {
 										System.out.println(getLocalName() + ": FAILURE was received, collision");
 										movementRequested = true;
+										resetBehaviour();
 									}
 								}
 							}
@@ -1032,29 +1078,20 @@ public class AgRover4 extends Agent {
 	private void claimCells(){
 		addBehaviour (new SimpleBehaviour (this){
 			
+			private static final long serialVersionUID = 8967217697442944792L;
 			//Receiver Agent ID
 			AID agCommunication;
 			private boolean claimCell = false;
 
 			public void action(){
 				if(!claimCell){
-					//Searching for an agent with RADIOCLAIMSERVICE Description
-					DFAgentDescription dfd = new DFAgentDescription();     
-					ServiceDescription sd = new ServiceDescription();
-					sd.setType(XplorationOntology.RADIOCLAIMSERVICE);
-					dfd.addServices(sd);
 
 					try {
-						// It finds agents of the required type
-						DFAgentDescription[] result = new DFAgentDescription[20];
-						result = DFService.search(myAgent, dfd);
-
 						// Gets the first occurrence, if there was success
-						if (result.length > 0)
+						if (radioClaimService.length > 0)
 						{
 							//System.out.println(result[0].getName());
-							agCommunication = (AID) result[0].getName();											
-							System.out.println(getLocalName()+ ": Radio Claim Service is found");
+							agCommunication = (AID) radioClaimService[0].getName();
 
 							ClaimCellInfo cci = new ClaimCellInfo();
 							
@@ -1062,7 +1099,7 @@ public class AgRover4 extends Agent {
 							myTeam.setTeamId(TEAM_ID);
 							cci.setTeam(myTeam);
 							org.xploration.ontology.Map cciMap = new org.xploration.ontology.Map();
-							System.out.println(analyzedCells);
+//							System.out.println(analyzedCells);
 							for (Cell c : analyzedCells) {
 								cciMap.addCellList(c);
 								claimedCells.add(c);
@@ -1075,16 +1112,16 @@ public class AgRover4 extends Agent {
 							try{
 								ACLMessage msg = MessageHandler.constructMessage(agCommunication, ACLMessage.INFORM, cci, XplorationOntology.CLAIMCELLINFO);
 								send(msg);	
-								System.out.println(getLocalName() + ": INFORM is sent");
+//								System.out.println(getLocalName() + ": claim INFORM is sent");
 								claimCell = true;
 							}
 							catch(Exception e){
 								e.printStackTrace();
-								System.out.println(getLocalName() + ": INFORM couldn't sent");
+								System.out.println(getLocalName() + ": INFORM couldn't be sent");
 							}
 						}
 						else{
-							System.out.println(getLocalName()+ ": No agent found yet");
+							System.out.println(getLocalName()+ ": No claiming service found yet");
 							doWait(5000);
 						}
 					}

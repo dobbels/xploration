@@ -3,12 +3,9 @@ package org.xploration.team4.platform;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 
-import org.xploration.ontology.Cell;
 import org.xploration.team4.common.Map;
 
 public class MapReader {

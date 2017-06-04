@@ -2,7 +2,6 @@ package org.xploration.team4.common;
 
 import java.util.ArrayList;
 
-import org.xploration.ontology.ClaimCellInfo;
 import org.xploration.ontology.XplorationOntology;
 
 import jade.content.AgentAction;

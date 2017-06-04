@@ -14,7 +14,6 @@ import jade.content.onto.basic.Action;
 import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
@@ -88,7 +87,22 @@ public class Capsule4 extends Agent {
 		getContentManager().registerLanguage(codec);
         getContentManager().registerOntology(ontology);
         		
-        capsuleRegistration(location);     
+        capsuleRegistration(location);
+        
+        killAgentAtMissionEnd();
+	}
+	
+	private WakerBehaviour killAgentAtMissionEnd() {
+		return new WakerBehaviour(this, missionLength*1000) {
+			
+			 
+			private static final long serialVersionUID = 1442964318675336227L;
+
+			protected void onWake() {
+				System.out.println(getLocalName() + ": committing suicide");
+                myAgent.doDelete();
+	        } 
+		};
 	}
 	
 	private Behaviour deployRover() {
@@ -120,7 +134,7 @@ public class Capsule4 extends Agent {
 	private void capsuleRegistration(Cell myCell){	
 		addBehaviour (new SimpleBehaviour(this)
 		{	
-			private static final long serialVersionUID1 = 3L;
+			private static final long serialVersionUID = -7873999374941843621L;
 
 			AID agMapSimulator;
 
@@ -213,13 +227,14 @@ public class Capsule4 extends Agent {
 							if (conc instanceof MapBroadcastInfo) {
 								MapBroadcastInfo mbi = (MapBroadcastInfo) conc;
 								org.xploration.ontology.Map map = mbi.getMap();
+								@SuppressWarnings("rawtypes")
 								Iterator it = map.getAllCellList();
 								Cell c;
 								while (it.hasNext()) {
 									c = (Cell) it.next();
 									localWorldMap.setCell(c);
 								}
-								System.out.println(getLocalName() + ": new local world map");
+//								System.out.println(getLocalName() + ": new local world map");
 //								localWorldMap.printWorldMap();
 							}
 						}
@@ -238,6 +253,8 @@ public class Capsule4 extends Agent {
 	private void listenRoverClaimCell(){
 		addBehaviour(tbf.wrap(new CyclicBehaviour(this){
 
+			private static final long serialVersionUID = -6727271021594639998L;
+
 			public void action(){
 				
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
@@ -252,12 +269,9 @@ public class Capsule4 extends Agent {
 							Concept conc = ((Action) ce).getAction();
 							if(conc instanceof ClaimCellInfo){			
 								
-								AID fromAgent = msg.getSender();
 								try{
 										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
 										Team claimedTeam = cellInfo.getTeam();
-										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
-										jade.util.leap.List myCellList = claimedMap.getCellList();
 										
 										System.out.println(getLocalName()+ ": claim INFORM is received from team " + claimedTeam.getTeamId());
 										try{
@@ -296,6 +310,7 @@ public class Capsule4 extends Agent {
 	private void cellClaimToSpacecraft(ClaimCellInfo cellInfo){
 		addBehaviour (new SimpleBehaviour (this){ 
 
+			private static final long serialVersionUID = 5145559126297018013L;
 			AID agCommunication;
 			private boolean claimCellToSpacecraft = false;
 

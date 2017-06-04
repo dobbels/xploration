@@ -2,10 +2,6 @@ package org.xploration.team4.common;
 
 import org.xploration.ontology.Cell;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 public class Map {

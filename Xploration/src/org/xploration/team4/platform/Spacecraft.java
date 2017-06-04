@@ -30,7 +30,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentController;
 /*
  * Capsules creation
@@ -145,14 +144,15 @@ public class Spacecraft extends Agent {
 			protected void handleElapsedTimeout() {
 				System.out.println(getLocalName() + ": Registration desk shutdown");
 		        removeBehaviour(registrationListener());
-		        // TODO remove registrationDesk from the yellow pages?
 		      } 
 		    });
 	}
 	
-	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator
+	private WakerBehaviour killAgentAtMissionEnd() {
 		return new WakerBehaviour(this, missionLength*1000) {
 			
+			private static final long serialVersionUID = 230287408130453277L;
+
 			protected void onWake() {
 				System.out.println(getLocalName() + ": committing suicide");
                 myAgent.doDelete();
@@ -212,12 +212,6 @@ public class Spacecraft extends Agent {
 						int teamNb = team.getTeamId();
 						String teamName = "Capsule" + teamNb;
 						String className = "org.xploration.team" + teamNb + ".company."+ teamName;
-//							String className = "org.xploration.team" + 4 + ".company."+ teamName;
-						//TODO delete next four lines!
-//						currentCell.setX(map.getHeight()/2);
-//						currentCell.setY(map.getWidth()/2);
-//						currentCell.setX(5);
-//						currentCell.setY(5);
 						Object[] args = new Object[]{ currentCell.getX(), currentCell.getY(), mapDimensionX, mapDimensionY, missionLength, Constants.COMMUNICATION_RANGE};
 				        agents.add(container.createNewAgent(teamName,className, args));
 					} catch (StaleProxyException e) {
@@ -327,6 +321,8 @@ public class Spacecraft extends Agent {
 	private Behaviour listenRoverClaimCellFromCapsule(){
 		return new CyclicBehaviour(this){
 
+			private static final long serialVersionUID = 4143636135684137091L;
+
 			public void action(){
 
 				ACLMessage msg = MessageHandler.receive(myAgent, ACLMessage.INFORM, XplorationOntology.CLAIMCELLINFO);
@@ -341,18 +337,14 @@ public class Spacecraft extends Agent {
 							Concept conc = ((Action) ce).getAction();
 							if(conc instanceof ClaimCellInfo){			
 								
-								AID fromAgent = msg.getSender();
 								try{
-										System.out.println(getLocalName()+ ": INFORM is received");
-										
-										ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
-										Team claimedTeam = cellInfo.getTeam();
-										org.xploration.ontology.Map claimedMap = cellInfo.getMap(); 
-																				
-										System.out.println(getLocalName()+ ": claimed team is team" + claimedTeam.getTeamId());
-										
-										//Forward message
-										sendClaimToScorer(cellInfo);
+									ClaimCellInfo cellInfo = (ClaimCellInfo) conc;
+									Team claimedTeam = cellInfo.getTeam();
+									
+									System.out.println(getLocalName()+ ": claim INFORM is received from team " + claimedTeam.getTeamId());
+									
+									//Forward message
+									sendClaimToScorer(cellInfo);
 								}
 								catch(Exception e){
 									e.printStackTrace();
@@ -384,6 +376,7 @@ public class Spacecraft extends Agent {
 		addBehaviour (new CyclicBehaviour (this){ 
 			//TODO should be simple behaviour. now it keeps doing nothing forever. The searching in yellow pages should then happen in a while loop 
 
+			private static final long serialVersionUID = 8890887936913615132L;
 			AID agScorer;
 			private boolean forwarded = false;
 

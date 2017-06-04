@@ -164,7 +164,7 @@ public class PlatformSimulator extends Agent {
 		addBehaviour(tbf.wrap(ccr));
 	}
 
-	private WakerBehaviour killAgentAtMissionEnd() { //TODO use in every agent, especially in PlatformSimulator
+	private WakerBehaviour killAgentAtMissionEnd() {
 		return new WakerBehaviour(this, Constants.MISSION_LENGTH*1000) {
 			
 			protected void onWake() {
@@ -265,12 +265,12 @@ public class PlatformSimulator extends Agent {
 				
 				org.xploration.ontology.Map map = mbi.getMap();
 				
-				Iterator it = map.getAllCellList();
-				Cell c;
-				while (it.hasNext()) {
-					c = (Cell) it.next();
-					System.out.println(getLocalName() + "  x: " + c.getX() + " y: "+ c.getY() +"  mineral: " + c.getMineral());
-				}
+//				Iterator it = map.getAllCellList();
+//				Cell c;
+//				while (it.hasNext()) {
+//					c = (Cell) it.next();
+//					System.out.println(getLocalName() + "  x: " + c.getX() + " y: "+ c.getY() +"  mineral: " + c.getMineral());
+//				}
 
 			}
 		};

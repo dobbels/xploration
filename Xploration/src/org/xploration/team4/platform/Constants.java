@@ -1,18 +1,11 @@
 package org.xploration.team4.platform;
 
 import org.xploration.ontology.Cell;
-import org.xploration.ontology.Team;
-
-import jade.util.leap.Properties;
-
-import org.xploration.ontology.RoverRegistrationInfo;
-import org.xploration.ontology.Team;
 
 public class Constants {
 	
 	public final static int TEAM_ID = 4;
 
-	//TODO use in all files, instead of local variables
 	public final static int MISSION_LENGTH = PropertyReader.getProperty("MISSION_LENGTH"); // in seconds
 	public final static int COMMUNICATION_RANGE = PropertyReader.getProperty("RADIO_RANGE"); // number of cells
 	public final static int REGISTRATION_WINDOW = PropertyReader.getProperty("REGISTRATION_WINDOW"); // in seconds

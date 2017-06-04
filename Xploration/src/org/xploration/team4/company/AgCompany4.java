@@ -3,10 +3,8 @@ package org.xploration.team4.company;
 import org.xploration.ontology.*;
 import org.xploration.team4.common.MessageHandler;
 
-import jade.content.AgentAction;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
-import jade.content.onto.basic.Action;
 import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.core.AID;

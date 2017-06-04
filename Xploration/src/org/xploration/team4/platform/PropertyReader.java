@@ -35,13 +35,6 @@ public class PropertyReader {
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
 	public static void main(String[] args) {
 
 		Properties prop = new Properties();
